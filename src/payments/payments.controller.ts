@@ -13,9 +13,14 @@ import { PaymentsService } from './payments.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/user.entity';
 
+// Solo clientes gestionan pagos
 @Controller('payments')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.CLIENT)
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
