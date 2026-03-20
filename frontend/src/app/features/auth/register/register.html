@@ -1,0 +1,68 @@
+<div class="register-container">
+  <form (ngSubmit)="onSubmit()">
+    <h2>Crear cuenta</h2>
+
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" [(ngModel)]="form.username" name="username" required placeholder="juan123" />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="form.email" name="email" required placeholder="juan@email.com" />
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" />
+    </div>
+
+    <div class="field">
+      <label>DNI</label>
+      <input type="text" [(ngModel)]="form.dni" name="dni" required placeholder="1234567890" />
+    </div>
+
+    <div class="field">
+      <label>Nombre</label>
+      <input type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Juan" />
+    </div>
+
+    <div class="field">
+      <label>Apellido</label>
+      <input type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Pérez" />
+    </div>
+
+    <div class="field">
+      <label>Fecha de nacimiento</label>
+      <input type="date" [(ngModel)]="form.birthDate" name="birthDate" required />
+    </div>
+
+    <div class="field">
+      <label>Lugar de nacimiento</label>
+      <input type="text" [(ngModel)]="form.birthPlace" name="birthPlace" required placeholder="Pereira" />
+    </div>
+
+    <div class="field">
+      <label>Dirección de envío</label>
+      <input type="text" [(ngModel)]="form.shippingAddress" name="shippingAddress" required placeholder="Calle 1 # 2-3, Pereira" />
+    </div>
+
+    <div class="field">
+      <label>Género</label>
+      <select [(ngModel)]="form.gender" name="gender" required>
+        <option value="" disabled>Selecciona...</option>
+        <option value="masculino">Masculino</option>
+        <option value="femenino">Femenino</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Registrando...' : 'Crear cuenta' }}
+    </button>
+
+    <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </form>
+</div>

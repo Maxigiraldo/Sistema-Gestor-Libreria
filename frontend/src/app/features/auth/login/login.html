@@ -1,0 +1,35 @@
+<div class="login-container">
+  <form (ngSubmit)="onSubmit()">
+    <h2>Iniciar sesión</h2>
+
+    <div class="field">
+      <label>Usuario</label>
+      <input
+        type="text"
+        [(ngModel)]="username"
+        name="username"
+        required
+        placeholder="tu_usuario"
+      />
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+        placeholder="••••••••"
+      />
+    </div>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit" [disabled]="loading">
+      {{ loading ? 'Entrando...' : 'Entrar' }}
+    </button>
+
+    <p class="register-link">¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+  </form>
+</div>
