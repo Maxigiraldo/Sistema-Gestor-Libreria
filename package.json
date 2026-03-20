@@ -1,0 +1,11 @@
+{
+  "name": "sistema-gestor-libreria",
+  "private": true,
+  "scripts": {
+    "start:backend": "cd backend && npm run start:dev",
+    "start:frontend": "cd frontend && ng serve",
+    "start:all": "npm run start:backend & npm run start:frontend",
+    "install:all": "npm i --prefix backend && npm i --prefix frontend",
+    "build:all": "npm run build --prefix backend && npm run build --prefix frontend"
+  }
+}
