@@ -13,6 +13,13 @@ export const routes: Routes = [
     .then(m => m.RegisterComponent)
   },
   {
+  path: 'profile',
+  loadComponent: () =>
+    import('./features/profile/profile/profile')
+    .then(m => m.ProfileComponent),
+  canActivate: [authGuard]
+  },
+  {
   path: 'books',
   loadComponent: () =>
     import('./features/books/book-list/book-list')

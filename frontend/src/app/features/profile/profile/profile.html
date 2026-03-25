@@ -1,0 +1,27 @@
+<div class="profile-container" *ngIf="user">
+  <h2>Mi perfil</h2>
+
+  <div class="profile-card">
+    <div class="field">
+      <span class="label">Usuario</span>
+      <span class="value">{{ user.username }}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Email</span>
+      <span class="value">{{ user.email }}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">Rol</span>
+      <span class="value">{{ user.role }}</span>
+    </div>
+
+    <div class="field">
+      <span class="label">ID</span>
+      <span class="value">#{{ user.id }}</span>
+    </div>
+  </div>
+
+  <button (click)="logout()">Cerrar sesión</button>
+</div>
