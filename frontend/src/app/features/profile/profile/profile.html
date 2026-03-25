@@ -6,22 +6,38 @@
       <span class="label">Usuario</span>
       <span class="value">{{ user.username }}</span>
     </div>
-
     <div class="field">
       <span class="label">Email</span>
       <span class="value">{{ user.email }}</span>
     </div>
-
     <div class="field">
       <span class="label">Rol</span>
       <span class="value">{{ user.role }}</span>
     </div>
-
     <div class="field">
       <span class="label">ID</span>
       <span class="value">#{{ user.id }}</span>
     </div>
   </div>
 
-  <button (click)="logout()">Cerrar sesión</button>
+  <div class="profile-actions">
+    <a routerLink="/profile/edit" class="btn-secondary">Editar perfil</a>
+    <button class="btn-secondary" (click)="showPasswordModal = true">
+      Cambiar contraseña
+    </button>
+    <button class="btn-danger" (click)="showLogoutModal = true">
+      Cerrar sesión
+    </button>
+  </div>
 </div>
+
+<app-confirm-logout
+  *ngIf="showLogoutModal"
+  (confirmed)="confirmLogout()"
+  (cancelled)="showLogoutModal = false"
+/>
+
+<app-change-password
+  *ngIf="showPasswordModal"
+  (closed)="showPasswordModal = false"
+/>
