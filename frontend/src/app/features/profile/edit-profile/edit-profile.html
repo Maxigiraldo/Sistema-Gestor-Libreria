@@ -1,0 +1,21 @@
+<div class="edit-profile-container">
+  <h2>Editar perfil</h2>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" [(ngModel)]="form.username" name="username" required />
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="form.email" name="email" required />
+    </div>
+
+    <p class="success" *ngIf="success">{{ success }}</p>
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit">Guardar cambios</button>
+    <a routerLink="/profile">Volver al perfil</a>
+  </form>
+</div>

@@ -1,1 +1,57 @@
-<h1>Productos</h1>
+<app-navbar />
+
+<div class="page-layout">
+  <app-sidebar />
+
+  <main class="main-content">
+    <div class="catalog-header">
+      <h2>Catálogo de libros</h2>
+      <span class="book-count" *ngIf="!loading">{{ books.length }} libros</span>
+    </div>
+
+    <div class="loading" *ngIf="loading">
+      <div class="spinner-large"></div>
+      <p>Cargando libros...</p>
+    </div>
+
+    <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+    <div class="books-grid" *ngIf="!loading && !error">
+      <div class="book-card" *ngFor="let book of books">
+        <div class="book-cover">
+          <img *ngIf="book.coverImage" [src]="book.coverImage" [alt]="book.title" />
+          <div *ngIf="!book.coverImage" class="book-cover-placeholder">
+            📚
+          </div>
+          <span class="condition-badge" [class.used]="book.condition === 'used'">
+            {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
+          </span>
+        </div>
+
+        <div class="book-info">
+          <h3 class="book-title">{{ book.title }}</h3>
+          <p class="book-author">{{ book.author }}</p>
+          <p class="book-genre">{{ book.genre }}</p>
+
+          <div class="book-footer">
+            <span class="book-price">
+              ${{ book.price | number:'1.0-0' }}
+            </span>
+            <span class="book-stock" [class.out]="getAvailableCount(book) === 0">
+              {{ getAvailableCount(book) > 0 ? getAvailableCount(book) + ' disponibles' : 'Agotado' }}
+            </span>
+          </div>
+
+          <button class="btn-add-cart"
+                  [disabled]="getAvailableCount(book) === 0">
+            🛒 Agregar
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="books.length === 0">
+        <p>No hay libros disponibles.</p>
+      </div>
+    </div>
+  </main>
+</div>

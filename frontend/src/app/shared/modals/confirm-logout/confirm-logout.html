@@ -1,0 +1,11 @@
+<div class="modal-backdrop" (click)="cancelled.emit()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-icon">👋</div>
+    <h3>¿Cerrar sesión?</h3>
+    <p>Tu sesión se cerrará y tendrás que volver a iniciar sesión.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelled.emit()">Cancelar</button>
+      <button class="btn-danger" (click)="confirmed.emit()">Sí, cerrar sesión</button>
+    </div>
+  </div>
+</div>

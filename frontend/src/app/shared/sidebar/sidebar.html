@@ -1,0 +1,45 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h3>Filtros</h3>
+    <button class="clear-btn" (click)="clearFilters()">Limpiar</button>
+  </div>
+
+  <div class="filter-group">
+    <label>Género</label>
+    <select [(ngModel)]="filters.genre" name="genre" disabled>
+      <option value="">Todos</option>
+      <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <label>Condición</label>
+    <div class="radio-group">
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" disabled />
+        Todos
+      </label>
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" disabled />
+        Nuevo
+      </label>
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" disabled />
+        Usado
+      </label>
+    </div>
+  </div>
+
+  <div class="filter-group">
+    <label>Precio</label>
+    <div class="price-range">
+      <input type="number" [(ngModel)]="filters.minPrice" name="minPrice"
+             placeholder="Mín" disabled />
+      <span>—</span>
+      <input type="number" [(ngModel)]="filters.maxPrice" name="maxPrice"
+             placeholder="Máx" disabled />
+    </div>
+  </div>
+
+  <p class="coming-soon">🔧 Filtros próximamente</p>
+</aside>
