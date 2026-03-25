@@ -1,68 +1,183 @@
-<div class="register-container">
-  <form (ngSubmit)="onSubmit()">
-    <h2>Crear cuenta</h2>
+<!-- src/app/features/auth/register/register.html -->
+<div class="register-wrapper">
+  <div class="register-card">
 
-    <div class="field">
-      <label>Usuario</label>
-      <input type="text" [(ngModel)]="form.username" name="username" required placeholder="juan123" />
+    <!-- Cabecera -->
+    <div class="register-header">
+      <div class="register-logo">📚</div>
+      <h1>Crear cuenta</h1>
+      <p>Únete a la librería desde Pereira, Colombia</p>
     </div>
 
-    <div class="field">
-      <label>Email</label>
-      <input type="email" [(ngModel)]="form.email" name="email" required placeholder="juan@email.com" />
+    <!-- Indicador de pasos -->
+    <div class="steps-bar">
+      <div class="step" [class.step--active]="step === 1" [class.step--done]="step > 1">
+        <div class="step__circle">
+          <svg *ngIf="step > 1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span *ngIf="step <= 1">1</span>
+        </div>
+        <span class="step__label">Personal</span>
+      </div>
+      <div class="step__line" [class.step__line--done]="step > 1"></div>
+      <div class="step" [class.step--active]="step === 2">
+        <div class="step__circle">
+          <span>2</span>
+        </div>
+        <span class="step__label">Cuenta</span>
+      </div>
     </div>
 
-    <div class="field">
-      <label>Contraseña</label>
-      <input type="password" [(ngModel)]="form.password" name="password" required placeholder="••••••••" />
+    <!-- Error global -->
+    <div class="error-msg" *ngIf="error">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ error }}
     </div>
 
-    <div class="field">
-      <label>DNI</label>
-      <input type="text" [(ngModel)]="form.dni" name="dni" required placeholder="1234567890" />
-    </div>
+    <form (ngSubmit)="onSubmit()" novalidate>
 
-    <div class="field">
-      <label>Nombre</label>
-      <input type="text" [(ngModel)]="form.firstName" name="firstName" required placeholder="Juan" />
-    </div>
+      <!-- ══════════ PASO 1: Datos personales ══════════ -->
+      <div class="form-step" *ngIf="step === 1">
 
-    <div class="field">
-      <label>Apellido</label>
-      <input type="text" [(ngModel)]="form.lastName" name="lastName" required placeholder="Pérez" />
-    </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="firstName" name="firstName" placeholder="Carlos"/>
+            <span class="field-error" *ngIf="submitted1 && !firstName.trim()">Obligatorio.</span>
+          </div>
+          <div class="field">
+            <label>Apellido *</label>
+            <input type="text" [(ngModel)]="lastName" name="lastName" placeholder="Ramírez"/>
+            <span class="field-error" *ngIf="submitted1 && !lastName.trim()">Obligatorio.</span>
+          </div>
+        </div>
 
-    <div class="field">
-      <label>Fecha de nacimiento</label>
-      <input type="date" [(ngModel)]="form.birthDate" name="birthDate" required />
-    </div>
+        <div class="field">
+          <label>Número de documento *</label>
+          <input type="text" [(ngModel)]="dni" name="dni" placeholder="1002345678" inputmode="numeric"/>
+          <span class="field-hint">Cédula de ciudadanía u otro documento.</span>
+          <span class="field-error" *ngIf="submitted1 && !dni.trim()">Obligatorio.</span>
+        </div>
 
-    <div class="field">
-      <label>Lugar de nacimiento</label>
-      <input type="text" [(ngModel)]="form.birthPlace" name="birthPlace" required placeholder="Pereira" />
-    </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Fecha de nacimiento *</label>
+            <input type="date" [(ngModel)]="birthDate" name="birthDate" [max]="maxBirthDate"/>
+            <span class="field-error" *ngIf="submitted1 && !birthDate">Obligatorio.</span>
+          </div>
+          <div class="field">
+            <label>Lugar de nacimiento *</label>
+            <input type="text" [(ngModel)]="birthPlace" name="birthPlace" placeholder="Pereira"/>
+            <span class="field-error" *ngIf="submitted1 && !birthPlace.trim()">Obligatorio.</span>
+          </div>
+        </div>
 
-    <div class="field">
-      <label>Dirección de envío</label>
-      <input type="text" [(ngModel)]="form.shippingAddress" name="shippingAddress" required placeholder="Calle 1 # 2-3, Pereira" />
-    </div>
+        <div class="field">
+          <label>Género *</label>
+          <select [(ngModel)]="gender" name="gender" class="field-select">
+            <option value="" disabled>Selecciona una opción</option>
+            <option value="masculino">Masculino</option>
+            <option value="femenino">Femenino</option>
+            <option value="no_binario">No binario</option>
+            <option value="prefiero_no_decir">Prefiero no decir</option>
+          </select>
+          <span class="field-error" *ngIf="submitted1 && !gender">Obligatorio.</span>
+        </div>
 
-    <div class="field">
-      <label>Género</label>
-      <select [(ngModel)]="form.gender" name="gender" required>
-        <option value="" disabled>Selecciona...</option>
-        <option value="masculino">Masculino</option>
-        <option value="femenino">Femenino</option>
-        <option value="otro">Otro</option>
-      </select>
-    </div>
+        <div class="field">
+          <label>Dirección de envío *</label>
+          <input type="text" [(ngModel)]="shippingAddress" name="shippingAddress" placeholder="Calle 10 # 5-23, Pereira"/>
+          <span class="field-hint">Dirección predeterminada para tus pedidos.</span>
+          <span class="field-error" *ngIf="submitted1 && !shippingAddress.trim()">Obligatorio.</span>
+        </div>
 
-    <p class="error" *ngIf="error">{{ error }}</p>
+        <button type="button" class="btn-primary" (click)="goStep2()">
+          Continuar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
 
-    <button type="submit" [disabled]="loading">
-      {{ loading ? 'Registrando...' : 'Crear cuenta' }}
-    </button>
+      </div>
 
-    <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
-  </form>
+      <!-- ══════════ PASO 2: Credenciales ══════════ -->
+      <div class="form-step" *ngIf="step === 2">
+
+        <button type="button" class="btn-back" (click)="goStep1()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          Volver al paso anterior
+        </button>
+
+        <div class="field">
+          <label>Nombre de usuario *</label>
+          <input type="text" [(ngModel)]="username" name="username" placeholder="carlos_ramirez" autocomplete="username"/>
+          <span class="field-hint">Solo letras, números y guión bajo. Sin espacios.</span>
+          <span class="field-error" *ngIf="submitted2 && !username.trim()">Obligatorio.</span>
+        </div>
+
+        <div class="field">
+          <label>Correo electrónico *</label>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="correo@ejemplo.com" autocomplete="email"/>
+          <span class="field-error" *ngIf="submitted2 && !email.trim()">Obligatorio.</span>
+        </div>
+
+        <div class="field">
+          <label>Contraseña *</label>
+          <div class="input-with-toggle">
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Mínimo 6 caracteres"
+              autocomplete="new-password"
+            />
+            <button type="button" class="toggle-btn" (click)="togglePassword()">
+              <svg *ngIf="!showPassword" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="showPassword" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <span class="field-error" *ngIf="submitted2 && !password.trim()">Obligatorio.</span>
+          <span class="field-error" *ngIf="submitted2 && password.trim() && password.length < 6">Mínimo 6 caracteres.</span>
+        </div>
+
+        <!-- Checkbox privacidad -->
+        <label class="privacy-label">
+          <input type="checkbox" [(ngModel)]="acceptPrivacy" name="acceptPrivacy"/>
+          <span class="privacy-box"></span>
+          <span class="privacy-text">
+            Acepto los <a href="#" class="link">Términos de uso</a> y la
+            <a href="#" class="link">Política de privacidad</a>
+            (Ley 1581 de 2012).
+          </span>
+        </label>
+        <span class="field-error" *ngIf="submitted2 && !acceptPrivacy">Debes aceptar la política de privacidad.</span>
+
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">Crear mi cuenta</span>
+          <span *ngIf="loading" class="spinner-wrap">
+            <span class="spinner"></span>
+            Creando cuenta...
+          </span>
+        </button>
+
+      </div>
+
+    </form>
+
+    <p class="login-link">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </p>
+
+  </div>
 </div>
