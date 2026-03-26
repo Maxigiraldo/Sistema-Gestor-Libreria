@@ -1,0 +1,190 @@
+<app-navbar />
+
+<div class="admin-layout">
+<aside class="admin-sidebar">
+    <h3>Panel ROOT</h3>
+    <nav>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'list'"
+        (click)="activeTab = 'list'">
+        👥 Administradores
+    </button>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'create'"
+        (click)="activeTab = 'create'">
+        ➕ Crear admin
+    </button>
+    </nav>
+</aside>
+
+<main class="admin-main">
+
+    <!-- ───── LISTA DE ADMINS ───── -->
+    <section *ngIf="activeTab === 'list'">
+    <div class="section-header">
+        <div>
+        <h2>Administradores</h2>
+        <p class="subtitle">Gestiona las cuentas de administrador</p>
+        </div>
+        <button class="btn-primary" (click)="activeTab = 'create'">
+        + Nuevo admin
+        </button>
+    </div>
+
+      <div class="loading-state" *ngIf="loadingList">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+    </div>
+
+      <div class="table-wrapper" *ngIf="!loadingList">
+        <table *ngIf="admins.length > 0">
+        <thead>
+            <tr>
+            <th>#</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let admin of admins">
+            <td class="id-cell">{{ admin.id }}</td>
+            <td>
+                <div class="user-cell">
+                <div class="avatar">{{ admin.username[0].toUpperCase() }}</div>
+                {{ admin.username }}
+                </div>
+            </td>
+            <td class="email-cell">{{ admin.email }}</td>
+            <td>
+                <span class="badge" [class.badge--active]="admin.active" [class.badge--inactive]="!admin.active">
+                {{ admin.active ? 'Activo' : 'Inactivo' }}
+                </span>
+            </td>
+            <td class="date-cell">{{ admin.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td>
+                <button
+                class="btn-deactivate"
+                [disabled]="!admin.active || deactivatingId === admin.id"
+                (click)="deactivate(admin)">
+                {{ deactivatingId === admin.id ? '...' : 'Desactivar' }}
+                </button>
+            </td>
+            </tr>
+        </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="admins.length === 0">
+        <div class="empty-icon">👤</div>
+        <p>No hay administradores aún.</p>
+        <button class="btn-primary" (click)="activeTab = 'create'">
+            Crear el primero
+        </button>
+        </div>
+    </div>
+    </section>
+
+    <!-- ───── CREAR ADMIN ───── -->
+    <section *ngIf="activeTab === 'create'">
+    <div class="section-header">
+        <div>
+        <h2>Crear administrador</h2>
+        <p class="subtitle">Asigna credenciales de acceso al nuevo admin</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form (ngSubmit)="onCreate()" novalidate>
+
+        <div class="field">
+            <label>Nombre de usuario *</label>
+            <input
+            type="text"
+            [(ngModel)]="form.username"
+            name="username"
+            placeholder="admin_pereira"
+            autocomplete="off"
+            />
+            <span class="field-error" *ngIf="submitted && !form.username.trim()">
+            Obligatorio.
+            </span>
+        </div>
+
+        <div class="field">
+            <label>Correo electrónico *</label>
+            <input
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            placeholder="admin@libreria.com"
+            autocomplete="off"
+            />
+            <span class="field-error" *ngIf="submitted && !form.email.trim()">
+            Obligatorio.
+            </span>
+        </div>
+
+        <div class="field">
+            <label>Contraseña *</label>
+            <div class="input-toggle">
+            <input
+                [type]="showPass ? 'text' : 'password'"
+                [(ngModel)]="form.password"
+                name="password"
+                placeholder="Mínimo 6 caracteres"
+                autocomplete="new-password"
+            />
+            <button type="button" class="toggle-btn" (click)="showPass = !showPass">
+                <svg *ngIf="!showPass" width="17" height="17" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg *ngIf="showPass" width="17" height="17" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            </button>
+            </div>
+            <span class="field-error" *ngIf="submitted && form.password.length < 6">
+            Mínimo 6 caracteres.
+            </span>
+        </div>
+
+          <div class="error-msg" *ngIf="createError">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ createError }}
+        </div>
+
+          <div class="success-msg" *ngIf="createSuccess">
+            ✅ {{ createSuccess }}
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="resetForm()">
+            Limpiar
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="creating">
+              <span *ngIf="!creating">Crear administrador</span>
+              <span *ngIf="creating" class="spinner-wrap">
+                <span class="spinner-sm"></span> Creando...
+            </span>
+            </button>
+        </div>
+
+        </form>
+    </div>
+    </section>
+
+</main>
+</div>

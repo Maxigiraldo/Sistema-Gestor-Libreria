@@ -34,5 +34,12 @@ export const routes: Routes = [
       .then(m => m.EditProfileComponent),
     canActivate: [authGuard]
   },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/admin-panel/admin-panel')
+      .then(m => m.AdminPanelComponent),
+    canActivate: [authGuard]  // el guard de rol ROOT lo manejas en el componente
+  },
   { path: '**', redirectTo: '' }
 ];

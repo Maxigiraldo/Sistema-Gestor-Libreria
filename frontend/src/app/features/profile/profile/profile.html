@@ -1,42 +1,110 @@
-<div class="profile-container" *ngIf="user">
-  <h2>Mi perfil</h2>
+<app-navbar />
 
-  <div class="profile-card">
-    <div class="field">
-      <span class="label">Usuario</span>
-      <span class="value">{{ user.username }}</span>
-    </div>
-    <div class="field">
-      <span class="label">Email</span>
-      <span class="value">{{ user.email }}</span>
-    </div>
-    <div class="field">
-      <span class="label">Rol</span>
-      <span class="value">{{ user.role }}</span>
-    </div>
-    <div class="field">
-      <span class="label">ID</span>
-      <span class="value">#{{ user.id }}</span>
-    </div>
-  </div>
+<div class="profile-layout" *ngIf="user">
+  <div class="profile-container">
 
-  <div class="profile-actions">
-    <a routerLink="/profile/edit" class="btn-secondary">Editar perfil</a>
-    <button class="btn-secondary" (click)="showPasswordModal = true">
-      Cambiar contraseña
-    </button>
-    <button class="btn-danger" (click)="showLogoutModal = true">
-      Cerrar sesión
-    </button>
+    <!-- Encabezado del perfil -->
+    <div class="profile-hero">
+      <div class="profile-avatar">
+        {{ user.username[0].toUpperCase() }}
+      </div>
+      <div class="profile-hero-info">
+        <h1>{{ user.username }}</h1>
+        <span class="role-badge" [class]="'role-' + user.role">
+          {{ roleLabel(user.role) }}
+        </span>
+      </div>
+      <div class="hero-actions">
+        <a routerLink="/profile/edit" class="btn-secondary">
+          ✏️ Editar perfil
+        </a>
+        <button class="btn-secondary" (click)="showPasswordModal = true">
+          🔑 Contraseña
+        </button>
+        <button class="btn-danger-soft" (click)="showLogoutModal = true">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+
+    <!-- Cards de datos -->
+    <div class="cards-grid">
+
+      <!-- Datos de cuenta -->
+      <div class="info-card">
+        <h3 class="card-title">
+          <span class="card-icon">👤</span> Cuenta
+        </h3>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-label">Usuario</span>
+            <span class="info-value">{{ user.username }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Correo</span>
+            <span class="info-value">{{ user.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Rol</span>
+            <span class="info-value">{{ roleLabel(user.role) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">ID</span>
+            <span class="info-value muted">#{{ user.id }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Datos personales (si están disponibles) -->
+      <div class="info-card" *ngIf="profile">
+        <h3 class="card-title">
+          <span class="card-icon">📋</span> Datos personales
+        </h3>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-label">Nombre completo</span>
+            <span class="info-value">{{ profile.firstName }} {{ profile.lastName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Documento</span>
+            <span class="info-value">{{ profile.dni }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Fecha de nacimiento</span>
+            <span class="info-value">{{ profile.birthDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-row" *ngIf="profile.birthPlace">
+            <span class="info-label">Lugar de nacimiento</span>
+            <span class="info-value">{{ profile.birthPlace }}</span>
+          </div>
+          <div class="info-row" *ngIf="profile.gender">
+            <span class="info-label">Género</span>
+            <span class="info-value">{{ profile.gender }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dirección de envío -->
+      <div class="info-card" *ngIf="profile?.shippingAddress">
+        <h3 class="card-title">
+          <span class="card-icon">📦</span> Dirección de envío
+        </h3>
+        <p class="address-text">{{ profile.shippingAddress }}</p>
+        <a routerLink="/profile/edit" class="link-edit">
+          Cambiar dirección →
+        </a>
+      </div>
+
+    </div>
   </div>
 </div>
 
+<!-- Modales -->
 <app-confirm-logout
   *ngIf="showLogoutModal"
   (confirmed)="confirmLogout()"
   (cancelled)="showLogoutModal = false"
 />
-
 <app-change-password
   *ngIf="showPasswordModal"
   (closed)="showPasswordModal = false"
