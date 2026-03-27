@@ -17,11 +17,17 @@
     <p class="error-msg" *ngIf="error">{{ error }}</p>
 
     <div class="books-grid" *ngIf="!loading && !error">
-      <div class="book-card" *ngFor="let book of books">
+
+      <div class="book-card" *ngFor="let book of books" (click)="openDetail(book)">
+
         <div class="book-cover">
-          <img *ngIf="book.coverImage" [src]="book.coverImage" [alt]="book.title" />
-          <div *ngIf="!book.coverImage" class="book-cover-placeholder">
-            📚
+          <img *ngIf="getCover(book)"
+              [src]="getCover(book)"
+              [alt]="book.title"
+              loading="lazy" />
+          <div *ngIf="!getCover(book)" class="book-cover-placeholder">
+            <span class="placeholder-emoji">📚</span>
+            <span class="placeholder-title">{{ book.title }}</span>
           </div>
           <span class="condition-badge" [class.used]="book.condition === 'used'">
             {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
@@ -33,25 +39,106 @@
           <p class="book-author">{{ book.author }}</p>
           <p class="book-genre">{{ book.genre }}</p>
 
+          <p class="book-description" *ngIf="getDescription(book)">
+            {{ getDescription(book) | slice:0:90 }}...
+          </p>
+
           <div class="book-footer">
-            <span class="book-price">
-              ${{ book.price | number:'1.0-0' }}
-            </span>
+            <span class="book-price">${{ book.price | number:'1.0-0' }}</span>
             <span class="book-stock" [class.out]="getAvailableCount(book) === 0">
-              {{ getAvailableCount(book) > 0 ? getAvailableCount(book) + ' disponibles' : 'Agotado' }}
+              {{ getAvailableCount(book) > 0
+                  ? getAvailableCount(book) + ' disp.'
+                  : 'Agotado' }}
             </span>
           </div>
 
           <button class="btn-add-cart"
-                  [disabled]="getAvailableCount(book) === 0">
+                  [disabled]="getAvailableCount(book) === 0"
+                  (click)="$event.stopPropagation()">
             🛒 Agregar
           </button>
         </div>
+
       </div>
 
       <div class="empty-state" *ngIf="books.length === 0">
         <p>No hay libros disponibles.</p>
       </div>
     </div>
+
+    <!-- ── Modal detalle ─────────────────────────────────── -->
+    <div class="detail-backdrop" *ngIf="selectedBook" (click)="closeDetail()">
+      <div class="detail-card" (click)="$event.stopPropagation()">
+
+        <button class="detail-close" (click)="closeDetail()">✕</button>
+
+        <div class="detail-layout">
+
+          <div class="detail-cover">
+            <img *ngIf="getCover(selectedBook)"
+                [src]="getCover(selectedBook)"
+                [alt]="selectedBook.title" />
+            <div *ngIf="!getCover(selectedBook)" class="book-cover-placeholder detail-placeholder">
+              📚
+            </div>
+          </div>
+
+          <div class="detail-info">
+            <span class="condition-badge" [class.used]="selectedBook.condition === 'used'">
+              {{ selectedBook.condition === 'new' ? 'Nuevo' : 'Usado' }}
+            </span>
+
+            <h2>{{ selectedBook.title }}</h2>
+            <p class="detail-author">{{ selectedBook.author }}</p>
+
+            <div class="detail-meta">
+              <div class="meta-item">
+                <span class="meta-label">Género</span>
+                <span>{{ selectedBook.genre }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Editorial</span>
+                <span>{{ selectedBook.publisher }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Idioma</span>
+                <span>{{ selectedBook.language }}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Año</span>
+                <span>{{ selectedBook.publicationYear }}</span>
+              </div>
+            </div>
+
+            <p class="detail-description" *ngIf="getDescription(selectedBook)">
+              {{ getDescription(selectedBook) }}
+            </p>
+
+            <a *ngIf="getPreviewLink(selectedBook)"
+              [href]="getPreviewLink(selectedBook)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="preview-link">Ver vista previa en Google Books →</a>
+
+            <div class="detail-footer">
+              <span class="detail-price">${{ selectedBook.price | number:'1.0-0' }}</span>
+              <span class="detail-stock" [class.out]="getAvailableCount(selectedBook) === 0">
+                {{ getAvailableCount(selectedBook) > 0
+                    ? getAvailableCount(selectedBook) + ' disponibles'
+                    : 'Agotado' }}
+              </span>
+            </div>
+
+            <button class="btn-add-full"
+                    [disabled]="getAvailableCount(selectedBook) === 0"
+                    (click)="$event.stopPropagation()">
+              🛒 Agregar al carrito
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
   </main>
 </div>

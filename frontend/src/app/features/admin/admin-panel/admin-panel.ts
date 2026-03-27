@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -16,12 +16,10 @@ import { AuthService } from '../../../core/services/auth';
 export class AdminPanelComponent implements OnInit {
   activeTab: 'list' | 'create' = 'list';
 
-  // Lista
   admins: AdminUser[] = [];
   loadingList = true;
   deactivatingId: number | null = null;
 
-  // Formulario crear
   form = { username: '', email: '', password: '' };
   submitted = false;
   creating = false;
@@ -33,10 +31,10 @@ export class AdminPanelComponent implements OnInit {
     private usersService: UsersService,
     private auth: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
-    // Redirigir si no es ROOT
     if (this.auth.getRole() !== 'root') {
       this.router.navigate(['/']);
       return;
@@ -47,8 +45,15 @@ export class AdminPanelComponent implements OnInit {
   loadAdmins() {
     this.loadingList = true;
     this.usersService.listAdmins().subscribe({
-      next: (data) => { this.admins = data; this.loadingList = false; },
-      error: () => { this.loadingList = false; }
+      next: (data) => {
+        this.admins = data;
+        this.loadingList = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingList = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -58,8 +63,12 @@ export class AdminPanelComponent implements OnInit {
       next: () => {
         admin.active = false;
         this.deactivatingId = null;
+        this.cdr.detectChanges();
       },
-      error: () => { this.deactivatingId = null; }
+      error: () => {
+        this.deactivatingId = null;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -75,20 +84,22 @@ export class AdminPanelComponent implements OnInit {
     ) return;
 
     this.creating = true;
+    this.cdr.detectChanges();
+
     this.usersService.createAdmin(this.form).subscribe({
       next: (res) => {
         this.createSuccess = `Admin "${res.user.username}" creado exitosamente.`;
         this.resetForm();
         this.creating = false;
+        this.cdr.detectChanges();
         this.loadAdmins();
       },
       error: (err) => {
         this.creating = false;
-        if (err.status === 409) {
-          this.createError = 'Usuario o correo ya registrado.';
-        } else {
-          this.createError = 'Error al crear el administrador.';
-        }
+        this.createError = err.status === 409
+          ? 'Usuario o correo ya registrado.'
+          : 'Error al crear el administrador.';
+        this.cdr.detectChanges();
       }
     });
   }

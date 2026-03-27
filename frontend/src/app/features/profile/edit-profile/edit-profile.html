@@ -1,21 +1,98 @@
-<div class="edit-profile-container">
-  <h2>Editar perfil</h2>
+<app-navbar />
 
-  <form (ngSubmit)="onSubmit()">
-    <div class="field">
-      <label>Usuario</label>
-      <input type="text" [(ngModel)]="form.username" name="username" required />
+<div class="edit-layout">
+  <div class="edit-container">
+
+    <div class="edit-header">
+      <a [routerLink]="['/profile']" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Volver al perfil
+      </a>
+      <h1>Editar perfil</h1>
+      <p class="subtitle">Actualiza tu información de cuenta</p>
     </div>
 
-    <div class="field">
-      <label>Email</label>
-      <input type="email" [(ngModel)]="form.email" name="email" required />
-    </div>
+    <form (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-card">
+        <h3 class="card-title">
+          <span class="card-icon">👤</span> Datos de cuenta
+        </h3>
 
-    <p class="success" *ngIf="success">{{ success }}</p>
-    <p class="error" *ngIf="error">{{ error }}</p>
+        <div class="field">
+          <label>Nombre de usuario *</label>
+          <input
+            type="text"
+            [(ngModel)]="form.username"
+            name="username"
+            placeholder="tu_usuario"
+            autocomplete="username"
+          />
+          <span class="field-error" *ngIf="submitted && !form.username.trim()">
+            Obligatorio.
+          </span>
+        </div>
 
-    <button type="submit">Guardar cambios</button>
-    <a routerLink="/profile">Volver al perfil</a>
-  </form>
+        <div class="field">
+          <label>Correo electrónico *</label>
+          <input
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            placeholder="correo@ejemplo.com"
+            autocomplete="email"
+          />
+          <span class="field-error" *ngIf="submitted && !form.email.trim()">
+            Obligatorio.
+          </span>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="card-title">
+          <span class="card-icon">📦</span> Dirección de envío
+        </h3>
+
+        <div class="field">
+          <label>Dirección predeterminada</label>
+          <input
+            type="text"
+            [(ngModel)]="form.shippingAddress"
+            name="shippingAddress"
+            placeholder="Calle 10 # 5-23, Pereira"
+          />
+          <span class="field-hint">
+            Esta dirección se usará por defecto en tus pedidos.
+          </span>
+        </div>
+      </div>
+
+      <div class="error-msg" *ngIf="error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ error }}
+      </div>
+
+      <div class="success-msg" *ngIf="success">
+        ✅ {{ success }}
+      </div>
+
+      <div class="form-actions">
+        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
+        <button type="submit" class="btn-primary" [disabled]="saving">
+          <span *ngIf="!saving">Guardar cambios</span>
+          <span *ngIf="saving" class="spinner-wrap">
+            <span class="spinner"></span> Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+
+  </div>
 </div>

@@ -15,10 +15,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Solo redirigir al login si el 401 ocurre en rutas protegidas,
+      // no en auth/login ni auth/register
       if (error.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        router.navigate(['/login']);
+        const isAuthRoute = req.url.includes('/auth/login') ||
+                            req.url.includes('/auth/register');
+        if (!isAuthRoute) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     })

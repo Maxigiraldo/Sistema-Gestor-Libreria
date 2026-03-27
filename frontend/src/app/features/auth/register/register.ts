@@ -1,4 +1,3 @@
-// src/app/features/auth/register/register.ts
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,12 +13,11 @@ import { AuthService } from '../../../core/services/auth';
 })
 export class RegisterComponent {
 
-  // Paso actual
   step = 1;
   submitted1 = false;
   submitted2 = false;
 
-  // Paso 1 — datos personales
+  // Paso 1
   firstName       = '';
   lastName        = '';
   dni             = '';
@@ -28,37 +26,52 @@ export class RegisterComponent {
   gender          = '';
   shippingAddress = '';
 
-  // Paso 2 — credenciales
-  username        = '';
-  email           = '';
-  password        = '';
-  acceptPrivacy   = false;
-  showPassword    = false;
+  // Paso 2
+  username      = '';
+  email         = '';
+  password      = '';
+  acceptPrivacy = false;
+  showPassword  = false;
 
-  // Estado general
   loading = false;
   error   = '';
 
   constructor(private auth: AuthService, private router: Router) {}
 
-  // Fecha máxima: debe tener al menos 13 años
   get maxBirthDate(): string {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 13);
     return d.toISOString().split('T')[0];
   }
 
-  togglePassword() {
-    this.showPassword = !this.showPassword;
+  get minBirthDate(): string {
+    return '1925-01-01';
   }
 
-  // Validar paso 1 antes de avanzar
+  togglePassword() { this.showPassword = !this.showPassword; }
+
+  // ── Validaciones ────────────────────────────────────────────────────────────
+
+  dniValid(): boolean {
+    return /^\d{6,12}$/.test(this.dni.trim());
+  }
+
+  emailValid(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(this.email.trim());
+  }
+
+  usernameValid(): boolean {
+    return /^[a-zA-Z0-9_-]{3,30}$/.test(this.username.trim());
+  }
+
+  // ── Navegación ──────────────────────────────────────────────────────────────
+
   goStep2() {
     this.submitted1 = true;
     if (
       this.firstName.trim() &&
       this.lastName.trim() &&
-      this.dni.trim() &&
+      this.dniValid() &&
       this.birthDate &&
       this.birthPlace.trim() &&
       this.gender &&
@@ -78,16 +91,12 @@ export class RegisterComponent {
     this.submitted2 = true;
     this.error = '';
 
-    // Validación manual paso 2
     if (
-      !this.username.trim() ||
-      !this.email.trim() ||
-      !this.password.trim() ||
+      !this.usernameValid() ||
+      !this.emailValid()    ||
       this.password.length < 6 ||
       !this.acceptPrivacy
-    ) {
-      return;
-    }
+    ) return;
 
     this.loading = true;
 
@@ -103,18 +112,13 @@ export class RegisterComponent {
       email:           this.email,
       password:        this.password,
     }).subscribe({
-      next: () => this.router.navigate(['/books']),
+      next: () => { this.loading = false; this.router.navigate(['/']); },
       error: (err) => {
         this.loading = false;
-        if (err.status === 409) {
-          this.error = 'El correo o nombre de usuario ya está registrado.';
-        } else if (err.status === 400) {
-          this.error = err.error?.message ?? 'Revisa los datos ingresados.';
-        } else if (err.status === 0) {
-          this.error = 'No se pudo conectar con el servidor.';
-        } else {
-          this.error = 'Ocurrió un error al registrarse. Intenta de nuevo.';
-        }
+        if (err.status === 409)      this.error = 'El correo o usuario ya está registrado.';
+        else if (err.status === 400) this.error = err.error?.message ?? 'Revisa los datos ingresados.';
+        else if (err.status === 0)   this.error = 'No se pudo conectar con el servidor.';
+        else                         this.error = 'Ocurrió un error. Intenta de nuevo.';
       },
       complete: () => { this.loading = false; }
     });

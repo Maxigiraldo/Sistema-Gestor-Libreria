@@ -60,12 +60,14 @@
           <input type="text" [(ngModel)]="dni" name="dni" placeholder="1002345678" inputmode="numeric"/>
           <span class="field-hint">Cédula de ciudadanía u otro documento.</span>
           <span class="field-error" *ngIf="submitted1 && !dni.trim()">Obligatorio.</span>
+          <span class="field-error" *ngIf="submitted1 && !dniValid()">Solo números, entre 6 y 12 dígitos.</span>
         </div>
 
         <div class="field-row">
           <div class="field">
             <label>Fecha de nacimiento *</label>
-            <input type="date" [(ngModel)]="birthDate" name="birthDate" [max]="maxBirthDate"/>
+            <input type="date" [(ngModel)]="birthDate" name="birthDate"
+              [min]="minBirthDate" [max]="maxBirthDate"/>
             <span class="field-error" *ngIf="submitted1 && !birthDate">Obligatorio.</span>
           </div>
           <div class="field">
@@ -117,13 +119,13 @@
           <label>Nombre de usuario *</label>
           <input type="text" [(ngModel)]="username" name="username" placeholder="carlos_ramirez" autocomplete="username"/>
           <span class="field-hint">Solo letras, números y guión bajo. Sin espacios.</span>
-          <span class="field-error" *ngIf="submitted2 && !username.trim()">Obligatorio.</span>
+          <span class="field-error" *ngIf="submitted2 && !usernameValid()">3-30 caracteres. Solo letras, números, _ o -. Sin espacios.</span>
         </div>
 
         <div class="field">
           <label>Correo electrónico *</label>
           <input type="email" [(ngModel)]="email" name="email" placeholder="correo@ejemplo.com" autocomplete="email"/>
-          <span class="field-error" *ngIf="submitted2 && !email.trim()">Obligatorio.</span>
+          <span class="field-error" *ngIf="submitted2 && !emailValid()">Ingresa un correo válido (ej: nombre@dominio.com).</span>
         </div>
 
         <div class="field">

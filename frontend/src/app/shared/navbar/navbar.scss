@@ -155,3 +155,24 @@
 
   &:hover { background: #4338ca; }
 }
+
+.btn-admin {
+  padding: 7px 14px;
+  background: #fef3c7;
+  color: #d97706;
+  border: 1.5px solid #fde68a;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+
+  &:hover {
+    background: #fde68a;
+    border-color: #f59e0b;
+  }
+}

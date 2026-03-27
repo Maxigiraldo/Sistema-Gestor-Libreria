@@ -1,6 +1,6 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <a routerLink="/">📚 Librería</a>
+    <a [routerLink]="['/']">📚 Librería</a>
   </div>
 
   <div class="navbar-search">
@@ -15,16 +15,21 @@
     </button>
 
     <ng-container *ngIf="user; else guestActions">
-      <a routerLink="/profile" class="user-chip">
+      <a *ngIf="user.role === 'root' || user.role === 'administrator'"
+         [routerLink]="['/admin']"
+         class="btn-admin">⚙️ Panel admin</a>
+
+      <a [routerLink]="['/profile']" class="user-chip">
         <span class="user-avatar">{{ user.username[0].toUpperCase() }}</span>
         <span class="user-name">{{ user.username }}</span>
       </a>
+
       <button class="btn-logout" (click)="showLogoutModal = true">Salir</button>
     </ng-container>
 
     <ng-template #guestActions>
-      <a routerLink="/login" class="btn-outline">Iniciar sesión</a>
-      <a routerLink="/register" class="btn-primary">Registrarse</a>
+      <a [routerLink]="['/login']" class="btn-outline">Iniciar sesión</a>
+      <a [routerLink]="['/register']" class="btn-primary">Registrarse</a>
     </ng-template>
   </div>
 </nav>
@@ -32,5 +37,5 @@
 <app-confirm-logout
   *ngIf="showLogoutModal"
   (confirmed)="confirmLogout()"
-  (cancelled)="showLogoutModal = false"
+  (cancelled)="cancelLogout()"
 />
