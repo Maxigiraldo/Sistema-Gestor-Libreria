@@ -1,0 +1,84 @@
+<div class="modal-backdrop" (click)="cancelled.emit()">
+  <div class="form-modal" (click)="$event.stopPropagation()">
+    <h3>{{ isEditing ? 'Editar libro' : 'Agregar libro' }}</h3>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Título *</label>
+          <input type="text" [(ngModel)]="form.title" name="title" required />
+        </div>
+
+        <div class="field">
+          <label>Autor *</label>
+          <input type="text" [(ngModel)]="form.author" name="author" required />
+        </div>
+
+        <div class="field">
+          <label>Género *</label>
+          <input type="text" [(ngModel)]="form.genre" name="genre" required />
+        </div>
+
+        <div class="field">
+          <label>Editorial</label>
+          <input type="text" [(ngModel)]="form.publisher" name="publisher" />
+        </div>
+
+        <div class="field">
+          <label>Idioma</label>
+          <input type="text" [(ngModel)]="form.language" name="language" />
+        </div>
+
+        <div class="field">
+          <label>Año de publicación</label>
+          <input type="number" [(ngModel)]="form.publicationYear" name="publicationYear" />
+        </div>
+
+        <div class="field">
+          <label>Fecha de publicación</label>
+          <input type="date" [(ngModel)]="form.publicationDate" name="publicationDate" />
+        </div>
+
+        <div class="field">
+          <label>Páginas</label>
+          <input type="number" [(ngModel)]="form.pages" name="pages" />
+        </div>
+
+        <div class="field">
+          <label>ISSN</label>
+          <input type="text" [(ngModel)]="form.issn" name="issn" />
+        </div>
+
+        <div class="field">
+          <label>Precio *</label>
+          <input type="number" [(ngModel)]="form.price" name="price" required />
+        </div>
+
+        <div class="field">
+          <label>Condición *</label>
+          <select [(ngModel)]="form.condition" name="condition" required>
+            <option value="new">Nuevo</option>
+            <option value="used">Usado</option>
+          </select>
+        </div>
+
+        <div class="field" *ngIf="!isEditing">
+          <label>Cantidad de ejemplares *</label>
+          <input type="number" [(ngModel)]="form.quantity" name="quantity"
+                 required min="1" />
+        </div>
+      </div>
+
+      <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancelled.emit()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Guardando...' : (isEditing ? 'Guardar cambios' : 'Crear libro') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

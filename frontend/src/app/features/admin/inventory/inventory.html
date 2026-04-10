@@ -1,0 +1,88 @@
+<app-navbar />
+
+<div class="inventory-page">
+  <div class="inventory-header">
+    <div>
+      <h2>Gestión de inventario</h2>
+      <p>{{ books.length }} libros registrados</p>
+    </div>
+    <button class="btn-primary" (click)="openCreate()">+ Agregar libro</button>
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    <div class="spinner-large"></div>
+    <p>Cargando inventario...</p>
+  </div>
+
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+  <div class="table-wrapper" *ngIf="!loading && !error">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Título</th>
+          <th>Autor</th>
+          <th>Género</th>
+          <th>Condición</th>
+          <th>Precio</th>
+          <th>Ejemplares</th>
+          <th>Disponibles</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let book of books">
+          <td class="id-cell">#{{ book.id }}</td>
+          <td class="title-cell">{{ book.title }}</td>
+          <td>{{ book.author }}</td>
+          <td>{{ book.genre }}</td>
+          <td>
+            <span class="badge" [class.used]="book.condition === 'used'">
+              {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
+            </span>
+          </td>
+          <td class="price-cell">${{ book.price | number:'1.0-0' }}</td>
+          <td class="center">{{ book.exemplars?.length ?? 0 }}</td>
+          <td class="center">
+            <span [class.zero]="getAvailable(book) === 0">
+              {{ getAvailable(book) }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="btn-edit" (click)="openEdit(book)">Editar</button>
+            <button class="btn-delete" (click)="openDelete(book)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="books.length === 0">
+      <p>No hay libros registrados. Agrega el primero.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Modal formulario -->
+<app-book-form
+  *ngIf="showForm"
+  [book]="selectedBook"
+  (saved)="onFormSaved()"
+  (cancelled)="showForm = false"
+/>
+
+<!-- Modal confirmar eliminación -->
+<div class="modal-backdrop" *ngIf="showDeleteConfirm" (click)="showDeleteConfirm = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-icon">🗑️</div>
+    <h3>¿Eliminar libro?</h3>
+    <p>
+      Se desactivará <strong>{{ bookToDelete?.title }}</strong>.
+      Esta acción se puede revertir desde la base de datos.
+    </p>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="showDeleteConfirm = false">Cancelar</button>
+      <button class="btn-danger" (click)="confirmDelete()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>

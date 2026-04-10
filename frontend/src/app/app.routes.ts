@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { adminGuard } from './core/guards/admin-guard';
 
 export const routes: Routes = [
   {
@@ -41,5 +42,12 @@ export const routes: Routes = [
       .then(m => m.AdminPanelComponent),
     canActivate: [authGuard]  // el guard de rol ROOT lo manejas en el componente
   },
+  {
+  path: 'admin/inventory',
+  loadComponent: () =>
+    import('./features/admin/inventory/inventory')
+    .then(m => m.InventoryComponent),
+  canActivate: [authGuard, adminGuard]
+},
   { path: '**', redirectTo: '' }
 ];

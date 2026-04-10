@@ -15,9 +15,13 @@
     </button>
 
     <ng-container *ngIf="user; else guestActions">
-      <a *ngIf="user.role === 'root' || user.role === 'administrator'"
+      <a *ngIf="user.role === 'root'"
          [routerLink]="['/admin']"
          class="btn-admin">⚙️ Panel admin</a>
+
+      <a *ngIf="user.role === 'administrator'"
+         [routerLink]="['/admin/inventory']"
+         class="btn-inventory">📦 Panel Inventario</a>
 
       <a [routerLink]="['/profile']" class="user-chip">
         <span class="user-avatar">{{ user.username[0].toUpperCase() }}</span>
@@ -26,6 +30,8 @@
 
       <button class="btn-logout" (click)="showLogoutModal = true">Salir</button>
     </ng-container>
+
+
 
     <ng-template #guestActions>
       <a [routerLink]="['/login']" class="btn-outline">Iniciar sesión</a>

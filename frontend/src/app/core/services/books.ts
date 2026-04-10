@@ -36,4 +36,16 @@ export class BooksService {
   getById(id: number) {
     return this.http.get<Book>(`${this.base}/books/${id}`);
   }
+
+  create(data: Partial<Book> & { quantity: number }) {
+  return this.http.post<any>(`${this.base}/books`, data);
+}
+
+  update(id: number, data: Partial<Book>) {
+    return this.http.put<any>(`${this.base}/books/${id}`, data);
+  }
+
+  delete(id: number) {
+    return this.http.delete<any>(`${this.base}/books/${id}`);
+  }
 }
