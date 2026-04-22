@@ -1,6 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { BooksService, Book } from '../../../../core/services/books';
 
 @Component({
@@ -10,7 +12,8 @@ import { BooksService, Book } from '../../../../core/services/books';
   templateUrl: './book-form.html',
   styleUrl: './book-form.scss'
 })
-export class BookFormComponent implements OnInit {
+export class BookFormComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   @Input() book: Book | null = null;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
@@ -34,7 +37,10 @@ export class BookFormComponent implements OnInit {
   error = '';
   isEditing = false;
 
-  constructor(private booksService: BooksService) {}
+  constructor(
+    private booksService: BooksService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     if (this.book) {
@@ -59,17 +65,30 @@ export class BookFormComponent implements OnInit {
   onSubmit() {
     this.loading = true;
     this.error = '';
+    this.cdr.detectChanges();
 
     const request = this.isEditing
       ? this.booksService.update(this.book!.id, this.form)
       : this.booksService.create(this.form);
 
-    request.subscribe({
-      next: () => { this.loading = false; this.saved.emit(); },
-      error: (err) => {
-        this.error = err.error?.message ?? 'Error al guardar el libro';
-        this.loading = false;
-      }
-    });
+    request
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => { 
+          this.loading = false; 
+          this.cdr.detectChanges();
+          this.saved.emit(); 
+        },
+        error: (err) => {
+          this.error = err.error?.message ?? 'Error al guardar el libro';
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

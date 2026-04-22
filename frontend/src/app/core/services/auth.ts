@@ -36,7 +36,20 @@ export class AuthService {
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    this.router.navigate(['/books']);
+    this.router.navigate(['/']);
+  }
+
+  isTokenExpired(): boolean {
+    const token = localStorage.getItem('token');
+    if (!token) return true;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const expMs = payload.exp * 1000;
+      return Date.now() >= expMs;
+    } catch {
+      return true;
+    }
   }
 
   isLoggedIn(): boolean {

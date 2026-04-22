@@ -64,12 +64,7 @@
 </div>
 
 <!-- Modal formulario -->
-<app-book-form
-  *ngIf="showForm"
-  [book]="selectedBook"
-  (saved)="onFormSaved()"
-  (cancelled)="showForm = false"
-/>
+<app-book-form *ngIf="showForm" [book]="selectedBook" (saved)="onFormSaved()" (cancelled)="showForm = false" />
 
 <!-- Modal confirmar eliminación -->
 <div class="modal-backdrop" *ngIf="showDeleteConfirm" (click)="showDeleteConfirm = false">

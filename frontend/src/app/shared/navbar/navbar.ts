@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { ConfirmLogoutComponent } from '../modals/confirm-logout/confirm-logout';
 
@@ -11,28 +11,20 @@ import { ConfirmLogoutComponent } from '../modals/confirm-logout/confirm-logout'
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
-export class NavbarComponent implements OnInit {
-  user: any = null;
+export class NavbarComponent {
   showLogoutModal = false;
 
-  constructor(
-    private auth: AuthService,
-    private cdr: ChangeDetectorRef,
-  ) {}
+  constructor(public auth: AuthService) {}
 
-  ngOnInit() {
-    this.user = this.auth.getUser();
+  get user() {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    if (!token || !userData) return null;
+    return JSON.parse(userData);
   }
 
   confirmLogout() {
     this.auth.logout();
     this.showLogoutModal = false;
-    this.user = null;
-    this.cdr.detectChanges();
-  }
-
-  cancelLogout() {
-    this.showLogoutModal = false;
-    this.cdr.detectChanges();
   }
 }

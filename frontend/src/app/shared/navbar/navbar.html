@@ -43,5 +43,5 @@
 <app-confirm-logout
   *ngIf="showLogoutModal"
   (confirmed)="confirmLogout()"
-  (cancelled)="cancelLogout()"
+  (cancelled)="showLogoutModal = false"
 />
