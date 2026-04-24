@@ -44,10 +44,20 @@
           </td>
           <td class="price-cell">${{ book.price | number:'1.0-0' }}</td>
           <td class="center">{{ book.exemplars?.length ?? 0 }}</td>
-          <td class="center">
-            <span [class.zero]="getAvailable(book) === 0">
-              {{ getAvailable(book) }}
-            </span>
+          <td class="center stock-cell">
+            <button
+              class="btn-stock"
+              (click)="adjustStock(book, -1)"
+              [disabled]="adjustingStock[book.id] || getAvailable(book) === 0"
+              title="Retirar un ejemplar"
+            >−</button>
+            <span [class.zero]="getAvailable(book) === 0">{{ getAvailable(book) }}</span>
+            <button
+              class="btn-stock"
+              (click)="adjustStock(book, 1)"
+              [disabled]="adjustingStock[book.id]"
+              title="Agregar un ejemplar"
+            >+</button>
           </td>
           <td class="actions-cell">
             <button class="btn-edit" (click)="openEdit(book)">Editar</button>

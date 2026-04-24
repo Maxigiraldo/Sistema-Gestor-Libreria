@@ -84,4 +84,11 @@ export class AuthService {
       }),
     );
   }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.http.put<{ message: string }>(`${this.base}/auth/change-password`, {
+      currentPassword,
+      newPassword,
+    });
+  }
 }

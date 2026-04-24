@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from './book.entity';
@@ -70,5 +70,44 @@ export class BooksService {
     book.active = false;
     await this.bookRepository.save(book);
     return { message: 'Libro eliminado exitosamente' };
+  }
+
+  async adjustStock(id: number, delta: number) {
+    if (!Number.isInteger(delta) || delta === 0) {
+      throw new BadRequestException('El delta debe ser un entero diferente de cero');
+    }
+    const book = await this.findOne(id);
+
+    if (delta > 0) {
+      const newExemplars: Exemplar[] = [];
+      for (let i = 0; i < delta; i++) {
+        newExemplars.push(
+          this.exemplarRepository.create({
+            uniqueCode: `LIB-${book.id}-${uuidv4().substring(0, 8).toUpperCase()}`,
+            book,
+            storeLocation: 'Sede Principal Pereira',
+            available: true,
+            outOfStock: false,
+          }),
+        );
+      }
+      await this.exemplarRepository.save(newExemplars);
+    } else {
+      const toRemove = Math.abs(delta);
+      const available = book.exemplars.filter((e) => e.available && !e.outOfStock);
+      if (available.length < toRemove) {
+        throw new BadRequestException(
+          `Solo hay ${available.length} ejemplar(es) disponibles para retirar`,
+        );
+      }
+      const targets = available.slice(0, toRemove);
+      for (const e of targets) {
+        e.available = false;
+        e.outOfStock = true;
+      }
+      await this.exemplarRepository.save(targets);
+    }
+
+    return this.findOne(id);
   }
 }

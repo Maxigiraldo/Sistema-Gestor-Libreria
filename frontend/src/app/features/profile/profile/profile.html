@@ -13,6 +13,7 @@
       </div>
       <div class="hero-actions">
         <a [routerLink]="['/profile/edit']" class="btn-secondary">✏️ Editar perfil</a>
+        <a [routerLink]="['/profile/categories']" class="btn-secondary" *ngIf="user.role === 'client'">📚 Categorías</a>
         <button class="btn-secondary" (click)="showPasswordModal = true">🔑 Contraseña</button>
         <button class="btn-danger-soft" (click)="showLogoutModal = true">Cerrar sesión</button>
       </div>

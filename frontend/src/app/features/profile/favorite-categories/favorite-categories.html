@@ -1,0 +1,49 @@
+<app-navbar />
+
+<div class="categories-layout">
+  <div class="categories-container">
+
+    <div class="page-header">
+      <a [routerLink]="['/profile']" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Volver al perfil
+      </a>
+      <h1>Categorías favoritas</h1>
+      <p class="subtitle">Selecciona los géneros que más te interesan</p>
+    </div>
+
+    <div class="loading-wrap" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div *ngIf="!loading">
+      <div class="genres-grid">
+        <button
+          *ngFor="let genre of allGenres"
+          class="genre-btn"
+          [class.selected]="isSelected(genre)"
+          (click)="toggle(genre)"
+          type="button"
+        >
+          {{ genre }}
+        </button>
+      </div>
+
+      <p class="selection-hint">{{ selected.size }} género(s) seleccionado(s)</p>
+
+      <div class="error-msg" *ngIf="error">{{ error }}</div>
+      <div class="success-msg" *ngIf="success">✅ {{ success }}</div>
+
+      <div class="form-actions">
+        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
+        <button class="btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Guardando...' : 'Guardar preferencias' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

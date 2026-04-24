@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
 import { UsersService, AdminUser } from '../../../core/services/users';
 import { AuthService } from '../../../core/services/auth';
@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth';
 @Component({
   selector: 'app-admin-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, NavbarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './admin-panel.html',
   styleUrl: './admin-panel.scss'
 })

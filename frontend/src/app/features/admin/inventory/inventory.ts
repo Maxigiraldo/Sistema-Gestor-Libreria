@@ -107,4 +107,26 @@ export class InventoryComponent implements OnInit, OnDestroy {
   getAvailable(book: Book): number {
     return book.exemplars?.filter(e => e.available).length ?? 0;
   }
+
+  adjustingStock: Record<number, boolean> = {};
+
+  adjustStock(book: Book, delta: number) {
+    if (this.adjustingStock[book.id]) return;
+    this.adjustingStock[book.id] = true;
+    this.booksService.adjustStock(book.id, delta)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updated) => {
+          const idx = this.books.findIndex(b => b.id === book.id);
+          if (idx !== -1) this.books[idx] = updated;
+          this.adjustingStock[book.id] = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.error = err?.error?.message ?? 'Error al ajustar el stock';
+          this.adjustingStock[book.id] = false;
+          this.cdr.detectChanges();
+        },
+      });
+  }
 }

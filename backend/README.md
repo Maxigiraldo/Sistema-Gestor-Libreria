@@ -1,3 +1,5 @@
+
+
 #  Librería Backend — API REST
 
 Sistema de Gestión y Compra de Libros en Línea  
@@ -117,6 +119,7 @@ El sistema usa **JWT (JSON Web Token)** con Bearer Token.
 1. El usuario se registra → `POST /auth/register`
 2. El usuario inicia sesión → `POST /auth/login`
 3. El servidor devuelve un `access_token`
+favoriteGenres, 
 4. El frontend debe incluir ese token en todas las peticiones protegidas
 
 ### Cómo enviar el token
@@ -134,6 +137,7 @@ El token expira en **15 minutos**. Cuando expire, el frontend debe hacer login d
 ---
 
 ## Roles y permisos
+#### Acceso a la base de datos
 
 El sistema tiene 4 roles:
 

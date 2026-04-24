@@ -57,4 +57,14 @@ export class BooksController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.booksService.remove(id);
   }
+
+  @Put(':id/exemplars/stock')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ROOT)
+  adjustStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('delta') delta: number,
+  ) {
+    return this.booksService.adjustStock(id, delta);
+  }
 }

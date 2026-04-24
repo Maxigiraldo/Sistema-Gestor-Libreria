@@ -10,6 +10,14 @@ export interface AdminUser {
   createdAt: string;
 }
 
+export interface UpdateProfileData {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  shippingAddress?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private base = environment.apiUrl;
@@ -29,5 +37,21 @@ export class UsersService {
     return this.http.patch<{ message: string }>(
       `${this.base}/users/admins/${id}/deactivate`, {}
     );
+  }
+
+  getProfile() {
+    return this.http.get<any>(`${this.base}/users/me/profile`);
+  }
+
+  updateProfile(data: UpdateProfileData) {
+    return this.http.put<any>(`${this.base}/users/me/profile`, data);
+  }
+
+  getCategories() {
+    return this.http.get<{ favoriteGenres: string[] }>(`${this.base}/users/me/categories`);
+  }
+
+  updateCategories(genres: string[]) {
+    return this.http.put<any>(`${this.base}/users/me/categories`, { genres });
   }
 }

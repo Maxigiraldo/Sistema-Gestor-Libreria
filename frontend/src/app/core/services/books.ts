@@ -48,4 +48,8 @@ export class BooksService {
   delete(id: number) {
     return this.http.delete<any>(`${this.base}/books/${id}`);
   }
+
+  adjustStock(id: number, delta: number) {
+    return this.http.put<Book>(`${this.base}/books/${id}/exemplars/stock`, { delta });
+  }
 }

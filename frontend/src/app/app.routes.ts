@@ -43,11 +43,25 @@ export const routes: Routes = [
     canActivate: [authGuard]  // el guard de rol ROOT lo manejas en el componente
   },
   {
-  path: 'admin/inventory',
-  loadComponent: () =>
-    import('./features/admin/inventory/inventory')
-    .then(m => m.InventoryComponent),
-  canActivate: [authGuard, adminGuard]
-},
+    path: 'admin/inventory',
+    loadComponent: () =>
+      import('./features/admin/inventory/inventory')
+      .then(m => m.InventoryComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'profile/categories',
+    loadComponent: () =>
+      import('./features/profile/favorite-categories/favorite-categories')
+      .then(m => m.FavoriteCategoriesComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'admin/bonus',
+    loadComponent: () =>
+      import('./features/admin/bonus-config/bonus-config')
+      .then(m => m.BonusConfigComponent),
+    canActivate: [authGuard, adminGuard]
+  },
   { path: '**', redirectTo: '' }
 ];

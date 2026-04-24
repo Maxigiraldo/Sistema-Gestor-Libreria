@@ -41,6 +41,13 @@ export class ClientProfile {
   @Column({ default: false })
   subscribedToNews: boolean;
 
+  /**
+   * Géneros favoritos del cliente. Puede ser un arreglo de strings o ids de géneros.
+   * Agregado en Sprint 2 para funcionalidad de categorías favoritas.
+   */
+  @Column('simple-array', { nullable: true })
+  favoriteGenres: string[];
+
   @CreateDateColumn()
   createdAt: Date;
 }
