@@ -33,7 +33,8 @@ export class BonusConfigComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.isRoot = this.auth.getRole() === 'root';
+    const role = this.auth.getRole();
+    this.isRoot = role === 'root' || role === 'administrator';
     this.http.get<{ discountPercentage: number }>(`${this.base}/config/bonus`).subscribe({
       next: (res) => {
         this.currentPercentage = Number(res.discountPercentage);

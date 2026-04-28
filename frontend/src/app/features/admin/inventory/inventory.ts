@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
@@ -9,7 +10,7 @@ import { BookFormComponent } from './book-form/book-form';
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, BookFormComponent],
+  imports: [CommonModule, RouterLink, NavbarComponent, BookFormComponent],
   templateUrl: './inventory.html',
   styleUrl: './inventory.scss'
 })

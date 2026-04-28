@@ -6,7 +6,10 @@
       <h2>Gestión de inventario</h2>
       <p>{{ books.length }} libros registrados</p>
     </div>
-    <button class="btn-primary" (click)="openCreate()">+ Agregar libro</button>
+    <div class="header-actions">
+      <a [routerLink]="['/admin/bonus']" class="btn-secondary">🎁 Configurar bono</a>
+      <button class="btn-primary" (click)="openCreate()">+ Agregar libro</button>
+    </div>
   </div>
 
   <div class="loading" *ngIf="loading">

@@ -18,7 +18,7 @@ export class ConfigController {
 
   @Put('bonus')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ROOT)
+  @Roles(UserRole.ROOT, UserRole.ADMIN)
   updateBonus(@Body('percentage') percentage: number) {
     return this.configService.updateBonus(Number(percentage));
   }
