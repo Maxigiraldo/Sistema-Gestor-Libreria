@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsOptional,
   IsDateString,
+  IsInt,
   Min,
 } from 'class-validator';
 import { BookCondition } from '../book.entity';
@@ -16,15 +17,18 @@ export class CreateBookDto {
   author: string;
 
   @IsNumber()
+  @IsOptional()
   publicationYear: number;
 
   @IsString()
   genre: string;
 
   @IsNumber()
+  @IsOptional()
   pages: number;
 
   @IsString()
+  @IsOptional()
   publisher: string;
 
   @IsString()
@@ -32,6 +36,7 @@ export class CreateBookDto {
   issn: string;
 
   @IsString()
+  @IsOptional()
   language: string;
 
   @IsDateString()
@@ -42,13 +47,14 @@ export class CreateBookDto {
   condition: BookCondition;
 
   @IsNumber()
-  @Min(0)
+  @Min(1000, { message: 'El precio mínimo es $1.000 COP' })
   price: number;
 
   @IsString()
   @IsOptional()
   coverImage: string;
 
-  @IsNumber()
+  @IsInt({ message: 'La cantidad debe ser un número entero' })
+  @Min(1, { message: 'Debe haber al menos 1 ejemplar' })
   quantity: number;
 }

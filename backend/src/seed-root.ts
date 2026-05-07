@@ -16,7 +16,7 @@ async function seed() {
     return;
   }
 
-  const hashed = await bcrypt.hash('root1234', 12);
+  const hashed = await bcrypt.hash('root123', 12);
   const root = userRepo.create({
     username: 'root',
     email: 'root@libreria.com',
@@ -24,7 +24,7 @@ async function seed() {
     role: UserRole.ROOT,
   });
   await userRepo.save(root);
-  console.log('✅ Usuario root creado. Username: root | Password: root1234');
+  console.log('✅ Usuario root creado. Username: root | Password: root123');
   await app.close();
 }
 

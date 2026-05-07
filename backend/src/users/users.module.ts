@@ -4,12 +4,12 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { ClientProfile } from './client-profile.entity';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-imports: [TypeOrmModule.forFeature([User, ClientProfile])],
-controllers: [UsersController],
-providers: [UsersService],
-exports: [UsersService],
-
+  imports: [TypeOrmModule.forFeature([User, ClientProfile]), MailModule],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

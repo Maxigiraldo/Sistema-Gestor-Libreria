@@ -1,6 +1,6 @@
 import {
   IsEmail, IsString, MinLength, MaxLength,
-  IsDateString, IsOptional, IsNotEmpty,
+  IsDateString, IsOptional, IsNotEmpty, Matches,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -18,6 +18,7 @@ export class RegisterDto {
   @IsNotEmpty({ message: 'La contraseña es obligatoria' })
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   @MaxLength(100)
+  @Matches(/\S/, { message: 'La contraseña no puede ser solo espacios' })
   password!: string;
 
   @IsString()

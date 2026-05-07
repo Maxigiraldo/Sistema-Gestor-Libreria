@@ -23,7 +23,7 @@ export class UsersService {
   private base = environment.apiUrl;
   constructor(private http: HttpClient) {}
 
-  createAdmin(data: { username: string; email: string; password: string }) {
+  createAdmin(data: { username: string; email: string }) {
     return this.http.post<{ message: string; user: AdminUser }>(
       `${this.base}/users/admins`, data
     );

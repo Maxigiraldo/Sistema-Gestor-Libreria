@@ -20,10 +20,9 @@ export class AdminPanelComponent implements OnInit {
   loadingList = true;
   deactivatingId: number | null = null;
 
-  form = { username: '', email: '', password: '' };
+  form = { username: '', email: '' };
   submitted = false;
   creating = false;
-  showPass = false;
   createError = '';
   createSuccess = '';
 
@@ -77,11 +76,10 @@ export class AdminPanelComponent implements OnInit {
     this.createError = '';
     this.createSuccess = '';
 
-    if (
-      !this.form.username.trim() ||
-      !this.form.email.trim() ||
-      this.form.password.length < 6
-    ) return;
+    if (!this.form.username.trim() || !this.form.email.trim()) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    if (!emailRegex.test(this.form.email.trim())) return;
 
     this.creating = true;
     this.cdr.detectChanges();
@@ -105,8 +103,7 @@ export class AdminPanelComponent implements OnInit {
   }
 
   resetForm() {
-    this.form = { username: '', email: '', password: '' };
+    this.form = { username: '', email: '' };
     this.submitted = false;
-    this.showPass = false;
   }
 }

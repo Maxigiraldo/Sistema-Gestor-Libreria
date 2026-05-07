@@ -63,5 +63,11 @@ export const routes: Routes = [
       .then(m => m.BonusConfigComponent),
     canActivate: [authGuard, adminGuard]
   },
+  {
+    path: 'set-password',
+    loadComponent: () =>
+      import('./features/auth/set-password/set-password')
+      .then(m => m.SetPasswordComponent)
+  },
   { path: '**', redirectTo: '' }
 ];

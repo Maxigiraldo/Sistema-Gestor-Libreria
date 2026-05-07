@@ -12,40 +12,44 @@ import { UserRole } from './user.entity';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ROOT)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   // ── Admin management (ROOT only) ──────────────────────────────────────────
 
   @Post('admins')
+  @Roles(UserRole.ROOT)
   createAdmin(@Body() dto: CreateAdminDto) {
     return this.usersService.createAdmin(dto);
   }
 
   @Get('admins')
+  @Roles(UserRole.ROOT)
   listAdmins() {
     return this.usersService.listAdmins();
   }
 
   @Patch('admins/:id/deactivate')
+  @Roles(UserRole.ROOT)
   deactivate(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.deactivateAdmin(id);
   }
 
-  // ── Client profile (CLIENT only) ─────────────────────────────────────────
+  // ── Profile (CLIENT, ADMIN, ROOT) ─────────────────────────────────────────
 
   @Get('me/profile')
-  @Roles(UserRole.CLIENT)
+  @Roles(UserRole.CLIENT, UserRole.ADMIN, UserRole.ROOT)
   getMyProfile(@Req() req: any) {
     return this.usersService.getClientProfile(req.user.sub);
   }
 
   @Put('me/profile')
-  @Roles(UserRole.CLIENT)
+  @Roles(UserRole.CLIENT, UserRole.ADMIN, UserRole.ROOT)
   updateMyProfile(@Req() req: any, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateClientProfile(req.user.sub, dto);
   }
+
+  // ── Categories (CLIENT only) ──────────────────────────────────────────────
 
   @Get('me/categories')
   @Roles(UserRole.CLIENT)

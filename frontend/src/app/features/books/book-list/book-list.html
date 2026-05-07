@@ -4,11 +4,14 @@
   <app-sidebar />
 
   <main class="main-content">
-    <div class="catalog-header">
-      <h2>Catálogo de libros</h2>
-      <span class="book-count" *ngIf="!loading">{{ books.length }} libros</span>
+
+    <!-- ── Franja ────────────────────────────────────────────── -->
+    <div class="catalog-strip">
+      <span class="strip-title">L I B R O S</span>
+      <span class="strip-count" *ngIf="!loading">{{ books.length }} títulos</span>
     </div>
 
+    <!-- ── Cargando ───────────────────────────────────────────── -->
     <div class="loading" *ngIf="loading">
       <div class="spinner-large"></div>
       <p>Cargando libros...</p>
@@ -16,70 +19,74 @@
 
     <p class="error-msg" *ngIf="error">{{ error }}</p>
 
-    <div class="books-grid" *ngIf="!loading && !error">
+    <!-- ── Estantería ─────────────────────────────────────────── -->
+    <div class="bookshelf" *ngIf="!loading && !error">
 
-      <div class="book-card" *ngFor="let book of books" (click)="openDetail(book)">
+      <div class="books-grid">
 
-        <div class="book-cover">
-          <img *ngIf="getCover(book)"
-              [src]="getCover(book)"
-              [alt]="book.title"
-              loading="lazy" />
-          <div *ngIf="!getCover(book)" class="book-cover-placeholder">
-            <span class="placeholder-emoji">📚</span>
-            <span class="placeholder-title">{{ book.title }}</span>
+        <div class="book-wrapper"
+             *ngFor="let book of books"
+             (click)="openDetail(book)"
+             [style.--spine]="getBookColor(book)">
+
+          <div class="book-3d">
+            <!-- Lomo -->
+            <div class="book-spine">
+              <span>{{ book.title }}</span>
+            </div>
+            <!-- Cara del libro -->
+            <div class="book-face">
+              <div class="book-cover-area">
+                <img *ngIf="getCover(book)"
+                     [src]="getCover(book)"
+                     [alt]="book.title"
+                     loading="lazy" />
+                <div *ngIf="!getCover(book)" class="book-cover-fallback">
+                  <span class="fallback-title">{{ book.title }}</span>
+                  <span class="fallback-author">{{ book.author }}</span>
+                </div>
+                <span class="condition-ribbon" [class.used]="book.condition === 'used'">
+                  {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
+                </span>
+              </div>
+              <div class="book-bottom">
+                <div class="book-price-row">
+                  <span class="book-price">{{ book.price | currency:'COP':'$':'1.0-0' }}</span>
+                  <span class="book-stock-badge" [class.out]="getAvailableCount(book) === 0">
+                    {{ getAvailableCount(book) > 0 ? getAvailableCount(book) + ' disp.' : 'Agotado' }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <span class="condition-badge" [class.used]="book.condition === 'used'">
-            {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
-          </span>
+
+          <!-- Sombra bajo el libro -->
+          <div class="book-shadow"></div>
         </div>
 
-        <div class="book-info">
-          <h3 class="book-title">{{ book.title }}</h3>
-          <p class="book-author">{{ book.author }}</p>
-          <p class="book-genre">{{ book.genre }}</p>
-
-          <p class="book-description" *ngIf="getDescription(book)">
-            {{ getDescription(book) | slice:0:90 }}...
-          </p>
-
-          <div class="book-footer">
-            <span class="book-price">${{ book.price | number:'1.0-0' }}</span>
-            <span class="book-stock" [class.out]="getAvailableCount(book) === 0">
-              {{ getAvailableCount(book) > 0
-                  ? getAvailableCount(book) + ' disp.'
-                  : 'Agotado' }}
-            </span>
-          </div>
-
-          <button class="btn-add-cart"
-                  [disabled]="getAvailableCount(book) === 0"
-                  (click)="$event.stopPropagation()">
-            🛒 Agregar
-          </button>
+        <div class="empty-state" *ngIf="books.length === 0">
+          <p>No hay libros disponibles.</p>
         </div>
 
-      </div>
+      </div><!-- /books-grid -->
+    </div><!-- /bookshelf -->
 
-      <div class="empty-state" *ngIf="books.length === 0">
-        <p>No hay libros disponibles.</p>
-      </div>
-    </div>
-
-    <!-- ── Modal detalle ─────────────────────────────────── -->
+    <!-- ── Modal detalle ──────────────────────────────────────── -->
     <div class="detail-backdrop" *ngIf="selectedBook" (click)="closeDetail()">
       <div class="detail-card" (click)="$event.stopPropagation()">
 
-        <button class="detail-close" (click)="closeDetail()">✕</button>
+        <button class="detail-close" (click)="closeDetail()">&#x2715;</button>
 
         <div class="detail-layout">
 
-          <div class="detail-cover">
+          <div class="detail-cover" [style.border-left-color]="getBookColor(selectedBook)">
             <img *ngIf="getCover(selectedBook)"
-                [src]="getCover(selectedBook)"
-                [alt]="selectedBook.title" />
-            <div *ngIf="!getCover(selectedBook)" class="book-cover-placeholder detail-placeholder">
-              📚
+                 [src]="getCover(selectedBook)"
+                 [alt]="selectedBook.title" />
+            <div *ngIf="!getCover(selectedBook)"
+                 class="detail-cover-fallback"
+                 [style.background]="getBookColor(selectedBook)">
+              <span>{{ selectedBook.title }}</span>
             </div>
           </div>
 
@@ -115,13 +122,13 @@
             </p>
 
             <a *ngIf="getPreviewLink(selectedBook)"
-              [href]="getPreviewLink(selectedBook)"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="preview-link">Ver vista previa en Google Books →</a>
+               [href]="getPreviewLink(selectedBook)"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="preview-link">Ver vista previa en Google Books &rarr;</a>
 
             <div class="detail-footer">
-              <span class="detail-price">${{ selectedBook.price | number:'1.0-0' }}</span>
+              <span class="detail-price">{{ selectedBook.price | currency:'COP':'$':'1.0-0' }}</span>
               <span class="detail-stock" [class.out]="getAvailableCount(selectedBook) === 0">
                 {{ getAvailableCount(selectedBook) > 0
                     ? getAvailableCount(selectedBook) + ' disponibles'
@@ -129,10 +136,8 @@
               </span>
             </div>
 
-            <button class="btn-add-full"
-                    [disabled]="getAvailableCount(selectedBook) === 0"
-                    (click)="$event.stopPropagation()">
-              🛒 Agregar al carrito
+            <button class="btn-add-full" [disabled]="true" (click)="$event.stopPropagation()">
+              Agregar al carrito
             </button>
           </div>
 

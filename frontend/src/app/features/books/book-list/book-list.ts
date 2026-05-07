@@ -81,6 +81,20 @@ export class BookListComponent implements OnInit {
     return book.exemplars.filter(e => e.available).length;
   }
 
+  private spineColors = [
+    '#7B241C','#1B4F72','#145A32','#4A235A','#784212',
+    '#1A5276','#0E6655','#6E2F0A','#2E4057','#4527A0',
+    '#880E4F','#1565C0','#2E7D32','#4E342E','#00695C',
+  ];
+
+  getBookColor(book: Book): string {
+    return this.spineColors[book.id % this.spineColors.length];
+  }
+
+  getTotalAvailable(): number {
+    return this.books.reduce((sum, b) => sum + this.getAvailableCount(b), 0);
+  }
+
   openDetail(book: Book) {
     this.selectedBook = book;
     this.fetchGoogleData(book);

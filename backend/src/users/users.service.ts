@@ -4,10 +4,12 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import { User, UserRole } from './user.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ClientProfile } from './client-profile.entity';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +18,7 @@ export class UsersService {
     private userRepository: Repository<User>,
     @InjectRepository(ClientProfile)
     private profileRepository: Repository<ClientProfile>,
+    private mailService: MailService,
   ) {}
 
   async createAdmin(dto: CreateAdminDto) {
@@ -24,16 +27,24 @@ export class UsersService {
     });
     if (exists) throw new ConflictException('Usuario o correo ya registrado');
 
-    const hashed = await bcrypt.hash(dto.password, 12);
+    const token = uuidv4();
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
     const user = this.userRepository.create({
       username: dto.username,
       email: dto.email,
-      password: hashed,
+      password: await bcrypt.hash(uuidv4(), 12), // contraseña temporal inutilizable
       role: UserRole.ADMIN,
+      active: false, // se activa cuando el admin configura su contraseña
+      passwordResetToken: token,
+      tokenExpiresAt: expiresAt,
     });
     const saved = await this.userRepository.save(user);
-    const { password, ...result } = saved;
-    return { message: 'Administrador creado', user: result };
+
+    await this.mailService.sendAdminWelcome(dto.email, dto.username, token);
+
+    const { password, passwordResetToken, tokenExpiresAt, ...result } = saved;
+    return { message: 'Administrador creado. Se envió correo para configurar contraseña.', user: result };
   }
 
   async listAdmins() {
@@ -58,11 +69,15 @@ export class UsersService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
+    const { password, passwordResetToken, tokenExpiresAt, ...userSafe } = user;
+
+    if (user.role !== UserRole.CLIENT) {
+      return { ...userSafe, profile: null };
+    }
+
     const profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
     });
-
-    const { password, ...userSafe } = user;
     return { ...userSafe, profile };
   }
 
@@ -77,6 +92,11 @@ export class UsersService {
     }
     await this.userRepository.save(user);
 
+    if (user.role !== UserRole.CLIENT) {
+      const { password, passwordResetToken, tokenExpiresAt, ...userSafe } = user;
+      return { message: 'Perfil actualizado', ...userSafe, profile: null };
+    }
+
     const profile = await this.profileRepository.findOne({
       where: { user: { id: userId } },
     });
@@ -89,7 +109,7 @@ export class UsersService {
 
     await this.profileRepository.save(profile);
 
-    const { password, ...userSafe } = user;
+    const { password, passwordResetToken, tokenExpiresAt, ...userSafe } = user;
     return { message: 'Perfil actualizado', ...userSafe, profile };
   }
 

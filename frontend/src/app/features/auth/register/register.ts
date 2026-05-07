@@ -94,7 +94,7 @@ export class RegisterComponent {
     if (
       !this.usernameValid() ||
       !this.emailValid()    ||
-      this.password.length < 6 ||
+      this.password.trim().length < 6 ||
       !this.acceptPrivacy
     ) return;
 

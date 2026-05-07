@@ -2,56 +2,126 @@
   <div class="form-modal" (click)="$event.stopPropagation()">
     <h3>{{ isEditing ? 'Editar libro' : 'Agregar libro' }}</h3>
 
+    <!-- ───── BUSCADOR GOOGLE BOOKS ───── -->
+    <div class="search-section" *ngIf="!isEditing">
+      <label class="search-label">Buscar en Google Books (opcional)</label>
+
+      <div *ngIf="filledFromSearch" class="search-filled-notice">
+        <span>Datos completados desde Google Books.</span>
+        <button type="button" class="btn-clear-search" (click)="clearSearch()">Limpiar y buscar otro</button>
+      </div>
+
+      <div class="search-row" *ngIf="!filledFromSearch">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          name="searchQuery"
+          placeholder="Ej. 100 años de soledad"
+          (keyup.enter)="searchBooks()"
+          autocomplete="off"
+        />
+        <button type="button" class="btn-search" (click)="searchBooks()" [disabled]="searching">
+          <span *ngIf="!searching">Buscar</span>
+          <span *ngIf="searching" class="spinner-sm"></span>
+        </button>
+      </div>
+      <p class="search-error" *ngIf="searchError">{{ searchError }}</p>
+
+      <div class="search-results" *ngIf="searchResults.length > 0">
+        <div class="result-item" *ngFor="let item of searchResults" (click)="fillFromResult(item)">
+          <img
+            *ngIf="item.volumeInfo.imageLinks?.smallThumbnail"
+            [src]="item.volumeInfo.imageLinks.smallThumbnail.replace('http://', 'https://')"
+            class="result-cover" alt=""
+          />
+          <div *ngIf="!item.volumeInfo.imageLinks?.smallThumbnail" class="result-cover-placeholder">📖</div>
+          <div class="result-info">
+            <span class="result-title">{{ item.volumeInfo.title }}</span>
+            <span class="result-author">{{ item.volumeInfo.authors?.join(', ') }}</span>
+            <span class="result-year">{{ item.volumeInfo.publishedDate }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <form (ngSubmit)="onSubmit()">
+
+      <!-- ───── PORTADA PREVIEW ───── -->
+      <div class="cover-preview" *ngIf="form.coverImage">
+        <img [src]="form.coverImage" alt="Portada" />
+        <button type="button" class="cover-clear" (click)="form.coverImage = ''" title="Quitar portada" *ngIf="!infoReadonly">✕</button>
+      </div>
+
+      <p class="info-readonly-note" *ngIf="isEditing">
+        Los datos bibliográficos no son editables. Solo puedes modificar precio, condición y ejemplares.
+      </p>
+
       <div class="form-grid">
         <div class="field full">
           <label>Título *</label>
-          <input type="text" [(ngModel)]="form.title" name="title" required />
+          <input type="text" [(ngModel)]="form.title" name="title" [readonly]="infoReadonly"
+                 [class.input-locked]="infoReadonly" />
+          <span class="field-error" *ngIf="formSubmitted && !form.title?.trim()">Obligatorio.</span>
         </div>
 
         <div class="field">
           <label>Autor *</label>
-          <input type="text" [(ngModel)]="form.author" name="author" required />
+          <input type="text" [(ngModel)]="form.author" name="author" [readonly]="infoReadonly"
+                 [class.input-locked]="infoReadonly" />
+          <span class="field-error" *ngIf="formSubmitted && !form.author?.trim()">Obligatorio.</span>
         </div>
 
         <div class="field">
           <label>Género *</label>
-          <input type="text" [(ngModel)]="form.genre" name="genre" required />
+          <input type="text" [(ngModel)]="form.genre" name="genre" [readonly]="infoReadonly"
+                 [class.input-locked]="infoReadonly" />
+          <span class="field-error" *ngIf="formSubmitted && !form.genre?.trim()">Obligatorio.</span>
         </div>
 
         <div class="field">
           <label>Editorial</label>
-          <input type="text" [(ngModel)]="form.publisher" name="publisher" />
+          <input type="text" [(ngModel)]="form.publisher" name="publisher" [readonly]="infoReadonly"
+                 [class.input-locked]="infoReadonly" />
         </div>
 
         <div class="field">
           <label>Idioma</label>
-          <input type="text" [(ngModel)]="form.language" name="language" />
+          <input type="text" [(ngModel)]="form.language" name="language" [readonly]="infoReadonly"
+                 [class.input-locked]="infoReadonly" />
         </div>
 
         <div class="field">
           <label>Año de publicación</label>
-          <input type="number" [(ngModel)]="form.publicationYear" name="publicationYear" />
+          <input type="number" [(ngModel)]="form.publicationYear" name="publicationYear"
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
         </div>
 
         <div class="field">
           <label>Fecha de publicación</label>
-          <input type="date" [(ngModel)]="form.publicationDate" name="publicationDate" />
+          <input type="date" [(ngModel)]="form.publicationDate" name="publicationDate"
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
         </div>
 
         <div class="field">
           <label>Páginas</label>
-          <input type="number" [(ngModel)]="form.pages" name="pages" />
+          <input type="number" [(ngModel)]="form.pages" name="pages"
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
         </div>
 
         <div class="field">
           <label>ISSN</label>
-          <input type="text" [(ngModel)]="form.issn" name="issn" />
+          <input type="text" [(ngModel)]="form.issn" name="issn"
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
         </div>
 
+        <!-- ───── CAMPOS EDITABLES ───── -->
         <div class="field">
-          <label>Precio *</label>
-          <input type="number" [(ngModel)]="form.price" name="price" required />
+          <label>Precio (COP) *</label>
+          <input type="number" [(ngModel)]="form.price" name="price" required
+                 min="1000" step="1000" placeholder="Ej: 25000" />
+          <span class="field-error" *ngIf="formSubmitted && (form.price === null || form.price < 1000)">
+            Mínimo $1.000 COP.
+          </span>
         </div>
 
         <div class="field">
@@ -62,23 +132,42 @@
           </select>
         </div>
 
+        <!-- Cantidad al crear -->
         <div class="field" *ngIf="!isEditing">
           <label>Cantidad de ejemplares *</label>
-          <input type="number" [(ngModel)]="form.quantity" name="quantity"
-                 required min="1" />
+          <input type="number" [(ngModel)]="form.quantity" name="quantity" required
+                 min="1" step="1" />
+          <span class="field-error" *ngIf="formSubmitted && form.quantity < 1">Mínimo 1 ejemplar.</span>
+        </div>
+
+        <!-- Ejemplares en modo edición -->
+        <div class="field" *ngIf="isEditing">
+          <label>Ejemplares actuales</label>
+          <input type="number" [value]="currentExemplarCount" readonly class="input-locked" />
+        </div>
+
+        <div class="field" *ngIf="isEditing">
+          <label>Agregar ejemplares</label>
+          <input type="number" [(ngModel)]="additionalQuantity" name="additionalQuantity"
+                 min="0" step="1" placeholder="0" />
+          <span class="field-hint">Deja en 0 si no deseas agregar.</span>
+        </div>
+
+        <div class="field full" *ngIf="!infoReadonly">
+          <label>URL de portada</label>
+          <input type="text" [(ngModel)]="form.coverImage" name="coverImage" placeholder="https://..." />
         </div>
       </div>
 
       <p class="error-msg" *ngIf="error">{{ error }}</p>
 
       <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="cancelled.emit()">
-          Cancelar
-        </button>
+        <button type="button" class="btn-secondary" (click)="cancelled.emit()">Cancelar</button>
         <button type="submit" class="btn-primary" [disabled]="loading">
           {{ loading ? 'Guardando...' : (isEditing ? 'Guardar cambios' : 'Crear libro') }}
         </button>
       </div>
+
     </form>
   </div>
 </div>

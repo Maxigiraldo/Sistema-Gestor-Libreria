@@ -149,7 +149,7 @@
             </button>
           </div>
           <span class="field-error" *ngIf="submitted2 && !password.trim()">Obligatorio.</span>
-          <span class="field-error" *ngIf="submitted2 && password.trim() && password.length < 6">Mínimo 6 caracteres.</span>
+          <span class="field-error" *ngIf="submitted2 && password.trim() && password.trim().length < 6">Mínimo 6 caracteres.</span>
         </div>
 
         <!-- Checkbox privacidad -->

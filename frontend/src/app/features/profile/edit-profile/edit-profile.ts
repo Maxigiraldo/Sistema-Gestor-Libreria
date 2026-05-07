@@ -23,11 +23,16 @@ export class EditProfileComponent implements OnInit {
   };
 
   email = '';
+  userRole = '';
   submitted = false;
   loading = true;
   saving = false;
   success = '';
   error = '';
+
+  get isClient(): boolean {
+    return this.userRole === 'client';
+  }
 
   constructor(
     private auth: AuthService,
@@ -38,6 +43,8 @@ export class EditProfileComponent implements OnInit {
 
   ngOnInit() {
     if (!this.auth.isLoggedIn()) { this.router.navigate(['/login']); return; }
+
+    this.userRole = this.auth.getRole();
 
     this.users.getProfile().subscribe({
       next: (data: any) => {

@@ -38,6 +38,12 @@ export class User {
   @Column({ default: true })
   active: boolean;
 
+  @Column({ nullable: true, type: 'varchar' })
+  passwordResetToken: string | null;
+
+  @Column({ nullable: true, type: 'timestamptz' })
+  tokenExpiresAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

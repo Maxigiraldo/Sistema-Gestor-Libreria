@@ -1,4 +1,7 @@
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable, UnauthorizedException, ConflictException,
+  NotFoundException, BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -20,32 +23,20 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    // Verificar si el usuario ya existe
     const existingUser = await this.userRepository.findOne({
-      where: [
-        { username: registerDto.username },
-        { email: registerDto.email },
-      ],
+      where: [{ username: registerDto.username }, { email: registerDto.email }],
     });
+    if (existingUser) throw new ConflictException('El usuario o correo ya está registrado');
 
-    if (existingUser) {
-      throw new ConflictException('El usuario o correo ya está registrado');
-    }
-
-    // Hashear contraseña
     const hashedPassword = await bcrypt.hash(registerDto.password, 12);
-
-    // Crear usuario
     const user = this.userRepository.create({
       username: registerDto.username,
       email: registerDto.email,
       password: hashedPassword,
       role: UserRole.CLIENT,
     });
-
     const savedUser = await this.userRepository.save(user);
 
-    // Crear perfil de cliente
     const profile = this.clientProfileRepository.create({
       user: savedUser,
       dni: registerDto.dni,
@@ -56,10 +47,8 @@ export class AuthService {
       shippingAddress: registerDto.shippingAddress,
       gender: registerDto.gender,
     });
-
     await this.clientProfileRepository.save(profile);
 
-    // Generar token
     const token = this.jwtService.sign({
       sub: savedUser.id,
       username: savedUser.username,
@@ -69,33 +58,21 @@ export class AuthService {
     return {
       message: 'Usuario registrado exitosamente',
       access_token: token,
-      user: {
-        id: savedUser.id,
-        username: savedUser.username,
-        email: savedUser.email,
-        role: savedUser.role,
-      },
+      user: { id: savedUser.id, username: savedUser.username, email: savedUser.email, role: savedUser.role },
     };
   }
 
   async login(loginDto: LoginDto) {
-    // Buscar usuario
-    const user = await this.userRepository.findOne({
-      where: { username: loginDto.username },
-    });
+    const user = await this.userRepository.findOne({ where: { username: loginDto.username } });
+    if (!user) throw new UnauthorizedException('Credenciales incorrectas');
 
-    if (!user) {
-      throw new UnauthorizedException('Credenciales incorrectas');
+    if (!user.active) {
+      throw new UnauthorizedException('Cuenta inactiva. Revisa tu correo para configurar tu contraseña');
     }
 
-    // Verificar contraseña
     const passwordValid = await bcrypt.compare(loginDto.password, user.password);
+    if (!passwordValid) throw new UnauthorizedException('Credenciales incorrectas');
 
-    if (!passwordValid) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
-
-    // Generar token
     const token = this.jwtService.sign({
       sub: user.id,
       username: user.username,
@@ -105,12 +82,7 @@ export class AuthService {
     return {
       message: 'Inicio de sesión exitoso',
       access_token: token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
     };
   }
 
@@ -124,5 +96,21 @@ export class AuthService {
     user.password = await bcrypt.hash(dto.newPassword, 12);
     await this.userRepository.save(user);
     return { message: 'Contraseña actualizada exitosamente' };
+  }
+
+  async setPasswordFromToken(token: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { passwordResetToken: token } });
+    if (!user) throw new BadRequestException('Token inválido o expirado');
+    if (!user.tokenExpiresAt || user.tokenExpiresAt < new Date()) {
+      throw new BadRequestException('El enlace ha expirado. Solicita uno nuevo al administrador ROOT');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
+    user.passwordResetToken = null;
+    user.tokenExpiresAt = null;
+    user.active = true;
+    await this.userRepository.save(user);
+
+    return { message: 'Contraseña configurada correctamente. Ya puedes iniciar sesión.' };
   }
 }

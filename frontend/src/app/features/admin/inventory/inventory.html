@@ -45,8 +45,8 @@
               {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
             </span>
           </td>
-          <td class="price-cell">${{ book.price | number:'1.0-0' }}</td>
-          <td class="center">{{ book.exemplars?.length ?? 0 }}</td>
+          <td class="price-cell">{{ book.price | currency:'COP':'$':'1.0-0':'es-CO' }}</td>
+          <td class="center">{{ book.exemplars.length }}</td>
           <td class="center stock-cell">
             <button
               class="btn-stock"

@@ -94,18 +94,14 @@ export class BooksService {
       await this.exemplarRepository.save(newExemplars);
     } else {
       const toRemove = Math.abs(delta);
-      const available = book.exemplars.filter((e) => e.available && !e.outOfStock);
+      const available = book.exemplars.filter((e) => e.available);
       if (available.length < toRemove) {
         throw new BadRequestException(
           `Solo hay ${available.length} ejemplar(es) disponibles para retirar`,
         );
       }
       const targets = available.slice(0, toRemove);
-      for (const e of targets) {
-        e.available = false;
-        e.outOfStock = true;
-      }
-      await this.exemplarRepository.save(targets);
+      await this.exemplarRepository.remove(targets);
     }
 
     return this.findOne(id);
