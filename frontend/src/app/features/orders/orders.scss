@@ -1,0 +1,296 @@
+.orders-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #000;
+
+  h1 {
+    font-family: Georgia, serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+  p { font-size: 13px; color: #6b7280; }
+}
+
+.btn-back {
+  font-size: 13px; color: #6b7280; text-transform: uppercase;
+  letter-spacing: .05em; white-space: nowrap; transition: color 0.2s;
+  &:hover { color: #111827; }
+}
+
+.loading {
+  display: flex; align-items: center; gap: 12px; padding: 48px 0; color: #6b7280;
+  p { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+}
+
+.spinner {
+  width: 28px; height: 28px; border: 3px solid #111827;
+  border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-msg {
+  color: #991b1b; background: #fee2e2; border-left: 4px solid #dc2626;
+  padding: 12px 16px; font-size: 14px; margin-bottom: 16px;
+}
+
+.empty-state {
+  text-align: center; padding: 80px 0; border: 1px dashed #d1d5db;
+  p { font-size: 14px; color: #6b7280; font-style: italic; font-family: Georgia, serif; margin-bottom: 20px; }
+}
+
+.btn-browse {
+  font-size: 13px; color: #111827; text-transform: uppercase;
+  letter-spacing: .06em; font-weight: 600; text-decoration: underline;
+  &:hover { color: #374151; }
+}
+
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-card {
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #111827;
+  background: #fff;
+
+  &.cancelled {
+    border-left-color: #d1d5db;
+    opacity: 0.7;
+  }
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.order-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.order-id {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #111827;
+}
+
+.order-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.order-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+
+  &.status-confirmed { background: #d1fae5; color: #065f46; }
+  &.status-cancelled { background: #fee2e2; color: #991b1b; }
+}
+
+.delivery-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  background: #f3f4f6;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 500;
+}
+
+.order-items {
+  padding: 12px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.item-code {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.item-title {
+  font-family: Georgia, serif;
+  font-size: 14px;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-author {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.item-price {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+}
+
+.footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-total {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.order-address {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid #d1d5db;
+  padding: 7px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) { border-color: #dc2626; color: #dc2626; }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+}
+
+.btn-spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(0,0,0,.2); border-top-color: currentColor;
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+}
+
+/* Confirm modal */
+.confirm-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(17,24,39,.6);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; z-index: 50;
+}
+
+.confirm-modal {
+  background: #fff;
+  padding: 36px;
+  max-width: 420px;
+  width: 100%;
+  border-left: 6px solid #dc2626;
+  box-shadow: 0 24px 48px -8px rgba(0,0,0,.35);
+
+  h3 {
+    font-family: Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #111827;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-outline {
+  padding: 8px 18px;
+  border: 1px solid #d1d5db;
+  background: none;
+  font-size: 13px;
+  cursor: pointer;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: all 0.2s;
+  &:hover { border-color: #111827; color: #111827; }
+}
+
+.btn-confirm-cancel {
+  padding: 8px 18px;
+  background: #dc2626;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: background 0.2s;
+  &:hover { background: #b91c1c; }
+}

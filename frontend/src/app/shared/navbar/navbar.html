@@ -4,24 +4,30 @@
   </div>
 
   <div class="navbar-search">
-    <input type="text" placeholder="Buscar libros, autores..." disabled />
+    <input type="text"
+           [(ngModel)]="searchQuery"
+           (ngModelChange)="onSearchInput()"
+           placeholder="Buscar por título..." />
     <span class="search-icon">🔍</span>
   </div>
 
   <div class="navbar-actions">
-    <button class="cart-btn" title="Carrito">
-      🛒
-      <span class="cart-badge">0</span>
-    </button>
-
     <ng-container *ngIf="user; else guestActions">
+
+      <!-- Admin links -->
       <a *ngIf="user.role === 'root'"
          [routerLink]="['/admin']"
          class="btn-admin">⚙️ Panel admin</a>
 
       <a *ngIf="user.role === 'administrator'"
          [routerLink]="['/admin/inventory']"
-         class="btn-inventory">📦 Panel Inventario</a>
+         class="btn-inventory">📦 Inventario</a>
+
+      <!-- Client links -->
+      <ng-container *ngIf="user.role === 'client'">
+        <a [routerLink]="['/orders']" class="btn-reservations">📦 Pedidos</a>
+        <a [routerLink]="['/reservations']" class="btn-reservations">📋 Reservas</a>
+      </ng-container>
 
       <a [routerLink]="['/profile']" class="user-chip">
         <span class="user-avatar">{{ user.username[0].toUpperCase() }}</span>
@@ -30,8 +36,6 @@
 
       <button class="btn-logout" (click)="showLogoutModal = true">Salir</button>
     </ng-container>
-
-
 
     <ng-template #guestActions>
       <a [routerLink]="['/login']" class="btn-outline">Iniciar sesión</a>

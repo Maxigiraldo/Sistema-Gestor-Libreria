@@ -1,10 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, skip, takeUntil } from 'rxjs/operators';
 import { BooksService, Book } from '../../../core/services/books';
 import { GoogleBooksService, GoogleBookInfo } from '../../../core/services/google-books';
+import { SearchService, SearchParams } from '../../../core/services/search';
+import { ReservationsService } from '../../../core/services/reservations';
+import { AuthService } from '../../../core/services/auth';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
 import { SidebarComponent } from '../../../shared/sidebar/sidebar';
-import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-book-list',
@@ -13,55 +17,129 @@ import { AuthService } from '../../../core/services/auth';
   templateUrl: './book-list.html',
   styleUrl: './book-list.scss'
 })
-export class BookListComponent implements OnInit {
+export class BookListComponent implements OnInit, OnDestroy {
   books: Book[] = [];
   loading = true;
   error = '';
   selectedBook: Book | null = null;
   googleCache: Record<number, GoogleBookInfo | null> = {};
 
+  isSearchActive = false;
+  searchTotal = 0;
+  private searchQuery = '';
+  private searchSubject = new Subject<void>();
+  private subs = new Subscription();
+  private destroy$ = new Subject<void>();
+  private fetchTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+  reservationMessage = '';
+  reservationError = '';
+  isReserving = false;
+
   constructor(
     private booksService: BooksService,
     private googleBooks: GoogleBooksService,
-    private auth: AuthService,
+    private searchService: SearchService,
+    private reservationsService: ReservationsService,
+    public auth: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.booksService.getAll().subscribe({
-      next: (data) => {
-        this.books = data;
-        this.loading = false;
-        // Precargar escalonado: 1 libro cada 700ms
-        data.forEach((book, i) => {
-          setTimeout(() => {
-            this.fetchGoogleData(book);
-          }, i * 700);
-        });
-      },
-      error: () => {
-        this.error = 'No se pudieron cargar los libros';
-        this.loading = false;
-      }
+    this.searchQuery = this.searchService.getCurrentQuery();
+    this.loadBooks();
+
+    this.subs.add(
+      this.searchSubject.pipe(debounceTime(350)).subscribe(() => this.loadBooks())
+    );
+
+    this.subs.add(
+      this.searchService.query$.pipe(skip(1), debounceTime(400)).subscribe(q => {
+        this.searchQuery = q;
+        this.searchSubject.next();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.fetchTimeouts.forEach(t => clearTimeout(t));
+    this.fetchTimeouts = [];
+  }
+
+  private buildParams(): SearchParams {
+    const p: SearchParams = {};
+    if (this.searchQuery) p.title = this.searchQuery;
+    return p;
+  }
+
+  private scheduleGoogleFetch(books: Book[]) {
+    this.fetchTimeouts.forEach(t => clearTimeout(t));
+    this.fetchTimeouts = [];
+    books.forEach((book, i) => {
+      const t = setTimeout(() => this.fetchGoogleData(book), i * 700);
+      this.fetchTimeouts.push(t);
     });
+  }
+
+  private loadBooks() {
+    this.loading = true;
+    this.error = '';
+
+    const params = this.buildParams();
+    const hasFilters = Object.values(params).some(v => v);
+
+    if (!hasFilters) {
+      this.isSearchActive = false;
+      this.subs.add(
+        this.booksService.getAll().subscribe({
+          next: (data) => {
+            this.books = data;
+            this.searchTotal = data.length;
+            this.loading = false;
+            this.scheduleGoogleFetch(data);
+          },
+          error: () => {
+            this.error = 'No se pudieron cargar los libros';
+            this.loading = false;
+          }
+        })
+      );
+    } else {
+      this.isSearchActive = true;
+      this.subs.add(
+        this.searchService.search(params).subscribe({
+          next: ({ results, total }) => {
+            this.books = results;
+            this.searchTotal = total;
+            this.loading = false;
+            this.scheduleGoogleFetch(results);
+          },
+          error: () => {
+            this.error = 'Error al buscar libros';
+            this.loading = false;
+          }
+        })
+      );
+    }
   }
 
   fetchGoogleData(book: Book) {
     if (book.id in this.googleCache) return;
     if (book.coverImage) {
-      this.googleCache[book.id] = {
-        thumbnail: book.coverImage,
-        description: '',
-        previewLink: ''
-      };
+      this.googleCache[book.id] = { thumbnail: book.coverImage, description: '', previewLink: '' };
       this.cdr.detectChanges();
       return;
     }
     this.googleCache[book.id] = null;
-    this.googleBooks.search(book.title, book.author).subscribe(info => {
-      this.googleCache[book.id] = info;
-      this.cdr.detectChanges();
-    });
+    this.googleBooks.search(book.title, book.author)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(info => {
+        this.googleCache[book.id] = info;
+        this.cdr.detectChanges();
+      });
   }
 
   getCover(book: Book): string {
@@ -91,16 +169,42 @@ export class BookListComponent implements OnInit {
     return this.spineColors[book.id % this.spineColors.length];
   }
 
-  getTotalAvailable(): number {
-    return this.books.reduce((sum, b) => sum + this.getAvailableCount(b), 0);
-  }
-
   openDetail(book: Book) {
     this.selectedBook = book;
+    this.reservationMessage = '';
+    this.reservationError = '';
     this.fetchGoogleData(book);
   }
 
   closeDetail() {
     this.selectedBook = null;
+    this.reservationMessage = '';
+    this.reservationError = '';
+  }
+
+  get isClient(): boolean {
+    return this.auth.getRole() === 'client';
+  }
+
+  reserveBook(book: Book) {
+    const exemplar = book.exemplars.find(e => e.available);
+    if (!exemplar) return;
+
+    this.isReserving = true;
+    this.reservationMessage = '';
+    this.reservationError = '';
+
+    this.reservationsService.create([exemplar.id]).subscribe({
+      next: () => {
+        this.reservationMessage = 'Reserva creada. Tienes 24 horas para recoger el libro.';
+        exemplar.available = false;
+        this.isReserving = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.reservationError = err.error?.message ?? 'No se pudo crear la reserva';
+        this.isReserving = false;
+      }
+    });
   }
 }

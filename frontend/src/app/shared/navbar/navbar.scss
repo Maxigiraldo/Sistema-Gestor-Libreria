@@ -33,9 +33,14 @@
     font-size: 14px;
     background: #ffffff;
     outline: none;
-    cursor: not-allowed;
-    color: #9ca3af;
+    color: #111827;
     letter-spacing: 0.02em;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #374151;
+      box-shadow: 0 0 0 2px rgba(0,0,0,.06);
+    }
 
     &::placeholder {
       color: #9ca3af;
@@ -59,38 +64,9 @@
   margin-left: auto;
 }
 
-.cart-btn {
-  position: relative;
-  background: none;
-  border: 1px solid #000000;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 6px 10px;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #f3f4f6;
-  }
-
-  .cart-badge {
-    position: absolute;
-    top: -6px;
-    right: -6px;
-    background: #000000;
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-}
-
 .btn-admin,
-.btn-inventory {
+.btn-inventory,
+.btn-reservations {
   padding: 6px 14px;
   border: 1px solid #000000;
   font-size: 13px;

@@ -64,6 +64,19 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard]
   },
   {
+    path: 'orders',
+    loadComponent: () =>
+      import('./features/orders/orders').then(m => m.OrdersComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'reservations',
+    loadComponent: () =>
+      import('./features/reservations/reservations')
+      .then(m => m.ReservationsComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'set-password',
     loadComponent: () =>
       import('./features/auth/set-password/set-password')

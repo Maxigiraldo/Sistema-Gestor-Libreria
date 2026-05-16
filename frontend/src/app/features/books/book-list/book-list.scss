@@ -518,7 +518,7 @@
   &.out { color: #dc2626; }
 }
 
-.btn-add-full {
+.btn-reserve {
   width: 100%;
   background: #111827;
   color: #ffffff;
@@ -530,6 +530,10 @@
   letter-spacing: .08em;
   font-weight: 600;
   transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
   &:hover:not(:disabled) { background: #1f2937; }
 
@@ -538,4 +542,44 @@
     cursor: not-allowed;
     color: #6b7280;
   }
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.reservation-success {
+  font-size: 13px;
+  color: #065f46;
+  background: #d1fae5;
+  border-left: 3px solid #065f46;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.reservation-error {
+  font-size: 13px;
+  color: #991b1b;
+  background: #fee2e2;
+  border-left: 3px solid #991b1b;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.strip-search-badge {
+  margin-left: 8px;
+  font-size: 10px;
+  padding: 2px 7px;
+  background: #111827;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+  vertical-align: middle;
 }

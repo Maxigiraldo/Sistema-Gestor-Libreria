@@ -1,0 +1,87 @@
+<app-navbar />
+
+<div class="orders-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Mis Pedidos</h1>
+      <p>Historial de compras y estado de entregas</p>
+    </div>
+    <a [routerLink]="['/']" class="btn-back">← Catálogo</a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando pedidos...</p>
+  </div>
+
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+  <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
+
+  <!-- Sin pedidos -->
+  <div class="empty-state" *ngIf="!loading && !error && orders.length === 0">
+    <p>No tienes pedidos aún.</p>
+    <a [routerLink]="['/']" class="btn-browse">Explorar catálogo →</a>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div class="orders-list" *ngIf="!loading && !error">
+
+    <div class="order-card" *ngFor="let order of orders" [class.cancelled]="order.status === 'cancelled'">
+
+      <div class="order-header">
+        <div class="order-meta">
+          <span class="order-id">#{{ order.id }}</span>
+          <span class="order-date">{{ order.createdAt | date:'d MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="order-badges">
+          <span class="status-badge" [class]="'status-' + order.status">
+            {{ statusLabel(order.status) }}
+          </span>
+          <span class="delivery-badge">{{ deliveryLabel(order.deliveryType) }}</span>
+        </div>
+      </div>
+
+      <div class="order-items" *ngIf="order.details?.length">
+        <div class="order-item" *ngFor="let d of order.details">
+          <span class="item-code">{{ d.exemplar?.uniqueCode }}</span>
+          <span class="item-title">{{ d.exemplar?.book?.title }}</span>
+          <span class="item-author">{{ d.exemplar?.book?.author }}</span>
+          <span class="item-price">{{ +d.unitPrice | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="order-footer">
+        <div class="footer-left">
+          <span class="order-total">Total: {{ +order.total | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="order-address" *ngIf="order.shippingAddress">
+            📍 {{ order.shippingAddress }}
+          </span>
+        </div>
+
+        <button *ngIf="order.status === 'confirmed'"
+                class="btn-cancel"
+                [disabled]="cancellingId === order.id"
+                (click)="requestCancel(order.id)">
+          <span *ngIf="cancellingId === order.id" class="btn-spinner"></span>
+          {{ cancellingId === order.id ? 'Cancelando...' : 'Cancelar pedido' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal confirmación de cancelación -->
+  <div class="confirm-backdrop" *ngIf="confirmCancelId" (click)="confirmCancelId = null">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <h3>¿Cancelar pedido #{{ confirmCancelId }}?</h3>
+      <p>Los artículos volverán a estar disponibles. Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="btn-outline" (click)="confirmCancelId = null">Volver</button>
+        <button class="btn-confirm-cancel" (click)="confirmCancel()">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

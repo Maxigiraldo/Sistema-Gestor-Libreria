@@ -1,0 +1,81 @@
+<app-navbar />
+
+<div class="reservations-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Mis Reservas</h1>
+      <p>Las reservas activas expiran en 24 horas</p>
+    </div>
+    <a [routerLink]="['/']" class="btn-back">← Volver al catálogo</a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando reservas...</p>
+  </div>
+
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+  <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
+
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- ── Reservas activas ───────────────────────────── -->
+    <section class="section" *ngIf="active.length > 0">
+      <h2 class="section-title">Activas <span class="badge">{{ active.length }}</span></h2>
+
+      <div class="reservations-list">
+        <div class="reservation-card active" *ngFor="let r of active">
+          <div class="card-left">
+            <span class="card-code">{{ getExemplarCode(r) }}</span>
+            <h3 class="card-title">{{ getBookTitle(r) }}</h3>
+            <p class="card-author">{{ getBookAuthor(r) }}</p>
+            <p class="card-date">Reservada el {{ r.createdAt | date:'d MMM yyyy, HH:mm' }}</p>
+          </div>
+          <div class="card-right">
+            <div class="expiry-block">
+              <span class="expiry-label">Expira en</span>
+              <span class="expiry-time">{{ timeLeft(r.expiresAt) }}</span>
+            </div>
+            <button class="btn-cancel"
+                    [disabled]="cancellingId === r.id"
+                    (click)="cancelReservation(r.id)">
+              <span *ngIf="cancellingId === r.id" class="btn-spinner"></span>
+              {{ cancellingId === r.id ? 'Cancelando...' : 'Cancelar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sin reservas activas -->
+    <div class="empty-active" *ngIf="active.length === 0">
+      <p>No tienes reservas activas.</p>
+      <a [routerLink]="['/']" class="btn-browse">Explorar catálogo →</a>
+    </div>
+
+    <!-- ── Historial ──────────────────────────────────── -->
+    <section class="section" *ngIf="past.length > 0">
+      <h2 class="section-title">Historial</h2>
+
+      <div class="reservations-list">
+        <div class="reservation-card past" *ngFor="let r of past">
+          <div class="card-left">
+            <span class="card-code">{{ getExemplarCode(r) }}</span>
+            <h3 class="card-title">{{ getBookTitle(r) }}</h3>
+            <p class="card-author">{{ getBookAuthor(r) }}</p>
+            <p class="card-date">{{ r.createdAt | date:'d MMM yyyy' }}</p>
+          </div>
+          <div class="card-right">
+            <span class="status-badge" [class]="'status-' + r.status">
+              {{ statusLabel(r.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

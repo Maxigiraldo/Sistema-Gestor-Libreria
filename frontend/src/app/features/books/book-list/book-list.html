@@ -7,14 +7,17 @@
 
     <!-- ── Franja ────────────────────────────────────────────── -->
     <div class="catalog-strip">
-      <span class="strip-title">L I B R O S</span>
-      <span class="strip-count" *ngIf="!loading">{{ books.length }} títulos</span>
+      <span class="strip-title">{{ isSearchActive ? 'RESULTADOS' : 'L I B R O S' }}</span>
+      <span class="strip-count" *ngIf="!loading">
+        {{ searchTotal }} {{ searchTotal === 1 ? 'título' : 'títulos' }}
+        <span *ngIf="isSearchActive" class="strip-search-badge">búsqueda activa</span>
+      </span>
     </div>
 
     <!-- ── Cargando ───────────────────────────────────────────── -->
     <div class="loading" *ngIf="loading">
       <div class="spinner-large"></div>
-      <p>Cargando libros...</p>
+      <p>{{ isSearchActive ? 'Buscando...' : 'Cargando libros...' }}</p>
     </div>
 
     <p class="error-msg" *ngIf="error">{{ error }}</p>
@@ -65,7 +68,7 @@
         </div>
 
         <div class="empty-state" *ngIf="books.length === 0">
-          <p>No hay libros disponibles.</p>
+          <p>{{ isSearchActive ? 'No se encontraron libros con esos filtros.' : 'No hay libros disponibles.' }}</p>
         </div>
 
       </div><!-- /books-grid -->
@@ -136,9 +139,19 @@
               </span>
             </div>
 
-            <button class="btn-add-full" [disabled]="true" (click)="$event.stopPropagation()">
-              Agregar al carrito
-            </button>
+            <!-- Mensajes de reserva -->
+            <p class="reservation-success" *ngIf="reservationMessage">{{ reservationMessage }}</p>
+            <p class="reservation-error" *ngIf="reservationError">{{ reservationError }}</p>
+
+            <ng-container *ngIf="isClient">
+              <!-- Reservar -->
+              <button class="btn-reserve"
+                      [disabled]="getAvailableCount(selectedBook) === 0 || isReserving || !!reservationMessage"
+                      (click)="reserveBook(selectedBook)">
+                <span *ngIf="isReserving" class="btn-spinner"></span>
+                {{ isReserving ? 'Reservando...' : reservationMessage ? 'Reservado' : 'Reservar (24h)' }}
+              </button>
+            </ng-container>
           </div>
 
         </div>
