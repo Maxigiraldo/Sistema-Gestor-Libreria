@@ -5,10 +5,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Order, OrderStatus } from './order.entity';
+import { Order, OrderStatus, DeliveryType } from './order.entity';
 import { OrderDetail } from './order-detail.entity';
 import { Exemplar } from '../exemplars/exemplar.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ShippingService } from '../shipping/shipping.service';
+import { ShippingType } from '../shipping/shipping.entity';
 
 @Injectable()
 export class OrdersService {
@@ -19,12 +21,12 @@ export class OrdersService {
     private orderDetailRepository: Repository<OrderDetail>,
     @InjectRepository(Exemplar)
     private exemplarRepository: Repository<Exemplar>,
+    private shippingService: ShippingService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: number) {
     const { exemplarIds, deliveryType, shippingAddress } = createOrderDto;
 
-    // Verificar ejemplares disponibles
     const exemplars = await Promise.all(
       exemplarIds.map(async (id) => {
         const exemplar = await this.exemplarRepository.findOne({
@@ -38,10 +40,8 @@ export class OrdersService {
       }),
     );
 
-    // Calcular total
     const total = exemplars.reduce((sum, e) => sum + Number(e.book.price), 0);
 
-    // Crear orden
     const order = this.orderRepository.create({
       client: { id: userId },
       total,
@@ -51,7 +51,6 @@ export class OrdersService {
     });
     const savedOrder = await this.orderRepository.save(order);
 
-    // Crear detalles y marcar ejemplares como no disponibles
     for (const exemplar of exemplars) {
       const detail = this.orderDetailRepository.create({
         order: savedOrder,
@@ -64,6 +63,15 @@ export class OrdersService {
       exemplar.available = false;
       await this.exemplarRepository.save(exemplar);
     }
+
+    const shippingType =
+      deliveryType === DeliveryType.HOME ? ShippingType.HOME : ShippingType.STORE;
+
+    await this.shippingService.create({
+      orderId: savedOrder.id,
+      type: shippingType,
+      destinationAddress: shippingAddress,
+    });
 
     return {
       message: 'Compra realizada exitosamente',
@@ -100,7 +108,6 @@ export class OrdersService {
       throw new BadRequestException('La orden ya está cancelada');
     }
 
-    // Liberar ejemplares
     for (const detail of order.details) {
       detail.exemplar.available = true;
       await this.exemplarRepository.save(detail.exemplar);

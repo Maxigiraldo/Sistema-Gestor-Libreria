@@ -70,6 +70,13 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'checkout',
+    loadComponent: () =>
+      import('./features/checkout/checkout')
+      .then(m => m.CheckoutComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'reservations',
     loadComponent: () =>
       import('./features/reservations/reservations')

@@ -33,10 +33,12 @@ export class ReservationsComponent implements OnInit {
       next: (data) => {
         this.reservations = data;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'No se pudieron cargar las reservas';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

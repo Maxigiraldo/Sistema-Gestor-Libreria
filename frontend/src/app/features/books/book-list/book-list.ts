@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, skip, takeUntil } from 'rxjs/operators';
 import { BooksService, Book } from '../../../core/services/books';
@@ -42,7 +43,8 @@ export class BookListComponent implements OnInit, OnDestroy {
     private searchService: SearchService,
     private reservationsService: ReservationsService,
     public auth: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -204,6 +206,19 @@ export class BookListComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.reservationError = err.error?.message ?? 'No se pudo crear la reserva';
         this.isReserving = false;
+      }
+    });
+  }
+
+  buyBook(book: Book) {
+    const exemplar = book.exemplars.find(e => e.available);
+    if (!exemplar) return;
+    this.router.navigate(['/checkout'], {
+      state: {
+        exemplarId: exemplar.id,
+        bookTitle: book.title,
+        bookAuthor: book.author,
+        price: Number(book.price),
       }
     });
   }

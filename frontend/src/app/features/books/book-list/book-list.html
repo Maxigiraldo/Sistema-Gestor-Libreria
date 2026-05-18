@@ -144,13 +144,21 @@
             <p class="reservation-error" *ngIf="reservationError">{{ reservationError }}</p>
 
             <ng-container *ngIf="isClient">
-              <!-- Reservar -->
-              <button class="btn-reserve"
-                      [disabled]="getAvailableCount(selectedBook) === 0 || isReserving || !!reservationMessage"
-                      (click)="reserveBook(selectedBook)">
-                <span *ngIf="isReserving" class="btn-spinner"></span>
-                {{ isReserving ? 'Reservando...' : reservationMessage ? 'Reservado' : 'Reservar (24h)' }}
-              </button>
+              <div class="detail-actions">
+                <!-- Reservar -->
+                <button class="btn-reserve"
+                        [disabled]="getAvailableCount(selectedBook) === 0 || isReserving || !!reservationMessage"
+                        (click)="reserveBook(selectedBook)">
+                  <span *ngIf="isReserving" class="btn-spinner"></span>
+                  {{ isReserving ? 'Reservando...' : reservationMessage ? 'Reservado' : 'Reservar (24h)' }}
+                </button>
+                <!-- Comprar -->
+                <button class="btn-buy"
+                        [disabled]="getAvailableCount(selectedBook) === 0"
+                        (click)="buyBook(selectedBook)">
+                  Comprar
+                </button>
+              </div>
             </ng-container>
           </div>
 

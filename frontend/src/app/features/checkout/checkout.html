@@ -1,0 +1,108 @@
+<app-navbar />
+
+<div class="checkout-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Confirmar Pedido</h1>
+      <p>Revisa los detalles antes de confirmar</p>
+    </div>
+    <a [routerLink]="['/']" class="btn-back">← Catálogo</a>
+  </div>
+
+  <div *ngIf="!profileLoaded" class="loading">
+    <div class="spinner"></div>
+    <p>Cargando...</p>
+  </div>
+
+  <div *ngIf="profileLoaded && state" class="checkout-layout">
+
+    <!-- Resumen del libro -->
+    <div class="checkout-section">
+      <h2 class="section-title">Resumen del pedido</h2>
+      <div class="book-summary">
+        <div class="book-info">
+          <span class="book-title">{{ state.bookTitle }}</span>
+          <span class="book-author">{{ state.bookAuthor }}</span>
+        </div>
+        <span class="book-price">{{ state.price | currency:'COP':'$':'1.0-0' }}</span>
+      </div>
+      <div class="order-total-row">
+        <span class="total-label">Total</span>
+        <span class="total-amount">{{ total | currency:'COP':'$':'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <!-- Tipo de entrega -->
+    <div class="checkout-section">
+      <h2 class="section-title">Tipo de entrega</h2>
+      <div class="delivery-toggle">
+        <button
+          class="toggle-btn"
+          [class.active]="deliveryType === 'home_delivery'"
+          (click)="deliveryType = 'home_delivery'">
+          Envío a domicilio
+        </button>
+        <button
+          class="toggle-btn"
+          [class.active]="deliveryType === 'store_pickup'"
+          (click)="deliveryType = 'store_pickup'">
+          Recogida en tienda
+        </button>
+      </div>
+    </div>
+
+    <!-- Dirección de envío (domicilio) -->
+    <div class="checkout-section" *ngIf="deliveryType === 'home_delivery'">
+      <h2 class="section-title">Dirección de envío</h2>
+      <p class="section-note">Dirección registrada en tu perfil. Puedes cambiarla solo para este pedido.</p>
+      <textarea
+        class="address-input"
+        [(ngModel)]="shippingAddress"
+        placeholder="Ingresa tu dirección completa..."
+        rows="3">
+      </textarea>
+    </div>
+
+    <!-- Recogida en tienda + mapa -->
+    <div class="checkout-section" *ngIf="deliveryType === 'store_pickup'">
+      <h2 class="section-title">Recogida en tienda</h2>
+      <p class="section-note">Te notificaremos cuando tu libro esté listo para recoger.</p>
+      <div class="store-card">
+        <div class="store-detail">
+          <span class="store-label">Dirección</span>
+          <span class="store-value">{{ STORE_ADDRESS }}</span>
+        </div>
+        <div class="store-detail">
+          <span class="store-label">Horario</span>
+          <span class="store-value">{{ STORE_HOURS }}</span>
+        </div>
+      </div>
+      <div class="map-wrapper">
+        <iframe
+          [src]="mapUrl"
+          width="100%"
+          height="280"
+          title="Ubicación de la tienda"
+          loading="lazy"
+          class="store-map">
+        </iframe>
+        <p class="map-caption">Ubicación aproximada de la tienda</p>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+    <!-- Acciones -->
+    <div class="checkout-actions">
+      <a [routerLink]="['/']" class="btn-cancel-link">Cancelar</a>
+      <button class="btn-confirm" [disabled]="loading" (click)="confirm()">
+        <span *ngIf="loading" class="btn-spinner"></span>
+        {{ loading ? 'Procesando...' : 'Confirmar pedido' }}
+      </button>
+    </div>
+
+  </div>
+
+</div>

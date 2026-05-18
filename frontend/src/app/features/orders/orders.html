@@ -56,18 +56,72 @@
         <div class="footer-left">
           <span class="order-total">Total: {{ +order.total | currency:'COP':'$':'1.0-0' }}</span>
           <span class="order-address" *ngIf="order.shippingAddress">
-            📍 {{ order.shippingAddress }}
+            {{ order.shippingAddress }}
           </span>
         </div>
 
-        <button *ngIf="order.status === 'confirmed'"
-                class="btn-cancel"
-                [disabled]="cancellingId === order.id"
-                (click)="requestCancel(order.id)">
-          <span *ngIf="cancellingId === order.id" class="btn-spinner"></span>
-          {{ cancellingId === order.id ? 'Cancelando...' : 'Cancelar pedido' }}
-        </button>
+        <div class="footer-right">
+          <button *ngIf="order.status === 'confirmed'"
+                  class="btn-shipping-toggle"
+                  (click)="toggleShipping(order.id)">
+            {{ isShippingExpanded(order.id) ? 'Ocultar envío' : 'Ver envío' }}
+          </button>
+
+          <button *ngIf="order.status === 'confirmed'"
+                  class="btn-cancel"
+                  [disabled]="cancellingId === order.id"
+                  (click)="requestCancel(order.id)">
+            <span *ngIf="cancellingId === order.id" class="btn-spinner"></span>
+            {{ cancellingId === order.id ? 'Cancelando...' : 'Cancelar' }}
+          </button>
+        </div>
       </div>
+
+      <!-- Panel de envío (expandible) -->
+      <div class="shipping-panel" *ngIf="order.status === 'confirmed' && isShippingExpanded(order.id)">
+
+        <div class="shipping-loading" *ngIf="isShippingLoading(order.id)">
+          <span class="shipping-spinner"></span>
+          <span>Cargando estado de envío...</span>
+        </div>
+
+        <div class="shipping-not-found" *ngIf="!isShippingLoading(order.id) && !getShipping(order.id)">
+          Envío aún no asignado.
+        </div>
+
+        <ng-container *ngIf="getShipping(order.id) as shipping">
+          <div class="shipping-progress">
+            <div class="progress-step" [class.reached]="statusReached(shipping.status, 'en_preparacion')">
+              <div class="step-dot"></div>
+              <span class="step-label">En preparación</span>
+            </div>
+            <div class="progress-line" [class.reached]="statusReached(shipping.status, 'enviado')"></div>
+            <div class="progress-step" [class.reached]="statusReached(shipping.status, 'enviado')">
+              <div class="step-dot"></div>
+              <span class="step-label">Enviado</span>
+            </div>
+            <div class="progress-line" [class.reached]="shipping.status === 'entregado'"></div>
+            <div class="progress-step" [class.reached]="shipping.status === 'entregado'">
+              <div class="step-dot"></div>
+              <span class="step-label">Entregado</span>
+            </div>
+          </div>
+
+          <div class="shipping-meta">
+            <span class="shipping-type-tag">
+              {{ shipping.type === 'domicilio' ? 'A domicilio' : 'Recogida en tienda' }}
+            </span>
+            <span *ngIf="shipping.estimatedDelivery && shipping.status !== 'entregado'" class="shipping-date">
+              Entrega estimada: {{ shipping.estimatedDelivery | date:'d MMM yyyy' }}
+            </span>
+            <span *ngIf="shipping.status === 'entregado' && shipping.deliveredAt" class="shipping-date delivered">
+              Entregado el {{ shipping.deliveredAt | date:'d MMM yyyy' }}
+            </span>
+          </div>
+        </ng-container>
+
+      </div>
+
     </div>
 
   </div>

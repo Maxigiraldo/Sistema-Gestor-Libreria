@@ -518,8 +518,14 @@
   &.out { color: #dc2626; }
 }
 
-.btn-reserve {
+.detail-actions {
+  display: flex;
+  gap: 8px;
   width: 100%;
+}
+
+.btn-reserve {
+  flex: 1;
   background: #111827;
   color: #ffffff;
   padding: 13px;
@@ -541,6 +547,28 @@
     background: #d1d5db;
     cursor: not-allowed;
     color: #6b7280;
+  }
+}
+
+.btn-buy {
+  flex: 1;
+  background: none;
+  color: #111827;
+  padding: 13px;
+  border: 2px solid #111827;
+  cursor: pointer;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: #111827; color: #fff; }
+
+  &:disabled {
+    border-color: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
   }
 }
 
