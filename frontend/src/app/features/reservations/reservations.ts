@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ReservationsService, Reservation } from '../../core/services/reservations';
 import { NavbarComponent } from '../../shared/navbar/navbar';
 
@@ -18,17 +18,19 @@ export class ReservationsComponent implements OnInit {
   cancellingId: number | null = null;
   cancelError = '';
 
+  selectedItems = new Set<number>(); // exemplar IDs seleccionados para comprar
+
   constructor(
     private reservationsService: ReservationsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
-  ngOnInit() {
-    this.load();
-  }
+  ngOnInit() { this.load(); }
 
   private load() {
     this.loading = true;
+    this.selectedItems.clear();
     this.reservationsService.getAll().subscribe({
       next: (data) => {
         this.reservations = data;
@@ -51,6 +53,43 @@ export class ReservationsComponent implements OnInit {
     return this.reservations.filter(r => r.status !== 'active');
   }
 
+  toggleItem(exemplarId: number) {
+    if (this.selectedItems.has(exemplarId)) {
+      this.selectedItems.delete(exemplarId);
+    } else {
+      this.selectedItems.add(exemplarId);
+    }
+    this.cdr.detectChanges();
+  }
+
+  buySelected() {
+    if (this.selectedItems.size === 0) return;
+
+    const items: { title: string; author: string; price: number; exemplarId: number }[] = [];
+
+    for (const r of this.active) {
+      for (const item of r.items) {
+        if (this.selectedItems.has(item.exemplar.id)) {
+          items.push({
+            exemplarId: item.exemplar.id,
+            title: item.exemplar.book.title,
+            author: item.exemplar.book.author,
+            price: Number(item.exemplar.book.price),
+          });
+        }
+      }
+    }
+
+    this.router.navigate(['/checkout'], {
+      state: {
+        exemplarIds: items.map(i => i.exemplarId),
+        items,
+        total: items.reduce((s, i) => s + i.price, 0),
+        fromReservation: true,
+      }
+    });
+  }
+
   cancelReservation(id: number) {
     this.cancellingId = id;
     this.cancelError = '';
@@ -67,6 +106,10 @@ export class ReservationsComponent implements OnInit {
     });
   }
 
+  isUrgent(expiresAt: string): boolean {
+    return new Date(expiresAt).getTime() - Date.now() < 3 * 3600 * 1000;
+  }
+
   timeLeft(expiresAt: string): string {
     const diff = new Date(expiresAt).getTime() - Date.now();
     if (diff <= 0) return 'Expirada';
@@ -80,20 +123,12 @@ export class ReservationsComponent implements OnInit {
       active: 'Activa',
       expired: 'Expirada',
       cancelled: 'Cancelada',
-      converted: 'Convertida en orden'
+      converted: 'Comprada'
     };
     return map[status] ?? status;
   }
 
-  getBookTitle(r: Reservation): string {
-    return r.items[0]?.exemplar?.book?.title ?? '—';
-  }
-
-  getBookAuthor(r: Reservation): string {
-    return r.items[0]?.exemplar?.book?.author ?? '—';
-  }
-
-  getExemplarCode(r: Reservation): string {
-    return r.items[0]?.exemplar?.uniqueCode ?? '—';
-  }
+  getBookTitle(r: Reservation): string { return r.items[0]?.exemplar?.book?.title ?? '—'; }
+  getBookAuthor(r: Reservation): string { return r.items[0]?.exemplar?.book?.author ?? '—'; }
+  getExemplarCode(r: Reservation): string { return r.items[0]?.exemplar?.uniqueCode ?? '—'; }
 }

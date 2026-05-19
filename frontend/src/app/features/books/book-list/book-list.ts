@@ -9,7 +9,7 @@ import { SearchService, SearchParams } from '../../../core/services/search';
 import { ReservationsService } from '../../../core/services/reservations';
 import { AuthService } from '../../../core/services/auth';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
-import { SidebarComponent } from '../../../shared/sidebar/sidebar';
+import { SidebarComponent, SidebarFilters } from '../../../shared/sidebar/sidebar';
 
 @Component({
   selector: 'app-book-list',
@@ -28,6 +28,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   isSearchActive = false;
   searchTotal = 0;
   private searchQuery = '';
+  private sidebarFilters: SidebarFilters = { genre: '', condition: '', minPrice: '', maxPrice: '' };
   private searchSubject = new Subject<void>();
   private subs = new Subscription();
   private destroy$ = new Subject<void>();
@@ -36,6 +37,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   reservationMessage = '';
   reservationError = '';
   isReserving = false;
+  selectedGenre = '';
 
   constructor(
     private booksService: BooksService,
@@ -71,9 +73,18 @@ export class BookListComponent implements OnInit, OnDestroy {
     this.fetchTimeouts = [];
   }
 
+  onFiltersChange(filters: SidebarFilters) {
+    this.sidebarFilters = filters;
+    this.loadBooks();
+  }
+
   private buildParams(): SearchParams {
     const p: SearchParams = {};
-    if (this.searchQuery) p.title = this.searchQuery;
+    if (this.searchQuery)              p.title     = this.searchQuery;
+    if (this.sidebarFilters.genre)     p.genre     = this.sidebarFilters.genre;
+    if (this.sidebarFilters.condition) p.condition = this.sidebarFilters.condition;
+    if (this.sidebarFilters.minPrice)  p.minPrice  = this.sidebarFilters.minPrice;
+    if (this.sidebarFilters.maxPrice)  p.maxPrice  = this.sidebarFilters.maxPrice;
     return p;
   }
 
@@ -89,6 +100,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   private loadBooks() {
     this.loading = true;
     this.error = '';
+    this.cdr.detectChanges();
 
     const params = this.buildParams();
     const hasFilters = Object.values(params).some(v => v);
@@ -102,10 +114,12 @@ export class BookListComponent implements OnInit, OnDestroy {
             this.searchTotal = data.length;
             this.loading = false;
             this.scheduleGoogleFetch(data);
+            this.cdr.detectChanges();
           },
           error: () => {
             this.error = 'No se pudieron cargar los libros';
             this.loading = false;
+            this.cdr.detectChanges();
           }
         })
       );
@@ -118,10 +132,12 @@ export class BookListComponent implements OnInit, OnDestroy {
             this.searchTotal = total;
             this.loading = false;
             this.scheduleGoogleFetch(results);
+            this.cdr.detectChanges();
           },
           error: () => {
             this.error = 'Error al buscar libros';
             this.loading = false;
+            this.cdr.detectChanges();
           }
         })
       );
@@ -186,6 +202,20 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   get isClient(): boolean {
     return this.auth.getRole() === 'client';
+  }
+
+  get genres(): string[] {
+    const g = new Set(this.books.map(b => b.genre).filter(Boolean));
+    return Array.from(g).sort();
+  }
+
+  get filteredBooks(): Book[] {
+    if (!this.selectedGenre) return this.books;
+    return this.books.filter(b => b.genre === this.selectedGenre);
+  }
+
+  setGenre(genre: string) {
+    this.selectedGenre = genre;
   }
 
   reserveBook(book: Book) {

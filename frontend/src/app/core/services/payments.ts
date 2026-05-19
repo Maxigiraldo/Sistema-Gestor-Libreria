@@ -62,4 +62,8 @@ export class PaymentsService {
   processPayment(data: { amount: number; method: 'tarjeta' | 'saldo'; cardId?: number }) {
     return this.http.post<PaymentResult>(`${this.base}/payments/process`, data);
   }
+
+  topup(amount: number) {
+    return this.http.post<Balance>(`${this.base}/payments/balance/topup`, { amount });
+  }
 }

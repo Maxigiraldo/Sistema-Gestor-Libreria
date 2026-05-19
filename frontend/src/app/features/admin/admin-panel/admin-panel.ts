@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
 import { UsersService, AdminUser } from '../../../core/services/users';
 import { AuthService } from '../../../core/services/auth';
+import { ReturnsService, ReturnRequest, ReturnStatus, RETURN_CAUSE_LABELS, RETURN_STATUS_LABELS } from '../../../core/services/returns';
 
 @Component({
   selector: 'app-admin-panel',
@@ -14,7 +15,8 @@ import { AuthService } from '../../../core/services/auth';
   styleUrl: './admin-panel.scss'
 })
 export class AdminPanelComponent implements OnInit {
-  activeTab: 'list' | 'create' = 'list';
+  activeTab: 'list' | 'create' | 'returns' = 'list';
+  isRoot = false;
 
   admins: AdminUser[] = [];
   loadingList = true;
@@ -26,48 +28,53 @@ export class AdminPanelComponent implements OnInit {
   createError = '';
   createSuccess = '';
 
+  // Returns
+  returns: ReturnRequest[] = [];
+  loadingReturns = false;
+  updatingReturnId: number | null = null;
+
+  readonly CAUSE_LABELS = RETURN_CAUSE_LABELS;
+  readonly STATUS_LABELS = RETURN_STATUS_LABELS;
+
   constructor(
     private usersService: UsersService,
     private auth: AuthService,
+    private returnsService: ReturnsService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
-    if (this.auth.getRole() !== 'root') {
+    const role = this.auth.getRole();
+    if (role !== 'root' && role !== 'administrator') {
       this.router.navigate(['/']);
       return;
     }
-    this.loadAdmins();
+    this.isRoot = role === 'root';
+
+    if (this.isRoot) {
+      this.loadAdmins();
+      this.activeTab = 'list';
+    } else {
+      this.activeTab = 'returns';
+    }
+
+    this.loadReturns();
   }
 
   loadAdmins() {
     this.loadingList = true;
     this.usersService.listAdmins().subscribe({
-      next: (data) => {
-        this.admins = data;
-        this.loadingList = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loadingList = false;
-        this.cdr.detectChanges();
-      }
+      next: (data) => { this.admins = data; this.loadingList = false; this.cdr.detectChanges(); },
+      error: () => { this.loadingList = false; this.cdr.detectChanges(); }
     });
   }
 
   deactivate(admin: AdminUser) {
     this.deactivatingId = admin.id;
     this.usersService.deactivateAdmin(admin.id).subscribe({
-      next: () => {
-        admin.active = false;
-        this.deactivatingId = null;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.deactivatingId = null;
-        this.cdr.detectChanges();
-      }
+      next: () => { admin.active = false; this.deactivatingId = null; this.cdr.detectChanges(); },
+      error: () => { this.deactivatingId = null; this.cdr.detectChanges(); }
     });
   }
 
@@ -75,9 +82,7 @@ export class AdminPanelComponent implements OnInit {
     this.submitted = true;
     this.createError = '';
     this.createSuccess = '';
-
     if (!this.form.username.trim() || !this.form.email.trim()) return;
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
     if (!emailRegex.test(this.form.email.trim())) return;
 
@@ -94,16 +99,43 @@ export class AdminPanelComponent implements OnInit {
       },
       error: (err) => {
         this.creating = false;
-        this.createError = err.status === 409
-          ? 'Usuario o correo ya registrado.'
-          : 'Error al crear el administrador.';
+        this.createError = err.status === 409 ? 'Usuario o correo ya registrado.' : 'Error al crear el administrador.';
         this.cdr.detectChanges();
       }
     });
   }
 
-  resetForm() {
-    this.form = { username: '', email: '' };
-    this.submitted = false;
+  resetForm() { this.form = { username: '', email: '' }; this.submitted = false; }
+
+  expandedReturnId: number | null = null;
+  toggleReturnDetail(id: number) {
+    this.expandedReturnId = this.expandedReturnId === id ? null : id;
+    this.cdr.detectChanges();
   }
+
+  // Returns management
+  loadReturns() {
+    this.loadingReturns = true;
+    this.returnsService.getAllReturns().subscribe({
+      next: (data) => { this.returns = data; this.loadingReturns = false; this.cdr.detectChanges(); },
+      error: () => { this.loadingReturns = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  updateReturnStatus(ret: ReturnRequest, status: ReturnStatus) {
+    this.updatingReturnId = ret.id;
+    this.cdr.detectChanges();
+    this.returnsService.updateStatus(ret.id, status).subscribe({
+      next: (updated) => {
+        const idx = this.returns.findIndex(r => r.id === ret.id);
+        if (idx > -1) this.returns[idx] = updated;
+        this.updatingReturnId = null;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.updatingReturnId = null; this.cdr.detectChanges(); }
+    });
+  }
+
+  causeLabel(cause: string): string { return (this.CAUSE_LABELS as any)[cause] ?? cause; }
+  statusLabel(status: string): string { return (this.STATUS_LABELS as any)[status] ?? status; }
 }

@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { ReturnCause } from '../return.entity';
+import { ReturnCause, RefundMethod } from '../return.entity';
 
 export class CreateReturnDto {
   @IsNumber()
@@ -11,4 +11,7 @@ export class CreateReturnDto {
   @IsString()
   @IsOptional()
   additionalDescription: string;
+
+  @IsEnum(RefundMethod)
+  refundMethod: RefundMethod;
 }

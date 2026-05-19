@@ -12,14 +12,19 @@
         </span>
       </div>
       <div class="hero-actions">
-        <a [routerLink]="['/profile/edit']" class="btn-secondary">✏️ Editar perfil</a>
-        <a [routerLink]="['/profile/categories']" class="btn-secondary" *ngIf="user.role === 'client'">📚 Categorías</a>
-        <button class="btn-secondary" (click)="showPasswordModal = true">🔑 Contraseña</button>
+        <a [routerLink]="['/profile/edit']" class="btn-secondary">Editar perfil</a>
+        <a [routerLink]="['/profile/categories']" class="btn-secondary" *ngIf="user.role === 'client'">Categorías</a>
+        <button class="btn-secondary" (click)="showPasswordModal = true">Contraseña</button>
         <button class="btn-danger-soft" (click)="showLogoutModal = true">Cerrar sesión</button>
       </div>
     </div>
 
+    <!-- Success after topup -->
+    <div class="topup-success" *ngIf="topupSuccess">{{ topupSuccess }}</div>
+
     <div class="cards-grid">
+
+      <!-- Account info -->
       <div class="info-card">
         <h3 class="card-title"><span class="card-icon">👤</span> Cuenta</h3>
         <div class="info-rows">
@@ -41,8 +46,76 @@
           </div>
         </div>
       </div>
+
+      <!-- Balance (client only) -->
+      <div class="info-card" *ngIf="isClient">
+        <div class="card-title-row">
+          <h3 class="card-title"><span class="card-icon">💰</span> Saldo de cuenta</h3>
+          <button class="btn-topup" (click)="openTopup()">+ Recargar</button>
+        </div>
+        <div class="balance-display" *ngIf="balance">
+          <span class="balance-value">{{ +balance.available | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="balance-label">Disponible para compras</span>
+        </div>
+        <div class="balance-loading" *ngIf="!balance">Cargando saldo...</div>
+      </div>
+
+      <!-- Saved cards (client only) -->
+      <div class="info-card" *ngIf="isClient">
+        <h3 class="card-title"><span class="card-icon">💳</span> Tarjetas guardadas</h3>
+
+        <div class="no-cards" *ngIf="savedCards.length === 0">
+          <p>No tienes tarjetas guardadas. Puedes guardar una al hacer tu próxima compra.</p>
+        </div>
+
+        <div class="saved-cards-list" *ngIf="savedCards.length > 0">
+          <div class="saved-card-row" *ngFor="let card of savedCards">
+            <div class="card-row-info">
+              <span class="card-row-brand">{{ card.brand }}</span>
+              <span class="card-row-digits">•••• •••• •••• {{ card.lastDigits }}</span>
+              <span class="card-row-type">{{ card.type === 'credito' ? 'Crédito' : 'Débito' }}</span>
+            </div>
+            <button class="btn-remove-card"
+                    [disabled]="removingCardId === card.id"
+                    (click)="removeCard(card)">
+              {{ removingCardId === card.id ? '...' : 'Eliminar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
+  </div>
+</div>
+
+<!-- Modal: Recargar saldo -->
+<div class="confirm-backdrop" *ngIf="showTopupModal" (click)="showTopupModal = false">
+  <div class="topup-modal" (click)="$event.stopPropagation()">
+    <h3>Recargar saldo</h3>
+    <p>Este es un sistema simulado. Elige el monto a agregar a tu cuenta.</p>
+
+    <div class="topup-amounts">
+      <button class="topup-preset" (click)="topupAmount = 50000" [class.selected]="topupAmount === 50000">$50.000</button>
+      <button class="topup-preset" (click)="topupAmount = 100000" [class.selected]="topupAmount === 100000">$100.000</button>
+      <button class="topup-preset" (click)="topupAmount = 200000" [class.selected]="topupAmount === 200000">$200.000</button>
+      <button class="topup-preset" (click)="topupAmount = 500000" [class.selected]="topupAmount === 500000">$500.000</button>
+    </div>
+
+    <div class="topup-custom">
+      <label>O ingresa un monto personalizado (COP)</label>
+      <input type="number" [(ngModel)]="topupAmount" min="1000" step="1000"
+             class="topup-input" placeholder="Ej: 75000" />
+    </div>
+
+    <p class="topup-error" *ngIf="topupError">{{ topupError }}</p>
+
+    <div class="topup-actions">
+      <button class="btn-topup-cancel" (click)="showTopupModal = false">Cancelar</button>
+      <button class="btn-topup-confirm" [disabled]="toppingUp" (click)="confirmTopup()">
+        {{ toppingUp ? 'Recargando...' : 'Recargar' }}
+      </button>
+    </div>
   </div>
 </div>
 

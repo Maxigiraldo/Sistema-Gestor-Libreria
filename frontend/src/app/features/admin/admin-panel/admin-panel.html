@@ -2,30 +2,39 @@
 
 <div class="admin-layout">
 <aside class="admin-sidebar">
-    <h3>Panel ROOT</h3>
+    <h3>Panel {{ isRoot ? 'ROOT' : 'Admin' }}</h3>
     <nav>
-    <button
+    <button *ngIf="isRoot"
         class="nav-item"
         [class.active]="activeTab === 'list'"
         (click)="activeTab = 'list'">
         👥 Administradores
     </button>
-    <button
+    <button *ngIf="isRoot"
         class="nav-item"
         [class.active]="activeTab === 'create'"
         (click)="activeTab = 'create'">
         ➕ Crear admin
     </button>
-    <a class="nav-item" [routerLink]="['/admin/bonus']">
+    <a class="nav-item" *ngIf="isRoot" [routerLink]="['/admin/bonus']">
         🎁 Configurar bono
     </a>
+    <a class="nav-item" [routerLink]="['/admin/inventory']">
+        📦 Inventario
+    </a>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'returns'"
+        (click)="activeTab = 'returns'; loadReturns()">
+        🔄 Devoluciones
+    </button>
     </nav>
 </aside>
 
 <main class="admin-main">
 
     <!-- ───── LISTA DE ADMINS ───── -->
-    <section *ngIf="activeTab === 'list'">
+    <section *ngIf="activeTab === 'list' && isRoot">
     <div class="section-header">
         <div>
         <h2>Administradores</h2>
@@ -92,7 +101,7 @@
     </section>
 
     <!-- ───── CREAR ADMIN ───── -->
-    <section *ngIf="activeTab === 'create'">
+    <section *ngIf="activeTab === 'create' && isRoot">
     <div class="section-header">
         <div>
         <h2>Crear administrador</h2>
@@ -105,27 +114,15 @@
 
         <div class="field">
             <label>Nombre de usuario *</label>
-            <input
-            type="text"
-            [(ngModel)]="form.username"
-            name="username"
-            placeholder="admin_pereira"
-            autocomplete="off"
-            />
-            <span class="field-error" *ngIf="submitted && !form.username.trim()">
-            Obligatorio.
-            </span>
+            <input type="text" [(ngModel)]="form.username" name="username"
+            placeholder="admin_pereira" autocomplete="off" />
+            <span class="field-error" *ngIf="submitted && !form.username.trim()">Obligatorio.</span>
         </div>
 
         <div class="field">
             <label>Correo electrónico *</label>
-            <input
-            type="email"
-            [(ngModel)]="form.email"
-            name="email"
-            placeholder="admin@libreria.com"
-            autocomplete="off"
-            />
+            <input type="email" [(ngModel)]="form.email" name="email"
+            placeholder="admin@libreria.com" autocomplete="off" />
             <span class="field-error" *ngIf="submitted && !form.email.trim()">Obligatorio.</span>
             <span class="field-error" *ngIf="submitted && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)">
               Correo inválido.
@@ -139,34 +136,119 @@
             El administrador recibirá un correo para configurar su propia contraseña.
         </div>
 
-          <div class="error-msg" *ngIf="createError">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            {{ createError }}
-        </div>
-
-          <div class="success-msg" *ngIf="createSuccess">
-            ✅ {{ createSuccess }}
-        </div>
+          <div class="error-msg" *ngIf="createError">{{ createError }}</div>
+          <div class="success-msg" *ngIf="createSuccess">✅ {{ createSuccess }}</div>
 
         <div class="form-actions">
-            <button type="button" class="btn-secondary" (click)="resetForm()">
-            Limpiar
-            </button>
+            <button type="button" class="btn-secondary" (click)="resetForm()">Limpiar</button>
             <button type="submit" class="btn-primary" [disabled]="creating">
               <span *ngIf="!creating">Crear administrador</span>
               <span *ngIf="creating" class="spinner-wrap">
                 <span class="spinner-sm"></span> Creando...
-            </span>
+              </span>
             </button>
         </div>
 
         </form>
     </div>
+    </section>
+
+    <!-- ───── DEVOLUCIONES ───── -->
+    <section *ngIf="activeTab === 'returns'">
+      <div class="section-header">
+        <div>
+          <h2>Devoluciones</h2>
+          <p class="subtitle">Gestiona las solicitudes de devolución de los clientes</p>
+        </div>
+        <button class="btn-secondary" (click)="loadReturns()">↻ Actualizar</button>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingReturns">
+        <div class="spinner"></div>
+        <span>Cargando devoluciones...</span>
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loadingReturns">
+        <table *ngIf="returns.length > 0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Pedido</th>
+              <th>Cliente</th>
+              <th>Motivo</th>
+              <th>Reembolso</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let ret of returns">
+              <tr>
+                <td class="id-cell">{{ ret.id }}</td>
+                <td>#{{ ret.order.id }}</td>
+                <td>{{ ret.client?.username ?? '—' }}</td>
+                <td>
+                  <span class="cause-tag">{{ causeLabel(ret.cause) }}</span>
+                  <button class="btn-expand-detail"
+                          *ngIf="ret.additionalDescription"
+                          (click)="toggleReturnDetail(ret.id)"
+                          [title]="expandedReturnId === ret.id ? 'Ocultar detalle' : 'Ver detalle'">
+                    {{ expandedReturnId === ret.id ? '▲' : '▼' }} Ver descripción
+                  </button>
+                </td>
+                <td>
+                  <span class="refund-method-tag" [class]="'rm-' + ret.refundMethod">
+                    {{ ret.refundMethod === 'balance' ? 'Saldo' : 'Tarjeta' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="return-status-badge" [class]="'rs-' + ret.status">
+                    {{ statusLabel(ret.status) }}
+                  </span>
+                </td>
+                <td class="date-cell">{{ ret.createdAt | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <div class="return-actions" *ngIf="ret.status === 'pendiente'">
+                    <button class="btn-approve"
+                            [disabled]="updatingReturnId === ret.id"
+                            (click)="updateReturnStatus(ret, 'aprobada')">
+                      Aprobar
+                    </button>
+                    <button class="btn-reject"
+                            [disabled]="updatingReturnId === ret.id"
+                            (click)="updateReturnStatus(ret, 'rechazada')">
+                      Rechazar
+                    </button>
+                  </div>
+                  <button class="btn-complete" *ngIf="ret.status === 'aprobada'"
+                          [disabled]="updatingReturnId === ret.id"
+                          (click)="updateReturnStatus(ret, 'completada')">
+                    Completar
+                  </button>
+                  <span class="status-final" *ngIf="ret.status === 'rechazada' || ret.status === 'completada'">
+                    —
+                  </span>
+                </td>
+              </tr>
+              <!-- Fila expandible con la descripción completa -->
+              <tr class="detail-row" *ngIf="expandedReturnId === ret.id && ret.additionalDescription">
+                <td colspan="8">
+                  <div class="detail-row-content">
+                    <span class="detail-row-label">Descripción del cliente:</span>
+                    <p class="detail-row-text">{{ ret.additionalDescription }}</p>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="returns.length === 0">
+          <div class="empty-icon">🔄</div>
+          <p>No hay solicitudes de devolución.</p>
+        </div>
+      </div>
     </section>
 
 </main>

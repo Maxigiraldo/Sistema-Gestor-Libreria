@@ -23,28 +23,57 @@
 
     <!-- ── Reservas activas ───────────────────────────── -->
     <section class="section" *ngIf="active.length > 0">
-      <h2 class="section-title">Activas <span class="badge">{{ active.length }}</span></h2>
+      <div class="section-header">
+        <h2 class="section-title">Activas <span class="badge">{{ active.length }}</span></h2>
+        <button class="btn-buy-selected"
+                [disabled]="selectedItems.size === 0"
+                (click)="buySelected()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          Comprar seleccionados
+          <span class="selected-count" *ngIf="selectedItems.size > 0">({{ selectedItems.size }})</span>
+        </button>
+      </div>
 
       <div class="reservations-list">
         <div class="reservation-card active" *ngFor="let r of active">
-          <div class="card-left">
-            <span class="card-code">{{ getExemplarCode(r) }}</span>
-            <h3 class="card-title">{{ getBookTitle(r) }}</h3>
-            <p class="card-author">{{ getBookAuthor(r) }}</p>
-            <p class="card-date">Reservada el {{ r.createdAt | date:'d MMM yyyy, HH:mm' }}</p>
+
+          <!-- Items con checkbox -->
+          <div class="reservation-items">
+            <label class="item-row"
+                   *ngFor="let item of r.items"
+                   [class.item-selected]="selectedItems.has(item.exemplar.id)">
+              <input type="checkbox"
+                     class="item-checkbox"
+                     [checked]="selectedItems.has(item.exemplar.id)"
+                     (change)="toggleItem(item.exemplar.id)" />
+              <div class="item-info">
+                <span class="item-code">{{ item.exemplar.uniqueCode }}</span>
+                <h3 class="item-title">{{ item.exemplar.book.title }}</h3>
+                <p class="item-author">{{ item.exemplar.book.author }}</p>
+                <span class="item-price">{{ item.exemplar.book.price | currency:'COP':'$':'1.0-0' }}</span>
+              </div>
+            </label>
           </div>
-          <div class="card-right">
+
+          <!-- Footer de la reserva -->
+          <div class="card-footer">
             <div class="expiry-block">
               <span class="expiry-label">Expira en</span>
-              <span class="expiry-time">{{ timeLeft(r.expiresAt) }}</span>
+              <span class="expiry-time" [class.expiry-urgent]="isUrgent(r.expiresAt)">
+                {{ timeLeft(r.expiresAt) }}
+              </span>
             </div>
             <button class="btn-cancel"
                     [disabled]="cancellingId === r.id"
                     (click)="cancelReservation(r.id)">
               <span *ngIf="cancellingId === r.id" class="btn-spinner"></span>
-              {{ cancellingId === r.id ? 'Cancelando...' : 'Cancelar' }}
+              {{ cancellingId === r.id ? 'Cancelando...' : 'Cancelar reserva' }}
             </button>
           </div>
+
         </div>
       </div>
     </section>
@@ -62,9 +91,9 @@
       <div class="reservations-list">
         <div class="reservation-card past" *ngFor="let r of past">
           <div class="card-left">
-            <span class="card-code">{{ getExemplarCode(r) }}</span>
-            <h3 class="card-title">{{ getBookTitle(r) }}</h3>
-            <p class="card-author">{{ getBookAuthor(r) }}</p>
+            <span class="item-code">{{ getExemplarCode(r) }}</span>
+            <h3 class="item-title">{{ getBookTitle(r) }}</h3>
+            <p class="item-author">{{ getBookAuthor(r) }}</p>
             <p class="card-date">{{ r.createdAt | date:'d MMM yyyy' }}</p>
           </div>
           <div class="card-right">

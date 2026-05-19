@@ -7,6 +7,7 @@
       <p>{{ books.length }} libros registrados</p>
     </div>
     <div class="header-actions">
+      <a [routerLink]="['/admin']" class="btn-secondary">⚙️ Panel admin</a>
       <a [routerLink]="['/admin/bonus']" class="btn-secondary">🎁 Configurar bono</a>
       <button class="btn-primary" (click)="openCreate()">+ Agregar libro</button>
     </div>

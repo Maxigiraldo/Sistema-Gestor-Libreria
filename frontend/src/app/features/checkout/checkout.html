@@ -4,7 +4,9 @@
 
   <div class="page-header">
     <div>
-      <h1>Confirmar Pedido</h1>
+      <h1>Confirmar Pedido
+        <span class="from-reservation-badge" *ngIf="state?.fromReservation">Desde reserva</span>
+      </h1>
       <p>Revisa los detalles antes de confirmar</p>
     </div>
     <a [routerLink]="['/']" class="btn-back">← Catálogo</a>
@@ -17,54 +19,53 @@
 
   <div *ngIf="profileLoaded && state" class="checkout-layout">
 
-    <!-- Resumen del libro -->
+    <!-- ── Resumen del pedido ─────────────────────────── -->
     <div class="checkout-section">
       <h2 class="section-title">Resumen del pedido</h2>
-      <div class="book-summary">
+
+      <div class="book-summary" *ngFor="let item of state.items">
         <div class="book-info">
-          <span class="book-title">{{ state.bookTitle }}</span>
-          <span class="book-author">{{ state.bookAuthor }}</span>
+          <span class="book-title">{{ item.title }}</span>
+          <span class="book-author">{{ item.author }}</span>
         </div>
-        <span class="book-price">{{ state.price | currency:'COP':'$':'1.0-0' }}</span>
+        <span class="book-price">{{ item.price | currency:'COP':'$':'1.0-0' }}</span>
       </div>
+
       <div class="order-total-row">
-        <span class="total-label">Total</span>
+        <span class="total-label">Total a pagar</span>
         <span class="total-amount">{{ total | currency:'COP':'$':'1.0-0' }}</span>
       </div>
     </div>
 
-    <!-- Tipo de entrega -->
+    <!-- ── Tipo de entrega ────────────────────────────── -->
     <div class="checkout-section">
       <h2 class="section-title">Tipo de entrega</h2>
       <div class="delivery-toggle">
-        <button
-          class="toggle-btn"
-          [class.active]="deliveryType === 'home_delivery'"
-          (click)="deliveryType = 'home_delivery'">
+        <button class="toggle-btn"
+                [class.active]="deliveryType === 'home_delivery'"
+                (click)="deliveryType = 'home_delivery'">
           Envío a domicilio
         </button>
-        <button
-          class="toggle-btn"
-          [class.active]="deliveryType === 'store_pickup'"
-          (click)="deliveryType = 'store_pickup'">
+        <button class="toggle-btn"
+                [class.active]="deliveryType === 'store_pickup'"
+                (click)="deliveryType = 'store_pickup'">
           Recogida en tienda
         </button>
       </div>
     </div>
 
-    <!-- Dirección de envío (domicilio) -->
+    <!-- ── Dirección de envío ─────────────────────────── -->
     <div class="checkout-section" *ngIf="deliveryType === 'home_delivery'">
       <h2 class="section-title">Dirección de envío</h2>
       <p class="section-note">Dirección registrada en tu perfil. Puedes cambiarla solo para este pedido.</p>
-      <textarea
-        class="address-input"
-        [(ngModel)]="shippingAddress"
-        placeholder="Ingresa tu dirección completa..."
-        rows="3">
+      <textarea class="address-input"
+                [(ngModel)]="shippingAddress"
+                placeholder="Ingresa tu dirección completa..."
+                rows="3">
       </textarea>
     </div>
 
-    <!-- Recogida en tienda + mapa -->
+    <!-- ── Recogida en tienda + mapa ──────────────────── -->
     <div class="checkout-section" *ngIf="deliveryType === 'store_pickup'">
       <h2 class="section-title">Recogida en tienda</h2>
       <p class="section-note">Te notificaremos cuando tu libro esté listo para recoger.</p>
@@ -79,25 +80,175 @@
         </div>
       </div>
       <div class="map-wrapper">
-        <iframe
-          [src]="mapUrl"
-          width="100%"
-          height="280"
-          title="Ubicación de la tienda"
-          loading="lazy"
-          class="store-map">
-        </iframe>
+        <iframe [src]="mapUrl" width="100%" height="280" title="Ubicación de la tienda" loading="lazy" class="store-map"></iframe>
         <p class="map-caption">Ubicación aproximada de la tienda</p>
       </div>
     </div>
 
-    <!-- Error -->
+    <!-- ── Método de pago ─────────────────────────────── -->
+    <div class="checkout-section">
+      <h2 class="section-title">Método de pago</h2>
+
+      <!-- Balance display -->
+      <div class="balance-card">
+        <div class="balance-info">
+          <span class="balance-label">Tu saldo disponible</span>
+          <span class="balance-amount">{{ balance | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+        <a [routerLink]="['/profile']" class="balance-link">Recargar →</a>
+      </div>
+
+      <!-- Payment method tabs -->
+      <div class="payment-tabs">
+        <button class="payment-tab"
+                [class.active]="paymentMethod === 'tarjeta'"
+                (click)="selectPaymentMethod('tarjeta')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          Tarjeta
+        </button>
+        <button class="payment-tab"
+                [class.active]="paymentMethod === 'saldo'"
+                [disabled]="balance <= 0"
+                (click)="selectPaymentMethod('saldo')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Saldo
+        </button>
+        <button class="payment-tab"
+                [class.active]="paymentMethod === 'mixto'"
+                [disabled]="balance <= 0"
+                (click)="selectPaymentMethod('mixto')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+          Saldo + Tarjeta
+        </button>
+      </div>
+
+      <!-- Payment breakdown for mixto -->
+      <div class="payment-breakdown" *ngIf="paymentMethod === 'mixto'">
+        <div class="breakdown-row">
+          <span>Desde saldo</span>
+          <span>{{ amountFromBalance | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+        <div class="breakdown-row">
+          <span>Desde tarjeta</span>
+          <span>{{ amountFromCard | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <!-- Insufficient balance warning -->
+      <p class="payment-warning" *ngIf="paymentMethod === 'saldo' && !balanceSufficient">
+        Tu saldo ({{ balance | currency:'COP':'$':'1.0-0' }}) no cubre el total del pedido.
+        <a [routerLink]="['/profile']">Recargar saldo</a> o usa otro método.
+      </p>
+
+      <!-- Saved cards -->
+      <div class="saved-cards" *ngIf="needsCard && savedCards.length > 0">
+        <p class="saved-label">Tarjetas guardadas</p>
+        <div class="saved-card-list">
+          <label class="saved-card-item" *ngFor="let card of savedCards"
+                 [class.selected]="selectedCardId === card.id">
+            <input type="radio" name="savedCard" [value]="card.id"
+                   [(ngModel)]="selectedCardId" />
+            <div class="saved-card-info">
+              <span class="card-brand-badge">{{ card.brand }}</span>
+              <span class="card-digits">•••• {{ card.lastDigits }}</span>
+              <span class="card-type-badge">{{ card.type === 'credito' ? 'Crédito' : 'Débito' }}</span>
+            </div>
+          </label>
+          <label class="saved-card-item" [class.selected]="selectedCardId === null">
+            <input type="radio" name="savedCard" [value]="null"
+                   [(ngModel)]="selectedCardId" />
+            <span class="new-card-label">+ Usar nueva tarjeta</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Card form -->
+      <div class="card-form" *ngIf="needsCard && selectedCardId === null">
+        <p class="section-note">Solo se aceptan Visa, Mastercard y American Express.</p>
+
+        <div class="card-number-wrap">
+          <input class="card-input card-number-input"
+                 type="text"
+                 placeholder="Número de tarjeta"
+                 [value]="cardNumber"
+                 (input)="onCardNumberInput($event)"
+                 maxlength="19"
+                 inputmode="numeric"
+                 autocomplete="cc-number" />
+          <span class="card-brand-display" *ngIf="cardBrand">{{ cardBrand }}</span>
+        </div>
+
+        <input class="card-input"
+               type="text"
+               placeholder="Nombre del titular"
+               [(ngModel)]="cardHolderName"
+               autocomplete="cc-name" />
+
+        <div class="card-row">
+          <input class="card-input"
+                 type="text"
+                 placeholder="MM/AA"
+                 [value]="cardExpiry"
+                 (input)="onCardExpiryInput($event)"
+                 maxlength="5"
+                 inputmode="numeric"
+                 autocomplete="cc-exp" />
+          <input class="card-input"
+                 type="text"
+                 placeholder="CVV"
+                 [(ngModel)]="cardCvv"
+                 maxlength="4"
+                 inputmode="numeric"
+                 autocomplete="cc-csc" />
+          <select class="card-input" [(ngModel)]="cardType">
+            <option value="credito">Crédito</option>
+            <option value="debito">Débito</option>
+          </select>
+        </div>
+
+        <label class="save-card-label">
+          <input type="checkbox" [(ngModel)]="saveCard" />
+          Guardar tarjeta para futuras compras
+        </label>
+
+        <p class="card-error" *ngIf="cardError">{{ cardError }}</p>
+        <div class="card-hints">
+          <div class="card-hint-row">
+            <span class="hint-ok">✓ Tarjeta válida:</span>
+            <span class="hint-mono">4111 1111 1111 1111</span>
+            <span class="hint-label">(Visa)</span>
+          </div>
+          <div class="card-hint-row">
+            <span class="hint-ok">✓ Tarjeta válida:</span>
+            <span class="hint-mono">5500 0000 0000 0004</span>
+            <span class="hint-label">(Mastercard)</span>
+          </div>
+          <div class="card-hint-row">
+            <span class="hint-err">✗ Tarjeta inválida:</span>
+            <span class="hint-mono">4111 1111 1111 0002</span>
+            <span class="hint-label">(siempre declinada)</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Error ──────────────────────────────────────── -->
     <p class="error-msg" *ngIf="error">{{ error }}</p>
 
-    <!-- Acciones -->
+    <!-- ── Acciones ───────────────────────────────────── -->
     <div class="checkout-actions">
       <a [routerLink]="['/']" class="btn-cancel-link">Cancelar</a>
-      <button class="btn-confirm" [disabled]="loading" (click)="confirm()">
+      <button class="btn-confirm"
+              [disabled]="loading || (paymentMethod === 'saldo' && !balanceSufficient)"
+              (click)="confirm()">
         <span *ngIf="loading" class="btn-spinner"></span>
         {{ loading ? 'Procesando...' : 'Confirmar pedido' }}
       </button>

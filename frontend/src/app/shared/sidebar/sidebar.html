@@ -1,45 +1,53 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar-collapsed]="collapsed">
   <div class="sidebar-header">
-    <h3>Filtros</h3>
-    <button class="clear-btn" (click)="clearFilters()">Limpiar</button>
+    <button class="collapse-btn" (click)="collapsed = !collapsed" [attr.aria-expanded]="!collapsed" aria-label="Mostrar u ocultar filtros">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="!collapsed" points="18 15 12 9 6 15"/>
+        <polyline *ngIf="collapsed"  points="6 9 12 15 18 9"/>
+      </svg>
+      <h3>Filtros</h3>
+    </button>
+    <button class="clear-btn" *ngIf="!collapsed" (click)="clearFilters()">Limpiar</button>
   </div>
 
-  <div class="filter-group">
-    <label>Género</label>
-    <select [(ngModel)]="filters.genre" name="genre" disabled>
-      <option value="">Todos</option>
-      <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
-    </select>
-  </div>
+  <div class="filter-body" [class.filter-body-hidden]="collapsed">
 
-  <div class="filter-group">
-    <label>Condición</label>
-    <div class="radio-group">
-      <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" disabled />
-        Todos
-      </label>
-      <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" disabled />
-        Nuevo
-      </label>
-      <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" disabled />
-        Usado
-      </label>
+    <div class="filter-group">
+      <label>Género</label>
+      <select [(ngModel)]="filters.genre" name="genre" (ngModelChange)="onSelectChange()">
+        <option value="">Todos</option>
+        <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+      </select>
     </div>
-  </div>
 
-  <div class="filter-group">
-    <label>Precio</label>
-    <div class="price-range">
-      <input type="number" [(ngModel)]="filters.minPrice" name="minPrice"
-             placeholder="Mín" disabled />
-      <span>—</span>
-      <input type="number" [(ngModel)]="filters.maxPrice" name="maxPrice"
-             placeholder="Máx" disabled />
+    <div class="filter-group">
+      <label>Condición</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" (ngModelChange)="onSelectChange()" />
+          Todos
+        </label>
+        <label class="radio-option">
+          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" (ngModelChange)="onSelectChange()" />
+          Nuevo
+        </label>
+        <label class="radio-option">
+          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" (ngModelChange)="onSelectChange()" />
+          Usado
+        </label>
+      </div>
     </div>
-  </div>
 
-  <p class="coming-soon">🔧 Filtros próximamente</p>
+    <div class="filter-group">
+      <label>Precio</label>
+      <div class="price-range">
+        <input type="number" [(ngModel)]="filters.minPrice" name="minPrice"
+               placeholder="Mín" (ngModelChange)="onPriceChange()" />
+        <span>—</span>
+        <input type="number" [(ngModel)]="filters.maxPrice" name="maxPrice"
+               placeholder="Máx" (ngModelChange)="onPriceChange()" />
+      </div>
+    </div>
+
+  </div>
 </aside>

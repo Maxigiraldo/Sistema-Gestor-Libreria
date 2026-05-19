@@ -20,8 +20,8 @@
          class="btn-admin">⚙️ Panel admin</a>
 
       <a *ngIf="user.role === 'administrator'"
-         [routerLink]="['/admin/inventory']"
-         class="btn-inventory">📦 Inventario</a>
+         [routerLink]="['/admin']"
+         class="btn-admin">⚙️ Panel admin</a>
 
       <!-- Client links -->
       <ng-container *ngIf="user.role === 'client'">

@@ -16,10 +16,18 @@ export enum ReturnStatus {
   COMPLETED = 'completada',
 }
 
+export enum RefundMethod {
+  BALANCE = 'balance',
+  CARD = 'card',
+}
+
 export enum ReturnCause {
   BAD_CONDITION = 'mal_estado',
   NO_EXPECTATIONS = 'no_expectativas',
   LATE_DELIVERY = 'demora_entrega',
+  REGRET = 'arrepentimiento',
+  WRONG_ORDER = 'pedido_incorrecto',
+  OTHER = 'otro',
 }
 
 @Entity('returns')
@@ -43,6 +51,13 @@ export class Return {
 
   @Column({ nullable: true })
   additionalDescription: string;
+
+  @Column({
+    type: 'enum',
+    enum: RefundMethod,
+    default: RefundMethod.BALANCE,
+  })
+  refundMethod: RefundMethod;
 
   @Column({ nullable: true })
   qrCode: string;

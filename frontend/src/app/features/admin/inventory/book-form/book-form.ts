@@ -5,6 +5,15 @@ import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { BooksService, Book } from '../../../../core/services/books';
+import { environment } from '../../../../../environments/environment';
+
+export const BOOK_GENRES = [
+  'Ficción', 'No ficción', 'Ciencia ficción', 'Fantasía', 'Terror',
+  'Romance', 'Thriller', 'Misterio', 'Historia', 'Biografía',
+  'Ciencia', 'Tecnología', 'Filosofía', 'Psicología', 'Economía',
+  'Derecho', 'Arte', 'Poesía', 'Infantil', 'Juvenil',
+  'Cómics', 'Religión', 'Política', 'Autoayuda', 'Otro'
+];
 
 @Component({
   selector: 'app-book-form',
@@ -25,6 +34,8 @@ export class BookFormComponent implements OnInit, OnDestroy {
     publicationDate: '', condition: 'new', price: null,
     quantity: 1, coverImage: ''
   };
+
+  genres = BOOK_GENRES;
 
   searchQuery = '';
   searchResults: any[] = [];
@@ -48,6 +59,73 @@ export class BookFormComponent implements OnInit, OnDestroy {
     it: 'Italiano', pt: 'Portugués', zh: 'Chino', ja: 'Japonés',
     ru: 'Ruso', ar: 'Árabe'
   };
+
+  private genreMap: Record<string, string> = {
+    'fiction': 'Ficción',
+    'nonfiction': 'No ficción',
+    'non-fiction': 'No ficción',
+    'general': 'No ficción',
+    'science fiction': 'Ciencia ficción',
+    'sci-fi': 'Ciencia ficción',
+    'fantasy': 'Fantasía',
+    'horror': 'Terror',
+    'romance': 'Romance',
+    'thriller': 'Thriller',
+    'suspense': 'Thriller',
+    'mystery': 'Misterio',
+    'detective': 'Misterio',
+    'crime': 'Misterio',
+    'history': 'Historia',
+    'historical': 'Historia',
+    'biography': 'Biografía',
+    'autobiography': 'Biografía',
+    'biography & autobiography': 'Biografía',
+    'memoir': 'Biografía',
+    'science': 'Ciencia',
+    'nature': 'Ciencia',
+    'technology': 'Tecnología',
+    'computers': 'Tecnología',
+    'engineering': 'Tecnología',
+    'philosophy': 'Filosofía',
+    'psychology': 'Psicología',
+    'self-help': 'Autoayuda',
+    'personal development': 'Autoayuda',
+    'economics': 'Economía',
+    'business': 'Economía',
+    'finance': 'Economía',
+    'law': 'Derecho',
+    'legal': 'Derecho',
+    'art': 'Arte',
+    'music': 'Arte',
+    'photography': 'Arte',
+    'architecture': 'Arte',
+    'poetry': 'Poesía',
+    'drama': 'Poesía',
+    'juvenile fiction': 'Juvenil',
+    'juvenile nonfiction': 'Juvenil',
+    'young adult': 'Juvenil',
+    "children's": 'Infantil',
+    'comics': 'Cómics',
+    'comic books': 'Cómics',
+    'graphic novels': 'Cómics',
+    'manga': 'Cómics',
+    'religion': 'Religión',
+    'spirituality': 'Religión',
+    'bibles': 'Religión',
+    'political science': 'Política',
+    'politics': 'Política',
+    'social science': 'Política',
+  };
+
+  private mapGenre(raw: string): string {
+    if (!raw) return 'Otro';
+    const key = raw.toLowerCase().trim();
+    if (this.genreMap[key]) return this.genreMap[key];
+    for (const [k, v] of Object.entries(this.genreMap)) {
+      if (key.includes(k) || k.includes(key)) return v;
+    }
+    return 'Otro';
+  }
 
   constructor(
     private booksService: BooksService,
@@ -87,8 +165,10 @@ export class BookFormComponent implements OnInit, OnDestroy {
     this.searchResults = [];
     this.searchError = '';
     const q = encodeURIComponent(this.searchQuery.trim());
+    const key = environment.googleBooksApiKey;
+    const keyParam = key ? `&key=${key}` : '';
     this.http
-      .get<any>(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=6`)
+      .get<any>(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=6${keyParam}`)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -97,9 +177,13 @@ export class BookFormComponent implements OnInit, OnDestroy {
           this.searching = false;
           this.cdr.detectChanges();
         },
-        error: () => {
+        error: (err) => {
           this.searching = false;
-          this.searchError = 'No se pudo conectar con Google Books.';
+          if (err.status === 429 || err.error?.error?.status === 'RESOURCE_EXHAUSTED') {
+            this.searchError = 'Cuota de Google Books agotada por hoy. Ingresa los datos manualmente.';
+          } else {
+            this.searchError = 'No se pudo conectar con Google Books. Ingresa los datos manualmente.';
+          }
           this.cdr.detectChanges();
         }
       });
@@ -118,7 +202,7 @@ export class BookFormComponent implements OnInit, OnDestroy {
 
     this.form.title           = v.title ?? '';
     this.form.author          = v.authors?.join(', ') ?? '';
-    this.form.genre           = v.categories?.[0] ?? '';
+    this.form.genre           = this.mapGenre(v.categories?.[0] ?? '');
     this.form.publisher       = v.publisher ?? '';
     this.form.publicationYear = rawDate ? parseInt(rawDate, 10) : null;
     this.form.publicationDate = fullDate;

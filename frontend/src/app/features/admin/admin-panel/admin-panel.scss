@@ -374,3 +374,138 @@ table {
   margin-bottom: 4px;
   line-height: 1.5;
 }
+
+/* ── Returns tab ────────────────────────────── */
+
+.cause-tag {
+  display: block;
+  font-size: 12px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.btn-expand-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 2px 0;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+
+  &:hover { color: #111827; }
+}
+
+.detail-row td {
+  padding: 0 !important;
+}
+
+.detail-row-content {
+  padding: 12px 20px;
+  background: #f9fafb;
+  border-top: 1px dashed #e5e7eb;
+}
+
+.detail-row-label {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.detail-row-text {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.refund-method-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+
+  &.rm-balance { background: #dbeafe; color: #1e40af; }
+  &.rm-card    { background: #fef3c7; color: #92400e; }
+}
+
+.return-status-badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+
+  &.rs-pendiente { background: #fffbeb; color: #92400e; }
+  &.rs-aprobada { background: #d1fae5; color: #065f46; }
+  &.rs-rechazada { background: #fee2e2; color: #991b1b; }
+  &.rs-completada { background: #f3f4f6; color: #374151; }
+}
+
+.return-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-approve {
+  padding: 5px 12px;
+  background: #059669;
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) { background: #047857; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-reject {
+  padding: 5px 12px;
+  background: none;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) { background: #fee2e2; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.btn-complete {
+  padding: 5px 12px;
+  background: #1d4ed8;
+  border: none;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) { background: #1e40af; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.status-final {
+  color: #9ca3af;
+  font-size: 13px;
+}
