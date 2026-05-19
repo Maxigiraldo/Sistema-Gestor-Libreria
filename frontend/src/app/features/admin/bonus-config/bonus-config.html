@@ -1,0 +1,64 @@
+<app-navbar />
+
+<div class="bonus-layout">
+  <div class="bonus-container">
+
+    <div class="page-header">
+      <a [routerLink]="['/admin']" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Volver al panel
+      </a>
+      <h1>Configuración de bono</h1>
+      <p class="subtitle">Porcentaje de descuento para clientes con bono activo</p>
+    </div>
+
+    <div class="loading-wrap" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="config-card" *ngIf="!loading">
+
+      <div class="current-value">
+        <span class="value-label">Descuento actual</span>
+        <span class="value-number">{{ currentPercentage }}%</span>
+      </div>
+
+      <div class="error-msg" *ngIf="error && !saving">{{ error }}</div>
+
+      <ng-container *ngIf="isRoot; else readOnly">
+        <div class="field">
+          <label>Nuevo porcentaje (0 – 100)</label>
+          <div class="input-row">
+            <input
+              type="number"
+              [(ngModel)]="newPercentage"
+              name="percentage"
+              min="0"
+              max="100"
+              step="1"
+              placeholder="Ej. 15"
+            />
+            <span class="suffix">%</span>
+          </div>
+        </div>
+
+        <div class="success-msg" *ngIf="success">✅ {{ success }}</div>
+
+        <div class="form-actions">
+          <button class="btn-primary" (click)="save()" [disabled]="saving">
+            {{ saving ? 'Guardando...' : 'Actualizar bono' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #readOnly>
+        <p class="read-only-msg">Solo el usuario ROOT puede modificar esta configuración.</p>
+      </ng-template>
+
+    </div>
+
+  </div>
+</div>

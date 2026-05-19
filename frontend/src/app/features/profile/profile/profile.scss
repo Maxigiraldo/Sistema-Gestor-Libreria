@@ -1,0 +1,158 @@
+.profile-layout {
+  min-height: calc(100vh - 64px);
+  background: #f9fafb;
+  padding: 40px 32px;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-hero {
+  background: #ffffff;
+  border-left: 6px solid #000000;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  flex-wrap: wrap;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  background: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, serif;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.profile-hero-info {
+  flex: 1;
+
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26px;
+    font-weight: 400;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+}
+
+.role-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  background: #111827;
+  color: #ffffff;
+
+  &.role-administrator { background: #1d4ed8; }
+  &.role-root { background: #7c3aed; }
+  &.role-client { background: #059669; }
+  &.role-visitor { background: #6b7280; }
+}
+
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-secondary {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:hover { border-color: #000000; color: #111827; }
+}
+
+.btn-danger-soft {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover { background: #fef2f2; border-color: #dc2626; }
+}
+
+.cards-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.info-card {
+  background: #ffffff;
+  border-left: 4px solid #000000;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.card-title {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111827;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon { font-size: 16px; }
+
+.info-rows { display: flex; flex-direction: column; }
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child { border-bottom: none; }
+}
+
+.info-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+
+  &.muted { color: #9ca3af; }
+}

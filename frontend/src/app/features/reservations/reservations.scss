@@ -1,0 +1,260 @@
+.reservations-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 32px 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #000000;
+
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: #111827;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  p {
+    font-size: 13px;
+    color: #6b7280;
+  }
+}
+
+.btn-back {
+  font-size: 13px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+  transition: color 0.2s;
+
+  &:hover { color: #111827; }
+}
+
+.section {
+  margin-bottom: 48px;
+}
+
+.section-title {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #111827;
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  font-family: inherit;
+  font-size: 12px;
+  background: #111827;
+  color: #ffffff;
+  padding: 2px 8px;
+  font-weight: 600;
+}
+
+.reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.reservation-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+
+  &.active {
+    border-left: 4px solid #111827;
+  }
+
+  &.past {
+    border-left: 4px solid #d1d5db;
+    opacity: 0.75;
+  }
+}
+
+.card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-code {
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.card-title {
+  font-family: Georgia, serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #111827;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-author {
+  font-size: 13px;
+  color: #4b5563;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.card-date {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.expiry-block {
+  text-align: right;
+}
+
+.expiry-label {
+  display: block;
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.expiry-time {
+  font-family: Georgia, serif;
+  font-size: 22px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.btn-cancel {
+  background: none;
+  border: 1px solid #d1d5db;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover:not(:disabled) {
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.btn-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(0,0,0,.2);
+  border-top-color: #6b7280;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.status-badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+
+  &.status-expired  { background: #fef3c7; color: #92400e; }
+  &.status-cancelled { background: #fee2e2; color: #991b1b; }
+  &.status-converted { background: #d1fae5; color: #065f46; }
+}
+
+.empty-active {
+  text-align: center;
+  padding: 60px 0;
+  border: 1px dashed #d1d5db;
+  margin-bottom: 48px;
+
+  p {
+    font-size: 14px;
+    color: #6b7280;
+    font-style: italic;
+    font-family: Georgia, serif;
+    margin-bottom: 20px;
+  }
+}
+
+.btn-browse {
+  font-size: 13px;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+  text-decoration: underline;
+
+  &:hover { color: #374151; }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: #6b7280;
+
+  p { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #111827;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.error-msg {
+  color: #dc2626;
+  border-left: 4px solid #dc2626;
+  padding: 12px 16px;
+  background: #fef2f2;
+  font-size: 14px;
+  margin-bottom: 16px;
+}

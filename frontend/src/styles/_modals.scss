@@ -1,0 +1,157 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal-card {
+  background: #ffffff;
+  padding: 36px 32px;
+  width: 100%;
+  max-width: 400px;
+  border-left: 6px solid #000000;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+
+  h3 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: #111827;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+}
+
+.modal-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 0;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #f9fafb;
+
+    &:focus {
+      border-color: #000000;
+      background: #ffffff;
+    }
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+
+  button {
+    flex: 1;
+  }
+}
+
+.btn-primary {
+  padding: 12px;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #1f2937;
+  }
+
+  &:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+  padding: 12px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #000000;
+    color: #111827;
+  }
+}
+
+.btn-danger {
+  padding: 12px;
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #b91c1c;
+  }
+}
+
+.error-msg {
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  border-left: 3px solid #dc2626;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.success-msg {
+  font-size: 13px;
+  color: #065f46;
+  background: #ecfdf5;
+  border-left: 3px solid #059669;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}

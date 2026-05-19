@@ -1,0 +1,173 @@
+<app-navbar />
+
+<div class="admin-layout">
+<aside class="admin-sidebar">
+    <h3>Panel ROOT</h3>
+    <nav>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'list'"
+        (click)="activeTab = 'list'">
+        👥 Administradores
+    </button>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'create'"
+        (click)="activeTab = 'create'">
+        ➕ Crear admin
+    </button>
+    <a class="nav-item" [routerLink]="['/admin/bonus']">
+        🎁 Configurar bono
+    </a>
+    </nav>
+</aside>
+
+<main class="admin-main">
+
+    <!-- ───── LISTA DE ADMINS ───── -->
+    <section *ngIf="activeTab === 'list'">
+    <div class="section-header">
+        <div>
+        <h2>Administradores</h2>
+        <p class="subtitle">Gestiona las cuentas de administrador</p>
+        </div>
+        <button class="btn-primary" (click)="activeTab = 'create'">
+        + Nuevo admin
+        </button>
+    </div>
+
+      <div class="loading-state" *ngIf="loadingList">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+    </div>
+
+      <div class="table-wrapper" *ngIf="!loadingList">
+        <table *ngIf="admins.length > 0">
+        <thead>
+            <tr>
+            <th>#</th>
+            <th>Usuario</th>
+            <th>Correo</th>
+            <th>Estado</th>
+            <th>Creado</th>
+            <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let admin of admins">
+            <td class="id-cell">{{ admin.id }}</td>
+            <td>
+                <div class="user-cell">
+                <div class="avatar">{{ admin.username[0].toUpperCase() }}</div>
+                {{ admin.username }}
+                </div>
+            </td>
+            <td class="email-cell">{{ admin.email }}</td>
+            <td>
+                <span class="badge" [class.badge--active]="admin.active" [class.badge--inactive]="!admin.active">
+                {{ admin.active ? 'Activo' : 'Inactivo' }}
+                </span>
+            </td>
+            <td class="date-cell">{{ admin.createdAt | date:'dd/MM/yyyy' }}</td>
+            <td>
+                <button
+                class="btn-deactivate"
+                [disabled]="!admin.active || deactivatingId === admin.id"
+                (click)="deactivate(admin)">
+                {{ deactivatingId === admin.id ? '...' : 'Desactivar' }}
+                </button>
+            </td>
+            </tr>
+        </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="admins.length === 0">
+        <div class="empty-icon">👤</div>
+        <p>No hay administradores aún.</p>
+        <button class="btn-primary" (click)="activeTab = 'create'">
+            Crear el primero
+        </button>
+        </div>
+    </div>
+    </section>
+
+    <!-- ───── CREAR ADMIN ───── -->
+    <section *ngIf="activeTab === 'create'">
+    <div class="section-header">
+        <div>
+        <h2>Crear administrador</h2>
+        <p class="subtitle">Asigna credenciales de acceso al nuevo admin</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <form (ngSubmit)="onCreate()" novalidate>
+
+        <div class="field">
+            <label>Nombre de usuario *</label>
+            <input
+            type="text"
+            [(ngModel)]="form.username"
+            name="username"
+            placeholder="admin_pereira"
+            autocomplete="off"
+            />
+            <span class="field-error" *ngIf="submitted && !form.username.trim()">
+            Obligatorio.
+            </span>
+        </div>
+
+        <div class="field">
+            <label>Correo electrónico *</label>
+            <input
+            type="email"
+            [(ngModel)]="form.email"
+            name="email"
+            placeholder="admin@libreria.com"
+            autocomplete="off"
+            />
+            <span class="field-error" *ngIf="submitted && !form.email.trim()">Obligatorio.</span>
+            <span class="field-error" *ngIf="submitted && form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)">
+              Correo inválido.
+            </span>
+        </div>
+
+        <div class="info-email-msg">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            El administrador recibirá un correo para configurar su propia contraseña.
+        </div>
+
+          <div class="error-msg" *ngIf="createError">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ createError }}
+        </div>
+
+          <div class="success-msg" *ngIf="createSuccess">
+            ✅ {{ createSuccess }}
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="resetForm()">
+            Limpiar
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="creating">
+              <span *ngIf="!creating">Crear administrador</span>
+              <span *ngIf="creating" class="spinner-wrap">
+                <span class="spinner-sm"></span> Creando...
+            </span>
+            </button>
+        </div>
+
+        </form>
+    </div>
+    </section>
+
+</main>
+</div>

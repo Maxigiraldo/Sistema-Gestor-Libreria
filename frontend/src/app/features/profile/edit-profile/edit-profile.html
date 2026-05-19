@@ -1,0 +1,132 @@
+<app-navbar />
+
+<div class="edit-layout">
+  <div class="edit-container">
+
+    <div class="edit-header">
+      <a [routerLink]="['/profile']" class="btn-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Volver al perfil
+      </a>
+      <h1>Editar perfil</h1>
+      <p class="subtitle">Actualiza tu información de cuenta</p>
+    </div>
+
+    <div class="loading-wrap" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" novalidate *ngIf="!loading">
+      <div class="form-card">
+        <h3 class="card-title">
+          <span class="card-icon">👤</span> Datos de cuenta
+        </h3>
+
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input type="email" [value]="email" disabled class="input-disabled" />
+          <span class="field-hint">El correo electrónico no se puede modificar.</span>
+        </div>
+
+        <div class="field">
+          <label>Nombre de usuario *</label>
+          <input
+            type="text"
+            [(ngModel)]="form.username"
+            name="username"
+            placeholder="tu_usuario"
+            autocomplete="username"
+          />
+          <span class="field-error" *ngIf="submitted && !form.username.trim()">
+            Obligatorio.
+          </span>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label>Nombre</label>
+            <input
+              type="text"
+              [(ngModel)]="form.firstName"
+              name="firstName"
+              placeholder="Tu nombre"
+              [readonly]="!isClient"
+              [class.input-disabled]="!isClient"
+            />
+          </div>
+          <div class="field">
+            <label>Apellido</label>
+            <input
+              type="text"
+              [(ngModel)]="form.lastName"
+              name="lastName"
+              placeholder="Tu apellido"
+              [readonly]="!isClient"
+              [class.input-disabled]="!isClient"
+            />
+          </div>
+        </div>
+        <span class="field-hint" *ngIf="!isClient">
+          El nombre y apellido no son requeridos para administradores.
+        </span>
+
+        <div class="field">
+          <label>Género</label>
+          <select [(ngModel)]="form.gender" name="gender">
+            <option value="">Prefiero no decir</option>
+            <option value="male">Masculino</option>
+            <option value="female">Femenino</option>
+            <option value="other">Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-card" *ngIf="isClient">
+        <h3 class="card-title">
+          <span class="card-icon">📦</span> Dirección de envío
+        </h3>
+
+        <div class="field">
+          <label>Dirección predeterminada</label>
+          <input
+            type="text"
+            [(ngModel)]="form.shippingAddress"
+            name="shippingAddress"
+            placeholder="Calle 10 # 5-23, Pereira"
+          />
+          <span class="field-hint">
+            Esta dirección se usará por defecto en tus pedidos.
+          </span>
+        </div>
+      </div>
+
+      <div class="error-msg" *ngIf="error">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ error }}
+      </div>
+
+      <div class="success-msg" *ngIf="success">
+        ✅ {{ success }}
+      </div>
+
+      <div class="form-actions">
+        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
+        <button type="submit" class="btn-primary" [disabled]="saving">
+          <span *ngIf="!saving">Guardar cambios</span>
+          <span *ngIf="saving" class="spinner-wrap">
+            <span class="spinner"></span> Guardando...
+          </span>
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>

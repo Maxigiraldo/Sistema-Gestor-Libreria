@@ -1,0 +1,51 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <a [routerLink]="['/']">📚 Librería</a>
+  </div>
+
+  <div class="navbar-search">
+    <input type="text"
+           [(ngModel)]="searchQuery"
+           (ngModelChange)="onSearchInput()"
+           placeholder="Buscar por título..." />
+    <span class="search-icon">🔍</span>
+  </div>
+
+  <div class="navbar-actions">
+    <ng-container *ngIf="user; else guestActions">
+
+      <!-- Admin links -->
+      <a *ngIf="user.role === 'root'"
+         [routerLink]="['/admin']"
+         class="btn-admin">⚙️ Panel admin</a>
+
+      <a *ngIf="user.role === 'administrator'"
+         [routerLink]="['/admin/inventory']"
+         class="btn-inventory">📦 Inventario</a>
+
+      <!-- Client links -->
+      <ng-container *ngIf="user.role === 'client'">
+        <a [routerLink]="['/orders']" class="btn-reservations">📦 Pedidos</a>
+        <a [routerLink]="['/reservations']" class="btn-reservations">📋 Reservas</a>
+      </ng-container>
+
+      <a [routerLink]="['/profile']" class="user-chip">
+        <span class="user-avatar">{{ user.username[0].toUpperCase() }}</span>
+        <span class="user-name">{{ user.username }}</span>
+      </a>
+
+      <button class="btn-logout" (click)="showLogoutModal = true">Salir</button>
+    </ng-container>
+
+    <ng-template #guestActions>
+      <a [routerLink]="['/login']" class="btn-outline">Iniciar sesión</a>
+      <a [routerLink]="['/register']" class="btn-primary">Registrarse</a>
+    </ng-template>
+  </div>
+</nav>
+
+<app-confirm-logout
+  *ngIf="showLogoutModal"
+  (confirmed)="confirmLogout()"
+  (cancelled)="showLogoutModal = false"
+/>

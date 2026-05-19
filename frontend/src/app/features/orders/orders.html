@@ -1,0 +1,141 @@
+<app-navbar />
+
+<div class="orders-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Mis Pedidos</h1>
+      <p>Historial de compras y estado de entregas</p>
+    </div>
+    <a [routerLink]="['/']" class="btn-back">← Catálogo</a>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando pedidos...</p>
+  </div>
+
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+  <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
+
+  <!-- Sin pedidos -->
+  <div class="empty-state" *ngIf="!loading && !error && orders.length === 0">
+    <p>No tienes pedidos aún.</p>
+    <a [routerLink]="['/']" class="btn-browse">Explorar catálogo →</a>
+  </div>
+
+  <!-- Lista de pedidos -->
+  <div class="orders-list" *ngIf="!loading && !error">
+
+    <div class="order-card" *ngFor="let order of orders" [class.cancelled]="order.status === 'cancelled'">
+
+      <div class="order-header">
+        <div class="order-meta">
+          <span class="order-id">#{{ order.id }}</span>
+          <span class="order-date">{{ order.createdAt | date:'d MMM yyyy, HH:mm' }}</span>
+        </div>
+        <div class="order-badges">
+          <span class="status-badge" [class]="'status-' + order.status">
+            {{ statusLabel(order.status) }}
+          </span>
+          <span class="delivery-badge">{{ deliveryLabel(order.deliveryType) }}</span>
+        </div>
+      </div>
+
+      <div class="order-items" *ngIf="order.details?.length">
+        <div class="order-item" *ngFor="let d of order.details">
+          <span class="item-code">{{ d.exemplar?.uniqueCode }}</span>
+          <span class="item-title">{{ d.exemplar?.book?.title }}</span>
+          <span class="item-author">{{ d.exemplar?.book?.author }}</span>
+          <span class="item-price">{{ +d.unitPrice | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="order-footer">
+        <div class="footer-left">
+          <span class="order-total">Total: {{ +order.total | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="order-address" *ngIf="order.shippingAddress">
+            {{ order.shippingAddress }}
+          </span>
+        </div>
+
+        <div class="footer-right">
+          <button *ngIf="order.status === 'confirmed'"
+                  class="btn-shipping-toggle"
+                  (click)="toggleShipping(order.id)">
+            {{ isShippingExpanded(order.id) ? 'Ocultar envío' : 'Ver envío' }}
+          </button>
+
+          <button *ngIf="order.status === 'confirmed'"
+                  class="btn-cancel"
+                  [disabled]="cancellingId === order.id"
+                  (click)="requestCancel(order.id)">
+            <span *ngIf="cancellingId === order.id" class="btn-spinner"></span>
+            {{ cancellingId === order.id ? 'Cancelando...' : 'Cancelar' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel de envío (expandible) -->
+      <div class="shipping-panel" *ngIf="order.status === 'confirmed' && isShippingExpanded(order.id)">
+
+        <div class="shipping-loading" *ngIf="isShippingLoading(order.id)">
+          <span class="shipping-spinner"></span>
+          <span>Cargando estado de envío...</span>
+        </div>
+
+        <div class="shipping-not-found" *ngIf="!isShippingLoading(order.id) && !getShipping(order.id)">
+          Envío aún no asignado.
+        </div>
+
+        <ng-container *ngIf="getShipping(order.id) as shipping">
+          <div class="shipping-progress">
+            <div class="progress-step" [class.reached]="statusReached(shipping.status, 'en_preparacion')">
+              <div class="step-dot"></div>
+              <span class="step-label">En preparación</span>
+            </div>
+            <div class="progress-line" [class.reached]="statusReached(shipping.status, 'enviado')"></div>
+            <div class="progress-step" [class.reached]="statusReached(shipping.status, 'enviado')">
+              <div class="step-dot"></div>
+              <span class="step-label">Enviado</span>
+            </div>
+            <div class="progress-line" [class.reached]="shipping.status === 'entregado'"></div>
+            <div class="progress-step" [class.reached]="shipping.status === 'entregado'">
+              <div class="step-dot"></div>
+              <span class="step-label">Entregado</span>
+            </div>
+          </div>
+
+          <div class="shipping-meta">
+            <span class="shipping-type-tag">
+              {{ shipping.type === 'domicilio' ? 'A domicilio' : 'Recogida en tienda' }}
+            </span>
+            <span *ngIf="shipping.estimatedDelivery && shipping.status !== 'entregado'" class="shipping-date">
+              Entrega estimada: {{ shipping.estimatedDelivery | date:'d MMM yyyy' }}
+            </span>
+            <span *ngIf="shipping.status === 'entregado' && shipping.deliveredAt" class="shipping-date delivered">
+              Entregado el {{ shipping.deliveredAt | date:'d MMM yyyy' }}
+            </span>
+          </div>
+        </ng-container>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Modal confirmación de cancelación -->
+  <div class="confirm-backdrop" *ngIf="confirmCancelId" (click)="confirmCancelId = null">
+    <div class="confirm-modal" (click)="$event.stopPropagation()">
+      <h3>¿Cancelar pedido #{{ confirmCancelId }}?</h3>
+      <p>Los artículos volverán a estar disponibles. Esta acción no se puede deshacer.</p>
+      <div class="confirm-actions">
+        <button class="btn-outline" (click)="confirmCancelId = null">Volver</button>
+        <button class="btn-confirm-cancel" (click)="confirmCancel()">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
