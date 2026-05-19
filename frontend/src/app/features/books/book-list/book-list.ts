@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, skip, takeUntil } from 'rxjs/operators';
@@ -14,7 +15,7 @@ import { SidebarComponent, SidebarFilters } from '../../../shared/sidebar/sideba
 @Component({
   selector: 'app-book-list',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent, SidebarComponent],
   templateUrl: './book-list.html',
   styleUrl: './book-list.scss'
 })
@@ -38,6 +39,15 @@ export class BookListComponent implements OnInit, OnDestroy {
   reservationError = '';
   isReserving = false;
   selectedGenre = '';
+
+  recommendations: Book[] = [];
+  loadingRecs = false;
+
+  chatbotOpen = false;
+  myRecs: Book[] = [];
+  loadingMyRecs = false;
+  myRecsLoaded = false;
+
 
   constructor(
     private booksService: BooksService,
@@ -191,13 +201,39 @@ export class BookListComponent implements OnInit, OnDestroy {
     this.selectedBook = book;
     this.reservationMessage = '';
     this.reservationError = '';
+    this.recommendations = [];
     this.fetchGoogleData(book);
+    this.loadingRecs = true;
+    this.booksService.getRecommendations(book.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (recs) => { this.recommendations = recs; this.loadingRecs = false; this.cdr.detectChanges(); },
+        error: () => { this.loadingRecs = false; }
+      });
   }
 
   closeDetail() {
     this.selectedBook = null;
     this.reservationMessage = '';
     this.reservationError = '';
+  }
+
+  toggleChatbot() {
+    this.chatbotOpen = !this.chatbotOpen;
+    if (this.chatbotOpen && !this.myRecsLoaded) {
+      this.loadingMyRecs = true;
+      this.booksService.getMyRecommendations()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (recs) => {
+            this.myRecs = recs;
+            this.loadingMyRecs = false;
+            this.myRecsLoaded = true;
+            this.cdr.detectChanges();
+          },
+          error: () => { this.loadingMyRecs = false; this.cdr.detectChanges(); }
+        });
+    }
   }
 
   get isClient(): boolean {

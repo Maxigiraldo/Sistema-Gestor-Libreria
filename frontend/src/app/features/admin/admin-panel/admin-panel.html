@@ -28,6 +28,13 @@
         (click)="activeTab = 'returns'; loadReturns()">
         🔄 Devoluciones
     </button>
+    <button
+        class="nav-item"
+        [class.active]="activeTab === 'messages'"
+        (click)="activeTab = 'messages'; loadMessages()">
+        💬 Mensajes
+        <span class="msg-badge" *ngIf="totalUnread > 0">{{ totalUnread }}</span>
+    </button>
     </nav>
 </aside>
 
@@ -248,6 +255,89 @@
           <div class="empty-icon">🔄</div>
           <p>No hay solicitudes de devolución.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- ───── MENSAJES ───── -->
+    <section *ngIf="activeTab === 'messages'" class="messages-section">
+      <div class="section-header">
+        <div>
+          <h2>Mensajes de clientes</h2>
+          <p class="subtitle">Conversaciones en tiempo real con los clientes</p>
+        </div>
+        <button class="btn-secondary" (click)="loadMessages()">↻ Actualizar</button>
+      </div>
+
+      <div class="messages-layout">
+
+        <!-- Lista de conversaciones -->
+        <div class="conv-list">
+          <div class="loading-state" *ngIf="loadingConversations">
+            <div class="spinner"></div>
+          </div>
+          <div class="conv-empty" *ngIf="!loadingConversations && conversations.length === 0">
+            <p>No hay mensajes aún.</p>
+          </div>
+          <div class="conv-item"
+               *ngFor="let conv of conversations"
+               [class.conv-active]="selectedConversation?.clientId === conv.clientId"
+               (click)="openConversation(conv)">
+            <div class="conv-avatar">{{ conv.clientName[0] | uppercase }}</div>
+            <div class="conv-meta">
+              <span class="conv-name">{{ conv.clientName }}</span>
+              <span class="conv-last">{{ conv.lastMessage }}</span>
+            </div>
+            <span class="conv-badge" *ngIf="conv.unread > 0">{{ conv.unread }}</span>
+          </div>
+        </div>
+
+        <!-- Hilo de mensajes -->
+        <div class="conv-thread">
+          <div class="thread-empty" *ngIf="!selectedConversation">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <p>Selecciona una conversación</p>
+          </div>
+
+          <ng-container *ngIf="selectedConversation">
+            <div class="thread-header">
+              <div class="thread-avatar">{{ selectedConversation.clientName[0] | uppercase }}</div>
+              <span>{{ selectedConversation.clientName }}</span>
+            </div>
+
+            <div class="thread-messages">
+              <div class="loading-state" *ngIf="loadingMessages">
+                <div class="spinner"></div>
+              </div>
+              <ng-container *ngIf="!loadingMessages">
+                <div *ngFor="let msg of conversationMessages"
+                     class="admin-bubble"
+                     [class.bubble-client]="msg.senderRole === 'client'"
+                     [class.bubble-admin]="msg.senderRole !== 'client'">
+                  <span class="bubble-name">{{ msg.senderName }}</span>
+                  <p class="bubble-text">{{ msg.content }}</p>
+                  <span class="bubble-time">{{ msg.createdAt | date:'dd/MM HH:mm' }}</span>
+                </div>
+              </ng-container>
+            </div>
+
+            <div class="thread-input-row">
+              <input class="thread-input"
+                     [(ngModel)]="adminChatInput"
+                     placeholder="Escribe una respuesta..."
+                     (keydown.enter)="sendAdminMessage()"
+                     [disabled]="sendingAdminChat" />
+              <button class="thread-send" (click)="sendAdminMessage()" [disabled]="!adminChatInput.trim() || sendingAdminChat">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </ng-container>
+        </div>
+
       </div>
     </section>
 
