@@ -20,8 +20,17 @@
 
       <!-- Client links -->
       <ng-container *ngIf="user.role === 'client'">
-        <a [routerLink]="['/orders']"      class="btn-reservations">📦 Pedidos</a>
-        <a [routerLink]="['/reservations']" class="btn-reservations">📋 Reservas</a>
+        <a [routerLink]="['/orders']" class="btn-reservations">📦 Pedidos</a>
+        <a [routerLink]="['/cart']" class="btn-cart-nav" aria-label="Carrito">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span class="cart-badge" *ngIf="(cartService.cartCount$ | async) as count">
+            {{ count > 0 ? count : '' }}
+          </span>
+          Carrito
+        </a>
 
         <!-- Botón chat soporte -->
         <button class="btn-chat" (click)="toggleChat()" [class.btn-chat-active]="chatOpen" aria-label="Chat con soporte">

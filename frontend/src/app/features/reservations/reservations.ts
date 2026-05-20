@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { ReservationsService, Reservation } from '../../core/services/reservations';
+import { ReservationsService, Reservation, ReservationItem } from '../../core/services/reservations';
 import { NavbarComponent } from '../../shared/navbar/navbar';
 
 @Component({
@@ -15,10 +15,8 @@ export class ReservationsComponent implements OnInit {
   reservations: Reservation[] = [];
   loading = true;
   error = '';
-  cancellingId: number | null = null;
-  cancelError = '';
-
-  selectedItems = new Set<number>(); // exemplar IDs seleccionados para comprar
+  removingId: number | null = null;
+  removeError = '';
 
   constructor(
     private reservationsService: ReservationsService,
@@ -30,7 +28,6 @@ export class ReservationsComponent implements OnInit {
 
   private load() {
     this.loading = true;
-    this.selectedItems.clear();
     this.reservationsService.getAll().subscribe({
       next: (data) => {
         this.reservations = data;
@@ -38,70 +35,62 @@ export class ReservationsComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error = 'No se pudieron cargar las reservas';
+        this.error = 'No se pudo cargar el carrito';
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  get active(): Reservation[] {
-    return this.reservations.filter(r => r.status === 'active');
+  get cartItems(): ReservationItem[] {
+    return this.reservations
+      .filter(r => r.status === 'active')
+      .flatMap(r => r.items);
+  }
+
+  get cartTotal(): number {
+    return this.cartItems.reduce((sum, i) => sum + Number(i.exemplar.book.price), 0);
+  }
+
+  get cartExpiresAt(): string | null {
+    const active = this.reservations.find(r => r.status === 'active');
+    return active ? active.expiresAt : null;
   }
 
   get past(): Reservation[] {
     return this.reservations.filter(r => r.status !== 'active');
   }
 
-  toggleItem(exemplarId: number) {
-    if (this.selectedItems.has(exemplarId)) {
-      this.selectedItems.delete(exemplarId);
-    } else {
-      this.selectedItems.add(exemplarId);
-    }
-    this.cdr.detectChanges();
-  }
-
-  buySelected() {
-    if (this.selectedItems.size === 0) return;
-
-    const items: { title: string; author: string; price: number; exemplarId: number }[] = [];
-
-    for (const r of this.active) {
-      for (const item of r.items) {
-        if (this.selectedItems.has(item.exemplar.id)) {
-          items.push({
-            exemplarId: item.exemplar.id,
-            title: item.exemplar.book.title,
-            author: item.exemplar.book.author,
-            price: Number(item.exemplar.book.price),
-          });
-        }
-      }
-    }
-
-    this.router.navigate(['/checkout'], {
-      state: {
-        exemplarIds: items.map(i => i.exemplarId),
-        items,
-        total: items.reduce((s, i) => s + i.price, 0),
-        fromReservation: true,
+  removeItem(exemplarId: number) {
+    this.removingId = exemplarId;
+    this.removeError = '';
+    this.reservationsService.removeFromCart(exemplarId).subscribe({
+      next: () => {
+        this.removingId = null;
+        this.load();
+      },
+      error: (err) => {
+        this.removeError = err.error?.message ?? 'No se pudo eliminar el libro';
+        this.removingId = null;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  cancelReservation(id: number) {
-    this.cancellingId = id;
-    this.cancelError = '';
-    this.reservationsService.cancel(id).subscribe({
-      next: () => {
-        this.cancellingId = null;
-        this.load();
-      },
-      error: (err) => {
-        this.cancelError = err.error?.message ?? 'No se pudo cancelar la reserva';
-        this.cancellingId = null;
-        this.cdr.detectChanges();
+  checkout() {
+    if (this.cartItems.length === 0) return;
+    const items = this.cartItems.map(i => ({
+      exemplarId: i.exemplar.id,
+      title: i.exemplar.book.title,
+      author: i.exemplar.book.author,
+      price: Number(i.exemplar.book.price),
+    }));
+    this.router.navigate(['/checkout'], {
+      state: {
+        exemplarIds: items.map(i => i.exemplarId),
+        items,
+        total: this.cartTotal,
+        fromReservation: true,
       }
     });
   }
@@ -112,7 +101,7 @@ export class ReservationsComponent implements OnInit {
 
   timeLeft(expiresAt: string): string {
     const diff = new Date(expiresAt).getTime() - Date.now();
-    if (diff <= 0) return 'Expirada';
+    if (diff <= 0) return 'Expirado';
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     return h > 0 ? `${h}h ${m}m` : `${m}m`;

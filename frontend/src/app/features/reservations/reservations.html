@@ -4,83 +4,75 @@
 
   <div class="page-header">
     <div>
-      <h1>Mis Reservas</h1>
-      <p>Las reservas activas expiran en 24 horas</p>
+      <h1>Mi Carrito</h1>
+      <p *ngIf="cartExpiresAt">
+        Reservado · expira en
+        <span [class.expiry-urgent]="isUrgent(cartExpiresAt)">{{ timeLeft(cartExpiresAt) }}</span>
+      </p>
+      <p *ngIf="!cartExpiresAt && !loading">El carrito está vacío</p>
     </div>
-    <a [routerLink]="['/']" class="btn-back">← Volver al catálogo</a>
+    <a [routerLink]="['/']" class="btn-back">← Seguir comprando</a>
   </div>
 
   <!-- Loading -->
   <div class="loading" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Cargando reservas...</p>
+    <p>Cargando carrito...</p>
   </div>
 
   <p class="error-msg" *ngIf="error">{{ error }}</p>
-  <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
+  <p class="error-msg" *ngIf="removeError">{{ removeError }}</p>
 
   <ng-container *ngIf="!loading && !error">
 
-    <!-- ── Reservas activas ───────────────────────────── -->
-    <section class="section" *ngIf="active.length > 0">
-      <div class="section-header">
-        <h2 class="section-title">Activas <span class="badge">{{ active.length }}</span></h2>
-        <button class="btn-buy-selected"
-                [disabled]="selectedItems.size === 0"
-                (click)="buySelected()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <!-- ── Carrito con items ──────────────────────────── -->
+    <section class="section" *ngIf="cartItems.length > 0">
+
+      <div class="cart-list">
+        <div class="cart-item" *ngFor="let item of cartItems">
+          <div class="item-info">
+            <span class="item-code">{{ item.exemplar.uniqueCode }}</span>
+            <h3 class="item-title">{{ item.exemplar.book.title }}</h3>
+            <p class="item-author">{{ item.exemplar.book.author }}</p>
+          </div>
+          <div class="item-right">
+            <span class="item-price">{{ item.exemplar.book.price | currency:'COP':'$':'1.0-0' }}</span>
+            <button class="btn-remove"
+                    [disabled]="removingId === item.exemplar.id"
+                    (click)="removeItem(item.exemplar.id)"
+                    aria-label="Eliminar del carrito">
+              <span *ngIf="removingId === item.exemplar.id" class="btn-spinner"></span>
+              <svg *ngIf="removingId !== item.exemplar.id" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen y checkout -->
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span class="summary-label">{{ cartItems.length }} {{ cartItems.length === 1 ? 'libro' : 'libros' }}</span>
+          <span class="summary-total">{{ cartTotal | currency:'COP':'$':'1.0-0' }}</span>
+        </div>
+        <button class="btn-checkout" (click)="checkout()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
-          Comprar seleccionados
-          <span class="selected-count" *ngIf="selectedItems.size > 0">({{ selectedItems.size }})</span>
+          Proceder al pago
         </button>
-      </div>
-
-      <div class="reservations-list">
-        <div class="reservation-card active" *ngFor="let r of active">
-
-          <!-- Items con checkbox -->
-          <div class="reservation-items">
-            <label class="item-row"
-                   *ngFor="let item of r.items"
-                   [class.item-selected]="selectedItems.has(item.exemplar.id)">
-              <input type="checkbox"
-                     class="item-checkbox"
-                     [checked]="selectedItems.has(item.exemplar.id)"
-                     (change)="toggleItem(item.exemplar.id)" />
-              <div class="item-info">
-                <span class="item-code">{{ item.exemplar.uniqueCode }}</span>
-                <h3 class="item-title">{{ item.exemplar.book.title }}</h3>
-                <p class="item-author">{{ item.exemplar.book.author }}</p>
-                <span class="item-price">{{ item.exemplar.book.price | currency:'COP':'$':'1.0-0' }}</span>
-              </div>
-            </label>
-          </div>
-
-          <!-- Footer de la reserva -->
-          <div class="card-footer">
-            <div class="expiry-block">
-              <span class="expiry-label">Expira en</span>
-              <span class="expiry-time" [class.expiry-urgent]="isUrgent(r.expiresAt)">
-                {{ timeLeft(r.expiresAt) }}
-              </span>
-            </div>
-            <button class="btn-cancel"
-                    [disabled]="cancellingId === r.id"
-                    (click)="cancelReservation(r.id)">
-              <span *ngIf="cancellingId === r.id" class="btn-spinner"></span>
-              {{ cancellingId === r.id ? 'Cancelando...' : 'Cancelar reserva' }}
-            </button>
-          </div>
-
-        </div>
       </div>
     </section>
 
-    <!-- Sin reservas activas -->
-    <div class="empty-active" *ngIf="active.length === 0">
-      <p>No tienes reservas activas.</p>
+    <!-- Carrito vacío -->
+    <div class="empty-active" *ngIf="cartItems.length === 0">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      <p>Tu carrito está vacío.</p>
       <a [routerLink]="['/']" class="btn-browse">Explorar catálogo →</a>
     </div>
 
@@ -100,6 +92,7 @@
             <span class="status-badge" [class]="'status-' + r.status">
               {{ statusLabel(r.status) }}
             </span>
+            <span class="history-count" *ngIf="r.items.length > 1">{{ r.items.length }} libros</span>
           </div>
         </div>
       </div>

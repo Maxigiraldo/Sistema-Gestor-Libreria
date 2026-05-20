@@ -77,12 +77,13 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
-    path: 'reservations',
+    path: 'cart',
     loadComponent: () =>
       import('./features/reservations/reservations')
       .then(m => m.ReservationsComponent),
     canActivate: [authGuard]
   },
+  { path: 'reservations', redirectTo: 'cart', pathMatch: 'full' },
   {
     path: 'set-password',
     loadComponent: () =>

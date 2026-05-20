@@ -1,5 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -7,16 +7,17 @@ import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
 import { SearchService } from '../../core/services/search';
 import { MessagingService, ChatMessage } from '../../core/services/messaging';
+import { ReservationsService } from '../../core/services/reservations';
 import { ConfirmLogoutComponent } from '../modals/confirm-logout/confirm-logout';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ConfirmLogoutComponent],
+  imports: [CommonModule, AsyncPipe, FormsModule, RouterLink, ConfirmLogoutComponent],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
-export class NavbarComponent implements OnDestroy {
+export class NavbarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   showLogoutModal = false;
   searchQuery = '';
@@ -31,7 +32,14 @@ export class NavbarComponent implements OnDestroy {
     public auth: AuthService,
     private searchService: SearchService,
     private messagingService: MessagingService,
+    public cartService: ReservationsService,
   ) {}
+
+  ngOnInit() {
+    if (this.isClient) {
+      this.cartService.refreshCartCount();
+    }
+  }
 
   get user() {
     const token = localStorage.getItem('token');

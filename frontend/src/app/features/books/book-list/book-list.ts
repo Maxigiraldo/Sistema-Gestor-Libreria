@@ -35,9 +35,9 @@ export class BookListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private fetchTimeouts: ReturnType<typeof setTimeout>[] = [];
 
-  reservationMessage = '';
-  reservationError = '';
-  isReserving = false;
+  cartMessage = '';
+  cartError = '';
+  isAddingToCart = false;
   selectedGenre = '';
 
   recommendations: Book[] = [];
@@ -199,8 +199,8 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   openDetail(book: Book) {
     this.selectedBook = book;
-    this.reservationMessage = '';
-    this.reservationError = '';
+    this.cartMessage = '';
+    this.cartError = '';
     this.recommendations = [];
     this.fetchGoogleData(book);
     this.loadingRecs = true;
@@ -214,8 +214,8 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   closeDetail() {
     this.selectedBook = null;
-    this.reservationMessage = '';
-    this.reservationError = '';
+    this.cartMessage = '';
+    this.cartError = '';
   }
 
   toggleChatbot() {
@@ -254,24 +254,25 @@ export class BookListComponent implements OnInit, OnDestroy {
     this.selectedGenre = genre;
   }
 
-  reserveBook(book: Book) {
+  addToCart(book: Book) {
     const exemplar = book.exemplars.find(e => e.available);
     if (!exemplar) return;
 
-    this.isReserving = true;
-    this.reservationMessage = '';
-    this.reservationError = '';
+    this.isAddingToCart = true;
+    this.cartMessage = '';
+    this.cartError = '';
 
-    this.reservationsService.create([exemplar.id]).subscribe({
+    this.reservationsService.addToCart(exemplar.id).subscribe({
       next: () => {
-        this.reservationMessage = 'Reserva creada. Tienes 24 horas para recoger el libro.';
+        this.cartMessage = 'Libro agregado al carrito. Tienes 24 horas para completar la compra.';
         exemplar.available = false;
-        this.isReserving = false;
+        this.isAddingToCart = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.reservationError = err.error?.message ?? 'No se pudo crear la reserva';
-        this.isReserving = false;
+        this.cartError = err.error?.message ?? 'No se pudo agregar al carrito';
+        this.isAddingToCart = false;
+        this.cdr.detectChanges();
       }
     });
   }
