@@ -1,49 +1,95 @@
 <app-navbar />
 
-<div class="categories-layout">
-  <div class="categories-container">
+<div class="categories-page">
 
-    <div class="page-header">
-      <a [routerLink]="['/profile']" class="btn-back">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2.5">
-          <polyline points="15 18 9 12 15 6"/>
+  <!-- ── Header ───────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-text">
+      <h1>
+        Elige tus categorías favoritas
+        <svg class="heart-title" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
-        Volver al perfil
-      </a>
-      <h1>Categorías favoritas</h1>
-      <p class="subtitle">Selecciona los géneros que más te interesan</p>
+      </h1>
+      <p class="subtitle">Selecciona las categorías que más te interesan y personalizaremos tus recomendaciones</p>
     </div>
+    <a [routerLink]="['/profile']" class="btn-back">← Volver al perfil</a>
+  </div>
 
-    <div class="loading-wrap" *ngIf="loading">
-      <div class="spinner"></div>
+  <!-- ── Info callout ──────────────────────────── -->
+  <div class="info-callout" *ngIf="showTip">
+    <span class="info-icon">💡</span>
+    <div class="info-body">
+      <strong>¿Para qué sirve?</strong>
+      <span>Usamos esta sección para sugerirte libros que podrían ser de tu interés.</span>
     </div>
+    <button class="info-close" (click)="showTip = false" aria-label="Cerrar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
 
-    <div *ngIf="!loading">
-      <div class="genres-grid">
-        <button
-          *ngFor="let genre of allGenres"
-          class="genre-btn"
-          [class.selected]="isSelected(genre)"
-          (click)="toggle(genre)"
-          type="button"
-        >
-          {{ genre }}
-        </button>
+  <!-- ── Loading ───────────────────────────────── -->
+  <div class="loading-wrap" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- ── Grid ─────────────────────────────────── -->
+  <div class="genres-grid" *ngIf="!loading">
+    <button
+      *ngFor="let genre of allGenres"
+      class="genre-card"
+      [class.genre-card-selected]="isSelected(genre)"
+      [style.background-color]="getMeta(genre).bg"
+      (click)="toggle(genre)"
+      type="button"
+    >
+      <!-- Heart toggle -->
+      <div class="card-heart">
+        <svg width="18" height="18" viewBox="0 0 24 24"
+             [attr.fill]="isSelected(genre) ? '#ef4444' : 'none'"
+             [attr.stroke]="isSelected(genre) ? '#ef4444' : 'rgba(0,0,0,0.25)'"
+             stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
       </div>
 
-      <p class="selection-hint">{{ selected.size }} género(s) seleccionado(s)</p>
+      <span class="card-icon">{{ getMeta(genre).icon }}</span>
+      <h3 class="card-name" [style.color]="getMeta(genre).color">{{ genre }}</h3>
+      <p class="card-desc" [style.color]="getMeta(genre).color">{{ getMeta(genre).desc }}</p>
+    </button>
+  </div>
 
-      <div class="error-msg" *ngIf="error">{{ error }}</div>
-      <div class="success-msg" *ngIf="success">✅ {{ success }}</div>
+  <!-- Feedback messages -->
+  <p class="error-msg" *ngIf="error">{{ error }}</p>
+  <p class="success-msg" *ngIf="success">{{ success }}</p>
 
-      <div class="form-actions">
-        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
-        <button class="btn-primary" (click)="save()" [disabled]="saving">
-          {{ saving ? 'Guardando...' : 'Guardar preferencias' }}
-        </button>
+</div>
+
+<!-- ── Sticky bottom bar ─────────────────────── -->
+<div class="bottom-bar" *ngIf="!loading">
+  <div class="bottom-bar-inner">
+    <div class="bottom-left">
+      <span class="bottom-count">
+        Has seleccionado <strong>{{ selected.size }}</strong>
+        {{ selected.size === 1 ? 'categoría' : 'categorías' }}
+      </span>
+      <div class="selected-chips" *ngIf="selected.size > 0">
+        <span class="chip" *ngFor="let g of selectedArray">
+          {{ g }}
+          <button class="chip-remove" (click)="toggle(g)" aria-label="Quitar">×</button>
+        </span>
       </div>
     </div>
-
+    <button class="btn-save" (click)="save()" [disabled]="saving || selected.size === 0">
+      <span *ngIf="saving">Guardando...</span>
+      <ng-container *ngIf="!saving">
+        Guardar preferencias
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+        </svg>
+      </ng-container>
+    </button>
   </div>
 </div>
