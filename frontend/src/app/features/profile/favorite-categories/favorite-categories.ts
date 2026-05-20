@@ -8,30 +8,36 @@ interface GenreMeta {
   icon: string;
   desc: string;
   bg: string;
-  color: string;
 }
 
+/* 5-tone muted palette — all tints stay readable with #111827 text */
+const W = '#faf6f1'; // warm parchment
+const B = '#f0f5fb'; // paper blue
+const G = '#f1f8f4'; // soft sage
+const L = '#f5f2fb'; // whisper lavender
+const P = '#f8f3ef'; // aged paper
+
 const GENRE_META: Record<string, GenreMeta> = {
-  'Ficción':             { icon: '📖', desc: 'Mundos imaginarios que te llevan a otras realidades',        bg: '#fce7f3', color: '#9d174d' },
-  'No Ficción':          { icon: '🔍', desc: 'Conocimiento real, hechos y aprendizaje continuo',           bg: '#dbeafe', color: '#1e40af' },
-  'Ciencia Ficción':     { icon: '🚀', desc: 'Explora el futuro, el espacio y la tecnología',              bg: '#ede9fe', color: '#5b21b6' },
-  'Fantasía':            { icon: '🧙', desc: 'Magia, criaturas y mundos llenos de posibilidades',          bg: '#d1fae5', color: '#065f46' },
-  'Romance':             { icon: '💕', desc: 'Historias de amor que te dejarán sin aliento',               bg: '#ffe4e6', color: '#9f1239' },
-  'Misterio':            { icon: '🔎', desc: 'Secretos, enigmas y giros que nadie predijo',                bg: '#f3e8ff', color: '#6b21a8' },
-  'Terror':              { icon: '👻', desc: 'Relatos que te harán leer con la luz encendida',             bg: '#1f2937', color: '#f9fafb' },
-  'Thriller':            { icon: '⚡', desc: 'Adrenalina, tensión y giros completamente inesperados',      bg: '#fef3c7', color: '#92400e' },
-  'Historia':            { icon: '🏛️', desc: 'Descubre los eventos que moldearon el mundo',               bg: '#fef9c3', color: '#78350f' },
-  'Biografía':           { icon: '🧑', desc: 'Vidas reales que inspiran, enseñan y emocionan',            bg: '#e0f2fe', color: '#0c4a6e' },
-  'Autoayuda':           { icon: '🌟', desc: 'Herramientas para crecer y ser tu mejor versión',           bg: '#fefce8', color: '#713f12' },
-  'Ciencia':             { icon: '🔬', desc: 'Explora los misterios del universo y la naturaleza',         bg: '#dcfce7', color: '#14532d' },
-  'Tecnología':          { icon: '💻', desc: 'El mundo digital y la innovación del mañana',               bg: '#e0f2fe', color: '#075985' },
-  'Arte':                { icon: '🎨', desc: 'Creatividad, expresión y la historia del arte',             bg: '#fdf4ff', color: '#7e22ce' },
-  'Literatura Infantil': { icon: '🧸', desc: 'Aventuras y cuentos mágicos para los más pequeños',         bg: '#fff7ed', color: '#9a3412' },
-  'Poesía':              { icon: '✍️', desc: 'Palabras que viven para siempre en el corazón',             bg: '#ffedd5', color: '#9a3412' },
-  'Filosofía':           { icon: '💭', desc: 'Preguntas profundas sobre la existencia y la mente',         bg: '#f5f3ff', color: '#581c87' },
-  'Economía':            { icon: '📊', desc: 'Mercados, finanzas y el pulso del mundo moderno',           bg: '#ecfdf5', color: '#064e3b' },
-  'Derecho':             { icon: '⚖️', desc: 'Normas, justicia y los fundamentos de la ley',             bg: '#fef2f2', color: '#7f1d1d' },
-  'Medicina':            { icon: '🩺', desc: 'Salud, bienestar y los secretos del cuerpo humano',         bg: '#f0fdf4', color: '#14532d' },
+  'Ficción':             { icon: '📖', desc: 'Mundos imaginarios que llevan a otras realidades',       bg: W },
+  'No Ficción':          { icon: '💡', desc: 'Conocimiento, hechos reales y aprendizaje continuo',     bg: B },
+  'Ciencia Ficción':     { icon: '🚀', desc: 'El futuro, el espacio y los límites de la tecnología',   bg: L },
+  'Fantasía':            { icon: '✨', desc: 'Magia, criaturas y mundos llenos de posibilidades',      bg: G },
+  'Romance':             { icon: '📚', desc: 'Historias de amor que no podrás dejar de leer',          bg: W },
+  'Misterio':            { icon: '🔍', desc: 'Secretos y enigmas que nadie podía predecir',            bg: L },
+  'Terror':              { icon: '🌑', desc: 'Relatos que harán que leas con la luz encendida',        bg: P },
+  'Thriller':            { icon: '⚡', desc: 'Adrenalina, tensión y giros inesperados',                bg: P },
+  'Historia':            { icon: '📜', desc: 'Descubre los eventos que moldearon el mundo',            bg: W },
+  'Biografía':           { icon: '✍️', desc: 'Vidas reales que inspiran, enseñan y emocionan',        bg: B },
+  'Autoayuda':           { icon: '🌿', desc: 'Herramientas para crecer y ser tu mejor versión',       bg: G },
+  'Ciencia':             { icon: '🔬', desc: 'Los misterios del universo y la naturaleza',             bg: B },
+  'Tecnología':          { icon: '💻', desc: 'El mundo digital y la innovación del mañana',           bg: B },
+  'Arte':                { icon: '🎨', desc: 'Creatividad, expresión e historia del arte',            bg: L },
+  'Literatura Infantil': { icon: '🧸', desc: 'Aventuras y cuentos mágicos para los más pequeños',    bg: G },
+  'Poesía':              { icon: '🌸', desc: 'Palabras que viven para siempre en el corazón',         bg: W },
+  'Filosofía':           { icon: '💭', desc: 'Preguntas profundas sobre la existencia y la mente',    bg: L },
+  'Economía':            { icon: '📊', desc: 'Mercados, finanzas y el pulso del mundo moderno',       bg: B },
+  'Derecho':             { icon: '⚖️', desc: 'Normas, justicia y los fundamentos de la ley',         bg: P },
+  'Medicina':            { icon: '🩺', desc: 'Salud, bienestar y los secretos del cuerpo humano',    bg: G },
 };
 
 const ALL_GENRES = Object.keys(GENRE_META);
@@ -73,7 +79,7 @@ export class FavoriteCategoriesComponent implements OnInit {
   }
 
   getMeta(genre: string): GenreMeta {
-    return GENRE_META[genre] ?? { icon: '📚', desc: '', bg: '#f3f4f6', color: '#374151' };
+    return GENRE_META[genre] ?? { icon: '📚', desc: '', bg: '#f8f3ef' };
   }
 
   get selectedArray(): string[] {
