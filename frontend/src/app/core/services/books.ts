@@ -52,4 +52,12 @@ export class BooksService {
   adjustStock(id: number, delta: number) {
     return this.http.put<Book>(`${this.base}/books/${id}/exemplars/stock`, { delta });
   }
+
+  getRecommendations(bookId: number) {
+    return this.http.get<Book[]>(`${this.base}/recommendations/book/${bookId}`);
+  }
+
+  getMyRecommendations() {
+    return this.http.get<Book[]>(`${this.base}/recommendations/for-me`);
+  }
 }

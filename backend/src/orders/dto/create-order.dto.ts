@@ -1,5 +1,11 @@
-import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { DeliveryType } from '../order.entity';
+
+export enum CheckoutPaymentMethod {
+  CARD = 'tarjeta',
+  BALANCE = 'saldo',
+  MIXED = 'mixto',
+}
 
 export class CreateOrderDto {
   @IsArray()
@@ -11,5 +17,41 @@ export class CreateOrderDto {
 
   @IsString()
   @IsOptional()
-  shippingAddress: string;
+  shippingAddress?: string;
+
+  @IsEnum(CheckoutPaymentMethod)
+  paymentMethod: CheckoutPaymentMethod;
+
+  // Card data — required when method is 'tarjeta' or 'mixto' (unless using savedCardId)
+  @IsOptional()
+  @IsString()
+  cardNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  cardHolderName?: string;
+
+  @IsOptional()
+  @IsString()
+  cardExpiry?: string;
+
+  @IsOptional()
+  @IsString()
+  cardCvv?: string;
+
+  @IsOptional()
+  @IsString()
+  cardType?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  saveCard?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  savedCardId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  fromReservation?: boolean;
 }

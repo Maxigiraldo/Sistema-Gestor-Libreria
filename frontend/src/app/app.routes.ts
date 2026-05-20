@@ -40,7 +40,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin/admin-panel/admin-panel')
       .then(m => m.AdminPanelComponent),
-    canActivate: [authGuard]  // el guard de rol ROOT lo manejas en el componente
+    canActivate: [authGuard, adminGuard]
   },
   {
     path: 'admin/inventory',
@@ -88,6 +88,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/set-password/set-password')
       .then(m => m.SetPasswordComponent)
+  },
+  {
+    path: 'devolucion/:id',
+    loadComponent: () =>
+      import('./features/returns/return-status/return-status')
+      .then(m => m.ReturnStatusComponent),
+    canActivate: [authGuard]
   },
   { path: '**', redirectTo: '' }
 ];

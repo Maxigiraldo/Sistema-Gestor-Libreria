@@ -19,6 +19,29 @@ export class MailService {
     });
   }
 
+  async sendReturnQr(email: string, username: string, orderId: number, returnId: number, qrCode: string) {
+    await this.transporter.sendMail({
+      from: this.config.get('MAIL_FROM') ?? 'Librería <no-reply@libreria.com>',
+      to: email,
+      subject: `Devolución #${returnId} — Código QR de seguimiento`,
+      html: `
+        <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;border-left:4px solid #059669">
+          <h2 style="font-size:22px;font-weight:400;margin-bottom:8px">Solicitud de devolución recibida</h2>
+          <p style="color:#4b5563;line-height:1.6">Hola <strong>${username}</strong>, hemos recibido tu solicitud de devolución para el pedido <strong>#${orderId}</strong>.</p>
+          <p style="color:#4b5563;line-height:1.6">Guarda este código QR — lo necesitarás para el seguimiento y entrega del producto:</p>
+          <div style="text-align:center;margin:24px 0">
+            <img src="${qrCode}" alt="QR Devolución #${returnId}" style="max-width:200px;border:1px solid #e5e7eb;padding:12px" />
+          </div>
+          <p style="font-size:13px;color:#6b7280">Referencia: Devolución <strong>#${returnId}</strong></p>
+          <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
+          <p style="font-size:11px;color:#9ca3af">Tienes 8 días desde la entrega para completar la devolución.</p>
+        </div>
+      `,
+    }).catch(err => {
+      this.logger.warn('No se pudo enviar correo de devolución:', err.message);
+    });
+  }
+
   async sendAdminWelcome(email: string, username: string, token: string) {
     const frontendUrl = this.config.get('FRONTEND_URL') ?? 'http://localhost:4200';
     const link = `${frontendUrl}/set-password?token=${token}`;

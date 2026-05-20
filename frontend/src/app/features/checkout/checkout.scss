@@ -1,7 +1,19 @@
 .checkout-page {
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
   padding: 40px 32px 80px;
+}
+
+.from-reservation-badge {
+  font-size: 11px;
+  padding: 2px 9px;
+  background: #dbeafe;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+  margin-left: 10px;
+  vertical-align: middle;
 }
 
 .page-header {
@@ -288,3 +300,265 @@
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
+/* ── Payment section ───────────────────────────── */
+
+.balance-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.balance-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+
+.balance-amount {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: #111827;
+  font-weight: 700;
+}
+
+.balance-link {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  transition: color 0.2s;
+  &:hover { color: #111827; }
+}
+
+.payment-tabs {
+  display: flex;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+}
+
+.payment-tab {
+  flex: 1;
+  padding: 11px 12px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+
+  & + & { border-left: 1px solid #e5e7eb; }
+
+  &.active {
+    background: #111827;
+    color: #fff;
+    svg { stroke: #fff; }
+  }
+
+  &:hover:not(.active):not(:disabled) {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+}
+
+.payment-breakdown {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #374151;
+  padding: 4px 0;
+  &:first-child { color: #059669; }
+  &:last-child { font-weight: 600; }
+}
+
+.payment-warning {
+  font-size: 13px;
+  color: #92400e;
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+
+  a { color: #b45309; font-weight: 600; text-decoration: underline; }
+}
+
+.saved-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 10px;
+}
+
+.saved-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.saved-card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: border-color 0.15s;
+
+  &.selected { border-color: #111827; }
+  &:hover { border-color: #9ca3af; }
+
+  input[type="radio"] { accent-color: #111827; }
+}
+
+.saved-card-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-brand-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.card-digits {
+  font-size: 13px;
+  color: #374151;
+  font-family: monospace;
+}
+
+.card-type-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  background: #f3f4f6;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.new-card-label {
+  font-size: 13px;
+  color: #374151;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-number-wrap {
+  position: relative;
+}
+
+.card-brand-display {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  font-weight: 700;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  pointer-events: none;
+}
+
+.card-input {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  color: #111827;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  background: #fff;
+
+  &:focus { border-color: #111827; }
+  &::placeholder { color: #9ca3af; }
+}
+
+.card-number-input { padding-right: 100px; }
+
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.save-card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+
+  input[type="checkbox"] { accent-color: #111827; width: 14px; height: 14px; }
+}
+
+.card-error {
+  font-size: 13px;
+  color: #991b1b;
+  background: #fee2e2;
+  border-left: 3px solid #dc2626;
+  padding: 10px 14px;
+}
+
+.card-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.card-hint-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.hint-ok { color: #059669; font-weight: 600; white-space: nowrap; }
+.hint-err { color: #dc2626; font-weight: 600; white-space: nowrap; }
+.hint-mono { font-family: monospace; color: #111827; letter-spacing: .05em; }
+.hint-label { color: #9ca3af; font-style: italic; }

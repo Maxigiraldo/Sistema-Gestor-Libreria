@@ -8,9 +8,13 @@ import { Repository } from 'typeorm';
 import { Order, OrderStatus, DeliveryType } from './order.entity';
 import { OrderDetail } from './order-detail.entity';
 import { Exemplar } from '../exemplars/exemplar.entity';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { Reservation, ReservationStatus } from '../reservations/reservation.entity';
+import { ReservationItem } from '../reservations/reservation-item.entity';
+import { CreateOrderDto, CheckoutPaymentMethod } from './dto/create-order.dto';
 import { ShippingService } from '../shipping/shipping.service';
 import { ShippingType } from '../shipping/shipping.entity';
+import { PaymentsService } from '../payments/payments.service';
+import { In } from 'typeorm';
 
 @Injectable()
 export class OrdersService {
@@ -21,16 +25,35 @@ export class OrdersService {
     private orderDetailRepository: Repository<OrderDetail>,
     @InjectRepository(Exemplar)
     private exemplarRepository: Repository<Exemplar>,
+    @InjectRepository(Reservation)
+    private reservationRepository: Repository<Reservation>,
+    @InjectRepository(ReservationItem)
+    private reservationItemRepository: Repository<ReservationItem>,
     private shippingService: ShippingService,
+    private paymentsService: PaymentsService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, userId: number) {
-    const { exemplarIds, deliveryType, shippingAddress } = createOrderDto;
+    const {
+      exemplarIds,
+      deliveryType,
+      shippingAddress,
+      paymentMethod,
+      cardNumber,
+      cardHolderName,
+      cardExpiry,
+      cardType,
+      saveCard,
+      savedCardId,
+      fromReservation,
+    } = createOrderDto;
 
     const exemplars = await Promise.all(
       exemplarIds.map(async (id) => {
+        // Desde reserva: el ejemplar ya está bloqueado (available=false), buscar solo por ID
+        const where = fromReservation ? { id } : { id, available: true };
         const exemplar = await this.exemplarRepository.findOne({
-          where: { id, available: true },
+          where,
           relations: ['book'],
         });
         if (!exemplar) {
@@ -41,6 +64,15 @@ export class OrdersService {
     );
 
     const total = exemplars.reduce((sum, e) => sum + Number(e.book.price), 0);
+
+    // Process payment before creating order — throws if payment fails
+    await this.paymentsService.processOrderPayment(
+      userId,
+      total,
+      paymentMethod,
+      { cardNumber, cardHolderName, cardExpiry, cardType, saveCard },
+      savedCardId,
+    );
 
     const order = this.orderRepository.create({
       client: { id: userId },
@@ -60,8 +92,25 @@ export class OrdersService {
         subtotal: exemplar.book.price,
       });
       await this.orderDetailRepository.save(detail);
-      exemplar.available = false;
-      await this.exemplarRepository.save(exemplar);
+      if (!fromReservation) {
+        exemplar.available = false;
+        await this.exemplarRepository.save(exemplar);
+      }
+    }
+
+    // Marcar las reservas de estos ejemplares como CONVERTED para que el cron no las libere
+    if (fromReservation) {
+      const items = await this.reservationItemRepository.find({
+        where: { exemplar: { id: In(exemplarIds) } },
+        relations: ['reservation'],
+      });
+      const reservationIds = [...new Set(items.map((i) => i.reservation.id))];
+      if (reservationIds.length > 0) {
+        await this.reservationRepository.update(
+          { id: In(reservationIds), status: ReservationStatus.ACTIVE },
+          { status: ReservationStatus.CONVERTED },
+        );
+      }
     }
 
     const shippingType =
@@ -70,7 +119,7 @@ export class OrdersService {
     await this.shippingService.create({
       orderId: savedOrder.id,
       type: shippingType,
-      destinationAddress: shippingAddress,
+      destinationAddress: shippingAddress ?? '',
     });
 
     return {
@@ -84,6 +133,7 @@ export class OrdersService {
     return this.orderRepository.find({
       where: { client: { id: userId } },
       relations: ['details', 'details.exemplar', 'details.exemplar.book'],
+      order: { createdAt: 'DESC' },
     });
   }
 

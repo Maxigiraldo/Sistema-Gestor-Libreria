@@ -26,6 +26,16 @@ export interface CreateOrderData {
   exemplarIds: number[];
   deliveryType: 'home_delivery' | 'store_pickup';
   shippingAddress?: string;
+  paymentMethod: 'tarjeta' | 'saldo' | 'mixto';
+  // Card data (when paymentMethod is 'tarjeta' or 'mixto')
+  cardNumber?: string;
+  cardHolderName?: string;
+  cardExpiry?: string;
+  cardCvv?: string;
+  cardType?: 'credito' | 'debito';
+  saveCard?: boolean;
+  savedCardId?: number;
+  fromReservation?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })

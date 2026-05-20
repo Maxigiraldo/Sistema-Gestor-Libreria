@@ -1,0 +1,105 @@
+<app-navbar />
+
+<div class="status-page">
+
+  <div class="status-loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Cargando estado...</p>
+  </div>
+
+  <div class="status-error" *ngIf="error">
+    <p>{{ error }}</p>
+    <a [routerLink]="['/orders']" class="btn-back">← Volver a pedidos</a>
+  </div>
+
+  <ng-container *ngIf="!loading && !error && ret">
+
+    <div class="status-header">
+      <div>
+        <p class="status-label">SEGUIMIENTO DE DEVOLUCIÓN</p>
+        <h1 class="status-title">Solicitud #{{ ret.id }}</h1>
+        <p class="status-order">Pedido #{{ ret.order.id }}</p>
+      </div>
+      <a [routerLink]="['/orders']" class="btn-back">← Mis pedidos</a>
+    </div>
+
+    <!-- Estado actual destacado -->
+    <div class="current-status" [class]="'cs-' + ret.status">
+      <div class="cs-icon">
+        <ng-container *ngIf="ret.status === 'pendiente'">⏳</ng-container>
+        <ng-container *ngIf="ret.status === 'aprobada'">✅</ng-container>
+        <ng-container *ngIf="ret.status === 'rechazada'">❌</ng-container>
+        <ng-container *ngIf="ret.status === 'completada'">🎉</ng-container>
+      </div>
+      <div class="cs-body">
+        <span class="cs-state">{{ statusLabels[ret.status] }}</span>
+        <span class="cs-desc" *ngIf="ret.status === 'pendiente'">
+          Tu solicitud está en revisión por el administrador.
+        </span>
+        <span class="cs-desc" *ngIf="ret.status === 'aprobada'">
+          Tu devolución fue aprobada.
+          {{ ret.refundMethod === 'balance'
+            ? 'El importe ya fue acreditado a tu saldo de cuenta.'
+            : 'El reembolso a tu tarjeta se procesará en 7 días hábiles.' }}
+        </span>
+        <span class="cs-desc" *ngIf="ret.status === 'rechazada'">
+          La solicitud fue rechazada. Contacta con la tienda para más información.
+        </span>
+        <span class="cs-desc" *ngIf="ret.status === 'completada'">
+          El proceso de devolución ha finalizado correctamente.
+        </span>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-track" *ngIf="!isRejected">
+      <div class="progress-step" [class.reached]="stepReached('pendiente')">
+        <div class="p-dot"></div>
+        <span class="p-label">Solicitada</span>
+      </div>
+      <div class="progress-line" [class.reached]="stepReached('aprobada')"></div>
+      <div class="progress-step" [class.reached]="stepReached('aprobada')">
+        <div class="p-dot"></div>
+        <span class="p-label">Aprobada</span>
+      </div>
+      <div class="progress-line" [class.reached]="stepReached('completada')"></div>
+      <div class="progress-step" [class.reached]="stepReached('completada')">
+        <div class="p-dot"></div>
+        <span class="p-label">Completada</span>
+      </div>
+    </div>
+
+    <!-- Detalle de la solicitud -->
+    <div class="detail-card">
+      <h2 class="detail-heading">Detalle de la solicitud</h2>
+
+      <div class="detail-row">
+        <span class="detail-key">Motivo</span>
+        <span class="detail-val">{{ causeLabels[ret.cause] }}</span>
+      </div>
+
+      <div class="detail-row" *ngIf="ret.additionalDescription">
+        <span class="detail-key">Descripción</span>
+        <span class="detail-val">{{ ret.additionalDescription }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Método de reembolso</span>
+        <span class="detail-val">
+          {{ ret.refundMethod === 'balance' ? 'Saldo de cuenta (inmediato)' : 'Tarjeta original (7 días hábiles)' }}
+        </span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Fecha de solicitud</span>
+        <span class="detail-val">{{ ret.createdAt | date:'d MMM yyyy, HH:mm' }}</span>
+      </div>
+
+      <div class="detail-row">
+        <span class="detail-key">Plazo límite</span>
+        <span class="detail-val">{{ ret.deadlineDate | date:'d MMM yyyy' }}</span>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

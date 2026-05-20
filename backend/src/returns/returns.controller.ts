@@ -38,6 +38,22 @@ export class ReturnsController {
     return this.returnsService.findByUser(req.user.sub);
   }
 
+  // Cliente consulta el detalle de una de sus devoluciones
+  @Get(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.CLIENT)
+  findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.returnsService.findById(id, req.user.sub);
+  }
+
+  // Admin ve todas las devoluciones
+  @Get('admin/all')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.ROOT)
+  findAll() {
+    return this.returnsService.findAll();
+  }
+
   // Solo admin actualiza estado de devolución
   @Put(':id/status')
   @UseGuards(RolesGuard)

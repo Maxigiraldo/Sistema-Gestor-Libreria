@@ -1,8 +1,9 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Book } from './book.entity';
 import { Exemplar } from '../exemplars/exemplar.entity';
+import { ReservationItem } from '../reservations/reservation-item.entity';
 import { CreateBookDto } from './dto/create-book.dto';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,6 +14,8 @@ export class BooksService {
     private bookRepository: Repository<Book>,
     @InjectRepository(Exemplar)
     private exemplarRepository: Repository<Exemplar>,
+    @InjectRepository(ReservationItem)
+    private reservationItemRepository: Repository<ReservationItem>,
   ) {}
 
   async create(createBookDto: CreateBookDto) {
@@ -100,8 +103,25 @@ export class BooksService {
           `Solo hay ${available.length} ejemplar(es) disponibles para retirar`,
         );
       }
-      const targets = available.slice(0, toRemove);
-      await this.exemplarRepository.remove(targets);
+
+      // Solo marcar como no disponibles los ejemplares que no están en reservas activas
+      const availableIds = available.map((e) => e.id);
+      const reservedItems = await this.reservationItemRepository.find({
+        where: { exemplar: { id: In(availableIds) } },
+        relations: ['exemplar'],
+      });
+      const reservedIds = new Set(reservedItems.map((ri) => ri.exemplar.id));
+      const freeExemplars = available.filter((e) => !reservedIds.has(e.id));
+
+      if (freeExemplars.length < toRemove) {
+        throw new BadRequestException(
+          `Solo hay ${freeExemplars.length} ejemplar(es) libres (sin reserva activa) para retirar`,
+        );
+      }
+
+      const targets = freeExemplars.slice(0, toRemove);
+      targets.forEach((e) => { e.available = false; e.outOfStock = true; });
+      await this.exemplarRepository.save(targets);
     }
 
     return this.findOne(id);

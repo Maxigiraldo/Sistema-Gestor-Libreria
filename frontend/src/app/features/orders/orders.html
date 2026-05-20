@@ -10,7 +10,6 @@
     <a [routerLink]="['/']" class="btn-back">← Catálogo</a>
   </div>
 
-  <!-- Loading -->
   <div class="loading" *ngIf="loading">
     <div class="spinner"></div>
     <p>Cargando pedidos...</p>
@@ -19,13 +18,11 @@
   <p class="error-msg" *ngIf="error">{{ error }}</p>
   <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
 
-  <!-- Sin pedidos -->
   <div class="empty-state" *ngIf="!loading && !error && orders.length === 0">
     <p>No tienes pedidos aún.</p>
     <a [routerLink]="['/']" class="btn-browse">Explorar catálogo →</a>
   </div>
 
-  <!-- Lista de pedidos -->
   <div class="orders-list" *ngIf="!loading && !error">
 
     <div class="order-card" *ngFor="let order of orders" [class.cancelled]="order.status === 'cancelled'">
@@ -40,14 +37,19 @@
             {{ statusLabel(order.status) }}
           </span>
           <span class="delivery-badge">{{ deliveryLabel(order.deliveryType) }}</span>
+          <!-- Return badge -->
+          <span class="return-badge" *ngIf="getReturnForOrder(order.id) as ret"
+                [class]="'return-' + ret.status">
+            Devolución: {{ returnStatusLabel(ret.status) }}
+          </span>
         </div>
       </div>
 
-      <div class="order-items" *ngIf="order.details?.length">
+      <div class="order-items" *ngIf="order.details.length">
         <div class="order-item" *ngFor="let d of order.details">
-          <span class="item-code">{{ d.exemplar?.uniqueCode }}</span>
-          <span class="item-title">{{ d.exemplar?.book?.title }}</span>
-          <span class="item-author">{{ d.exemplar?.book?.author }}</span>
+          <span class="item-code">{{ d.exemplar.uniqueCode }}</span>
+          <span class="item-title">{{ d.exemplar.book.title }}</span>
+          <span class="item-author">{{ d.exemplar.book.author }}</span>
           <span class="item-price">{{ +d.unitPrice | currency:'COP':'$':'1.0-0' }}</span>
         </div>
       </div>
@@ -67,7 +69,14 @@
             {{ isShippingExpanded(order.id) ? 'Ocultar envío' : 'Ver envío' }}
           </button>
 
-          <button *ngIf="order.status === 'confirmed'"
+          <!-- Return button (only for delivered orders within 8 days) -->
+          <button *ngIf="canReturn(order) && !getReturnForOrder(order.id)"
+                  class="btn-return"
+                  (click)="requestReturn(order.id)">
+            Solicitar devolución
+          </button>
+
+          <button *ngIf="order.status === 'confirmed' && !isDelivered(order.id)"
                   class="btn-cancel"
                   [disabled]="cancellingId === order.id"
                   (click)="requestCancel(order.id)">
@@ -77,7 +86,7 @@
         </div>
       </div>
 
-      <!-- Panel de envío (expandible) -->
+      <!-- Shipping panel (expandible) -->
       <div class="shipping-panel" *ngIf="order.status === 'confirmed' && isShippingExpanded(order.id)">
 
         <div class="shipping-loading" *ngIf="isShippingLoading(order.id)">
@@ -126,7 +135,7 @@
 
   </div>
 
-  <!-- Modal confirmación de cancelación -->
+  <!-- Modal: Confirmar cancelación -->
   <div class="confirm-backdrop" *ngIf="confirmCancelId" (click)="confirmCancelId = null">
     <div class="confirm-modal" (click)="$event.stopPropagation()">
       <h3>¿Cancelar pedido #{{ confirmCancelId }}?</h3>
@@ -134,6 +143,87 @@
       <div class="confirm-actions">
         <button class="btn-outline" (click)="confirmCancelId = null">Volver</button>
         <button class="btn-confirm-cancel" (click)="confirmCancel()">Sí, cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: QR de devolución -->
+  <div class="confirm-backdrop" *ngIf="returnQrCode" (click)="returnQrCode = null">
+    <div class="confirm-modal qr-modal" (click)="$event.stopPropagation()">
+      <h3>Devolución registrada — Pedido #{{ returnQrOrderId }}</h3>
+      <p>
+        Tu solicitud fue recibida. Guarda este código QR para el seguimiento
+        y preséntalo al devolver el producto.
+        <strong>También te lo enviamos al correo.</strong>
+      </p>
+      <div class="qr-wrapper">
+        <img [src]="returnQrCode" alt="Código QR de devolución" class="qr-img" />
+        <p class="qr-caption">Código QR de seguimiento</p>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-confirm-return" (click)="returnQrCode = null">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Solicitar devolución -->
+  <div class="confirm-backdrop" *ngIf="returnOrderId" (click)="returnOrderId = null">
+    <div class="confirm-modal return-modal" (click)="$event.stopPropagation()">
+      <h3>Solicitar devolución — Pedido #{{ returnOrderId }}</h3>
+      <p>Tienes 8 días desde la entrega para solicitar una devolución.</p>
+
+      <div class="return-form">
+        <label class="return-label">Motivo de devolución *</label>
+        <select class="return-select" [(ngModel)]="returnCause">
+          <option *ngFor="let c of returnCauses" [value]="c.value">{{ c.label }}</option>
+        </select>
+
+        <label class="return-label">
+          Descripción adicional
+          <span *ngIf="isDescriptionRequired()" class="required-mark"> *</span>
+        </label>
+        <textarea class="return-textarea"
+                  [(ngModel)]="returnDescription"
+                  [placeholder]="isDescriptionRequired() ? 'Describe el motivo de devolución (obligatorio)...' : 'Describe el problema con más detalle (opcional)...'"
+                  [class.required-empty]="isDescriptionRequired() && !returnDescription.trim()"
+                  rows="3">
+        </textarea>
+        <p class="return-hint" *ngIf="isDescriptionRequired() && !returnDescription.trim()">
+          Indica el motivo específico para continuar.
+        </p>
+
+        <p class="error-msg return-error" *ngIf="returnError">{{ returnError }}</p>
+        <label class="return-label">Método de reembolso *</label>
+        <div class="refund-options">
+          <label class="refund-option" [class.selected]="returnRefundMethod === 'balance'">
+            <input type="radio" name="refundMethod" value="balance" [(ngModel)]="returnRefundMethod" />
+            <div class="refund-option-content">
+              <span class="refund-option-title">Saldo de cuenta</span>
+              <span class="refund-option-desc">Inmediato al aprobarse la devolución</span>
+            </div>
+          </label>
+          <label class="refund-option" [class.selected]="returnRefundMethod === 'card'">
+            <input type="radio" name="refundMethod" value="card" [(ngModel)]="returnRefundMethod" />
+            <div class="refund-option-content">
+              <span class="refund-option-title">Tarjeta original</span>
+              <span class="refund-option-desc">7 días hábiles desde la aprobación</span>
+            </div>
+          </label>
+        </div>
+
+        <p class="return-info">
+          Al confirmar, recibirás un código QR para seguimiento de tu devolución.
+        </p>
+      </div>
+
+      <div class="confirm-actions">
+        <button class="btn-outline" (click)="returnOrderId = null">Cancelar</button>
+        <button class="btn-confirm-return"
+                [disabled]="!canConfirmReturn()"
+                (click)="confirmReturn()">
+          <span *ngIf="returningId === returnOrderId" class="btn-spinner"></span>
+          {{ returningId === returnOrderId ? 'Enviando...' : 'Confirmar devolución' }}
+        </button>
       </div>
     </div>
   </div>

@@ -15,18 +15,21 @@
     <ng-container *ngIf="user; else guestActions">
 
       <!-- Admin links -->
-      <a *ngIf="user.role === 'root'"
-         [routerLink]="['/admin']"
-         class="btn-admin">⚙️ Panel admin</a>
-
-      <a *ngIf="user.role === 'administrator'"
-         [routerLink]="['/admin/inventory']"
-         class="btn-inventory">📦 Inventario</a>
+      <a *ngIf="user.role === 'root'"     [routerLink]="['/admin']" class="btn-admin">⚙️ Panel admin</a>
+      <a *ngIf="user.role === 'administrator'" [routerLink]="['/admin']" class="btn-admin">⚙️ Panel admin</a>
 
       <!-- Client links -->
       <ng-container *ngIf="user.role === 'client'">
-        <a [routerLink]="['/orders']" class="btn-reservations">📦 Pedidos</a>
+        <a [routerLink]="['/orders']"      class="btn-reservations">📦 Pedidos</a>
         <a [routerLink]="['/reservations']" class="btn-reservations">📋 Reservas</a>
+
+        <!-- Botón chat soporte -->
+        <button class="btn-chat" (click)="toggleChat()" [class.btn-chat-active]="chatOpen" aria-label="Chat con soporte">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Soporte
+        </button>
       </ng-container>
 
       <a [routerLink]="['/profile']" class="user-chip">
@@ -38,11 +41,59 @@
     </ng-container>
 
     <ng-template #guestActions>
-      <a [routerLink]="['/login']" class="btn-outline">Iniciar sesión</a>
+      <a [routerLink]="['/login']"    class="btn-outline">Iniciar sesión</a>
       <a [routerLink]="['/register']" class="btn-primary">Registrarse</a>
     </ng-template>
   </div>
 </nav>
+
+<!-- ── Panel chat (fixed, visible desde cualquier página) ── -->
+<div class="chat-panel" [class.chat-panel-open]="chatOpen" *ngIf="isClient">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span>Chat con soporte</span>
+    </div>
+    <button class="chat-close" (click)="closeChat()" aria-label="Cerrar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="chat-messages">
+    <div class="chat-empty" *ngIf="chatMessages.length === 0">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <p>¿Tienes dudas? Escríbenos, un administrador te responderá pronto.</p>
+    </div>
+    <div *ngFor="let msg of chatMessages"
+         class="bubble"
+         [class.bubble-mine]="msg.senderRole === 'client'"
+         [class.bubble-admin]="msg.senderRole !== 'client'">
+      <span class="bubble-sender" *ngIf="msg.senderRole !== 'client'">{{ msg.senderName }}</span>
+      <p class="bubble-text">{{ msg.content }}</p>
+      <span class="bubble-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <input class="chat-input"
+           [(ngModel)]="chatInput"
+           placeholder="Escribe tu mensaje..."
+           (keydown.enter)="sendMessage()"
+           [disabled]="sendingChat" />
+    <button class="chat-send" (click)="sendMessage()" [disabled]="!chatInput.trim() || sendingChat">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
 
 <app-confirm-logout
   *ngIf="showLogoutModal"

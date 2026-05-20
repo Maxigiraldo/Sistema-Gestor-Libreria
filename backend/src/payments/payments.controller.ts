@@ -48,4 +48,9 @@ export class PaymentsController {
   processPayment(@Body() createPaymentDto: CreatePaymentDto, @Request() req) {
     return this.paymentsService.processPayment(createPaymentDto, req.user.sub);
   }
+
+  @Post('balance/topup')
+  topup(@Body('amount') amount: number, @Request() req) {
+    return this.paymentsService.topup(req.user.sub, Number(amount));
+  }
 }
