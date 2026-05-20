@@ -1,53 +1,113 @@
-<aside class="sidebar" [class.sidebar-collapsed]="collapsed">
+<aside class="sidebar">
+
+  <!-- Header -->
   <div class="sidebar-header">
-    <button class="collapse-btn" (click)="collapsed = !collapsed" [attr.aria-expanded]="!collapsed" aria-label="Mostrar u ocultar filtros">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline *ngIf="!collapsed" points="18 15 12 9 6 15"/>
-        <polyline *ngIf="collapsed"  points="6 9 12 15 18 9"/>
+    <h3 class="sidebar-title">Filtros</h3>
+    <button class="clear-btn" *ngIf="hasActiveFilters" (click)="clearFilters()">Limpiar</button>
+  </div>
+
+  <!-- ── Categorías ─────────────────────────────── -->
+  <div class="filter-section">
+    <button class="section-toggle" (click)="toggleSection('categories')">
+      <span>Categorías</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="sections.categories"  points="18 15 12 9 6 15"/>
+        <polyline *ngIf="!sections.categories" points="6 9 12 15 18 9"/>
       </svg>
-      <h3>Filtros</h3>
     </button>
-    <button class="clear-btn" *ngIf="!collapsed" (click)="clearFilters()">Limpiar</button>
+    <div class="section-body" [class.section-body-open]="sections.categories">
+      <button class="genre-item"
+              *ngFor="let g of visibleGenres"
+              [class.genre-item-active]="filters.genre === g"
+              (click)="selectGenre(g)">
+        <span class="genre-dot" [class.genre-dot-active]="filters.genre === g"></span>
+        {{ g }}
+      </button>
+      <button class="see-all-btn" (click)="showAllGenres = !showAllGenres">
+        {{ showAllGenres ? '← Ver menos' : 'Ver todos →' }}
+      </button>
+    </div>
   </div>
 
-  <div class="filter-body" [class.filter-body-hidden]="collapsed">
-
-    <div class="filter-group">
-      <label>Género</label>
-      <select [(ngModel)]="filters.genre" name="genre" (ngModelChange)="onSelectChange()">
-        <option value="">Todos</option>
-        <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <label>Condición</label>
-      <div class="radio-group">
-        <label class="radio-option">
-          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" (ngModelChange)="onSelectChange()" />
-          Todos
-        </label>
-        <label class="radio-option">
-          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" (ngModelChange)="onSelectChange()" />
-          Nuevo
-        </label>
-        <label class="radio-option">
-          <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" (ngModelChange)="onSelectChange()" />
-          Usado
-        </label>
+  <!-- ── Precio ─────────────────────────────────── -->
+  <div class="filter-section">
+    <button class="section-toggle" (click)="toggleSection('price')">
+      <span>Rango de precio</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="sections.price"  points="18 15 12 9 6 15"/>
+        <polyline *ngIf="!sections.price" points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <div class="section-body" [class.section-body-open]="sections.price">
+      <div class="price-display">
+        <span class="price-label">Hasta</span>
+        <span class="price-value">{{ formatPrice(maxPriceSlider) }}</span>
+      </div>
+      <input class="price-slider"
+             type="range"
+             min="5000"
+             max="500000"
+             step="5000"
+             [(ngModel)]="maxPriceSlider"
+             (ngModelChange)="onSliderChange()" />
+      <div class="price-range-labels">
+        <span>$5.000</span>
+        <span>$500.000</span>
       </div>
     </div>
-
-    <div class="filter-group">
-      <label>Precio</label>
-      <div class="price-range">
-        <input type="number" [(ngModel)]="filters.minPrice" name="minPrice"
-               placeholder="Mín" (ngModelChange)="onPriceChange()" />
-        <span>—</span>
-        <input type="number" [(ngModel)]="filters.maxPrice" name="maxPrice"
-               placeholder="Máx" (ngModelChange)="onPriceChange()" />
-      </div>
-    </div>
-
   </div>
+
+  <!-- ── Condición ──────────────────────────────── -->
+  <div class="filter-section">
+    <button class="section-toggle" (click)="toggleSection('condition')">
+      <span>Condición</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="sections.condition"  points="18 15 12 9 6 15"/>
+        <polyline *ngIf="!sections.condition" points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <div class="section-body" [class.section-body-open]="sections.condition">
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" />
+        <span class="radio-custom"></span>
+        Todos
+      </label>
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" />
+        <span class="radio-custom"></span>
+        Nuevo
+      </label>
+      <label class="radio-option">
+        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" />
+        <span class="radio-custom"></span>
+        Usado
+      </label>
+    </div>
+  </div>
+
+  <!-- ── Valoración ─────────────────────────────── -->
+  <div class="filter-section">
+    <button class="section-toggle" (click)="toggleSection('rating')">
+      <span>Valoración</span>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline *ngIf="sections.rating"  points="18 15 12 9 6 15"/>
+        <polyline *ngIf="!sections.rating" points="6 9 12 15 18 9"/>
+      </svg>
+    </button>
+    <div class="section-body" [class.section-body-open]="sections.rating">
+      <button class="rating-row"
+              *ngFor="let r of [5,4,3,2,1]"
+              [class.rating-row-active]="filters.rating === r"
+              (click)="setRating(r)">
+        <span class="stars-row">
+          <span *ngFor="let s of stars" class="star" [class.star-on]="s <= r">★</span>
+        </span>
+        <span class="rating-label">{{ r === 5 ? 'Solo 5 ★' : r + ' ★ y más' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Apply button -->
+  <button class="btn-apply" (click)="applyFilters()">Aplicar filtros</button>
+
 </aside>

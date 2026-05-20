@@ -4,221 +4,259 @@
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding: 0 32px;
+  gap: 0;
+  padding: 0 28px;
   height: 64px;
   background: #ffffff;
-  border-bottom: 2px solid #000000;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.navbar-brand a {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 20px;
-  font-weight: 400;
-  color: #111827;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
+/* ── Brand ───────────────────────────────────── */
+.navbar-brand {
+  flex-shrink: 0;
+  margin-right: 32px;
 
-.navbar-search {
-  flex: 1;
-  position: relative;
-  max-width: 480px;
-
-  input {
-    width: 100%;
-    padding: 8px 16px 8px 38px;
-    border: 1px solid #000000;
-    border-radius: 0;
-    font-size: 14px;
-    background: #ffffff;
-    outline: none;
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    font-weight: 400;
     color: #111827;
-    letter-spacing: 0.02em;
-    transition: border-color 0.2s;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    text-decoration: none;
 
-    &:focus {
-      border-color: #374151;
-      box-shadow: 0 0 0 2px rgba(0,0,0,.06);
-    }
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-  }
-
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 13px;
-    color: #6b7280;
+    svg { color: #111827; }
   }
 }
 
-.navbar-actions {
+/* ── Nav links ───────────────────────────────── */
+.nav-links {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-left: auto;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  margin-right: 24px;
 }
 
-.btn-admin,
-.btn-inventory,
-.btn-reservations {
-  padding: 6px 14px;
-  border: 1px solid #000000;
+.nav-link {
+  display: block;
+  padding: 6px 12px;
   font-size: 13px;
+  color: #6b7280;
   font-weight: 500;
-  color: #111827;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  transition: all 0.2s;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
 
   &:hover {
-    background: #000000;
-    color: #ffffff;
-  }
-}
-
-.user-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px 5px 6px;
-  border: 1px solid #000000;
-  transition: background 0.2s;
-
-  &:hover {
+    color: #111827;
     background: #f3f4f6;
   }
 }
 
-.user-avatar {
-  width: 28px;
-  height: 28px;
-  background: #000000;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
+.nav-link-active {
+  color: #111827 !important;
+  font-weight: 600;
+  background: #f3f4f6;
 }
 
-.user-name {
-  font-size: 14px;
-  color: #111827;
-}
-
-.btn-logout {
-  background: none;
-  border: 1px solid #d1d5db;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #000000;
-    color: #111827;
-  }
-}
-
-.btn-outline {
-  padding: 6px 16px;
-  border: 1px solid #000000;
-  font-size: 13px;
-  font-weight: 500;
-  color: #111827;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
-
-  &:hover {
-    background: #000000;
-    color: #ffffff;
-  }
-}
-
-.btn-primary {
-  padding: 6px 16px;
-  background: #000000;
-  border: 1px solid #000000;
-  font-size: 13px;
-  font-weight: 500;
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #1f2937;
-  }
-}
-
-.btn-cart-nav {
+/* ── Search ──────────────────────────────────── */
+.navbar-search {
+  flex: 1;
   position: relative;
+  max-width: 420px;
+  margin-right: auto;
+
+  input {
+    width: 100%;
+    padding: 8px 14px 8px 36px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+    background: #f9fafb;
+    outline: none;
+    color: #111827;
+    transition: border-color 0.2s, background 0.2s;
+
+    &:focus {
+      border-color: #111827;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+    }
+
+    &::placeholder { color: #9ca3af; }
+  }
+}
+
+.search-icon-svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* ── Actions ─────────────────────────────────── */
+.navbar-actions {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
-  border: 1px solid #000000;
-  font-size: 13px;
-  font-weight: 500;
-  color: #111827;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  transition: all 0.2s;
+  margin-left: 16px;
+}
+
+/* Icon-only button */
+.icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  cursor: pointer;
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 
   &:hover {
-    background: #000000;
-    color: #ffffff;
+    color: #111827;
+    background: #f3f4f6;
   }
 }
 
+.icon-btn-active {
+  color: #1d4ed8 !important;
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+/* Cart icon — inherits icon-btn */
+.cart-icon-btn { }
+
 .cart-badge {
   position: absolute;
-  top: -7px;
-  right: -7px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
   background: #dc2626;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  border-radius: 9px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
 }
 
-.btn-chat {
+/* User chip */
+.user-chip {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  background: #1d4ed8;
-  border: none;
+  gap: 7px;
+  padding: 5px 10px 5px 5px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+}
+
+.user-avatar {
+  width: 26px;
+  height: 26px;
+  background: #111827;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Logout */
+.btn-logout {
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+
+  &:hover {
+    border-color: #111827;
+    color: #111827;
+  }
+}
+
+/* Guest buttons */
+.btn-outline {
+  padding: 7px 16px;
+  border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
-  cursor: pointer;
-  transition: background .2s;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: all 0.15s;
 
-  &:hover     { background: #1e40af; }
+  &:hover {
+    border-color: #111827;
+    color: #111827;
+  }
 }
 
-.btn-chat-active { background: #1e40af; }
+.btn-primary {
+  padding: 7px 16px;
+  background: #111827;
+  border: 1px solid #111827;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background 0.15s;
 
-/* ── Chat panel ── */
+  &:hover { background: #1f2937; }
+}
+
+/* ── Chat panel ──────────────────────────────── */
 .chat-panel {
   position: fixed;
   bottom: 24px;
@@ -378,7 +416,16 @@
   &:disabled { background: #93c5fd; cursor: default; }
 }
 
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .navbar-brand { margin-right: 16px; }
+}
+
 @media (max-width: 640px) {
+  .navbar { padding: 0 16px; gap: 0; }
+  .user-name { display: none; }
+
   .chat-panel {
     right: 10px;
     left: 10px;

@@ -29,7 +29,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   isSearchActive = false;
   searchTotal = 0;
   private searchQuery = '';
-  private sidebarFilters: SidebarFilters = { genre: '', condition: '', minPrice: '', maxPrice: '' };
+  private sidebarFilters: SidebarFilters = { genre: '', condition: '', minPrice: '', maxPrice: '', rating: 0 };
   private searchSubject = new Subject<void>();
   private subs = new Subscription();
   private destroy$ = new Subject<void>();

@@ -1,14 +1,13 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 
 export interface SidebarFilters {
   genre: string;
   condition: string;
   minPrice: string;
   maxPrice: string;
+  rating: number;
 }
 
 @Component({
@@ -20,41 +19,70 @@ export interface SidebarFilters {
 })
 export class SidebarComponent {
   @Output() filtersChange = new EventEmitter<SidebarFilters>();
-  collapsed = false;
 
   filters: SidebarFilters = {
     genre: '',
     condition: '',
     minPrice: '',
     maxPrice: '',
+    rating: 0,
   };
 
-  genres = [
-    'Ficción', 'No ficción', 'Ciencia ficción', 'Fantasía', 'Terror',
-    'Romance', 'Thriller', 'Misterio', 'Historia', 'Biografía',
-    'Ciencia', 'Tecnología', 'Filosofía', 'Psicología', 'Economía',
-    'Derecho', 'Arte', 'Poesía', 'Infantil', 'Juvenil',
-    'Cómics', 'Religión', 'Política', 'Autoayuda', 'Otro'
+  maxPriceSlider = 500000;
+  showAllGenres = false;
+
+  sections = {
+    categories: true,
+    price: true,
+    condition: true,
+    rating: true,
+  };
+
+  readonly genres = [
+    'Ficción', 'No ficción', 'Romance', 'Historia',
+    'Ciencia ficción', 'Terror', 'Thriller', 'Misterio',
+    'Biografía', 'Ciencia', 'Tecnología', 'Filosofía',
+    'Psicología', 'Autoayuda', 'Infantil', 'Juvenil',
+    'Arte', 'Poesía', 'Economía', 'Derecho',
   ];
 
-  private priceSubject = new Subject<void>();
+  readonly stars = [1, 2, 3, 4, 5];
 
-  constructor() {
-    this.priceSubject.pipe(debounceTime(500)).subscribe(() => {
-      this.filtersChange.emit({ ...this.filters });
-    });
+  get visibleGenres(): string[] {
+    return this.showAllGenres ? this.genres : this.genres.slice(0, 6);
   }
 
-  onSelectChange() {
+  get hasActiveFilters(): boolean {
+    return !!(this.filters.genre || this.filters.condition || this.filters.maxPrice || this.filters.rating);
+  }
+
+  toggleSection(key: keyof typeof this.sections) {
+    this.sections[key] = !this.sections[key];
+  }
+
+  selectGenre(genre: string) {
+    this.filters.genre = this.filters.genre === genre ? '' : genre;
+  }
+
+  setRating(r: number) {
+    this.filters.rating = this.filters.rating === r ? 0 : r;
+  }
+
+  onSliderChange() {
+    this.filters.maxPrice = this.maxPriceSlider < 500000 ? String(this.maxPriceSlider) : '';
+  }
+
+  applyFilters() {
     this.filtersChange.emit({ ...this.filters });
-  }
-
-  onPriceChange() {
-    this.priceSubject.next();
   }
 
   clearFilters() {
-    this.filters = { genre: '', condition: '', minPrice: '', maxPrice: '' };
+    this.filters = { genre: '', condition: '', minPrice: '', maxPrice: '', rating: 0 };
+    this.maxPriceSlider = 500000;
     this.filtersChange.emit({ ...this.filters });
+  }
+
+  formatPrice(value: number): string {
+    return '$' + value.toLocaleString('es-CO');
   }
 }

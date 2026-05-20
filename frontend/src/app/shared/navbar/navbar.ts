@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
@@ -13,7 +13,7 @@ import { ConfirmLogoutComponent } from '../modals/confirm-logout/confirm-logout'
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, FormsModule, RouterLink, ConfirmLogoutComponent],
+  imports: [CommonModule, AsyncPipe, FormsModule, RouterLink, RouterLinkActive, ConfirmLogoutComponent],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss'
 })
