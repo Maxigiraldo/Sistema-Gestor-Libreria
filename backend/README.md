@@ -86,7 +86,10 @@ NODE_ENV=development
 ### 5. Iniciar el servidor
 
 ```bash
-npm run start:dev
+
+
+
+ run start:dev
 ```
 
 El servidor corre en: **http://localhost:3000**

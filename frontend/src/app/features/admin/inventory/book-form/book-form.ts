@@ -227,15 +227,25 @@ export class BookFormComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  // Bloquea teclas que no tienen sentido en campos enteros (e, punto, signo)
+  blockNonNumeric(event: KeyboardEvent) {
+    if (['-', '+', 'e', 'E', '.'].includes(event.key)) event.preventDefault();
+  }
+
   isFormValid(): boolean {
     const price = Number(this.form.price);
+    const year = this.form.publicationYear;
+    const currentYear = new Date().getFullYear();
+    if (year !== null && year !== undefined && (year < 1000 || year > currentYear + 5)) return false;
+    const pages = this.form.pages;
+    if (pages !== null && pages !== undefined && pages < 1) return false;
     return (
       !!this.form.title?.trim() &&
       !!this.form.author?.trim() &&
       !!this.form.genre?.trim() &&
       !isNaN(price) && price >= 1000 &&
       !!this.form.condition &&
-      (this.isEditing || (Number.isInteger(this.form.quantity) && this.form.quantity >= 1))
+      (this.isEditing || (Number.isInteger(Number(this.form.quantity)) && Number(this.form.quantity) >= 1))
     );
   }
 

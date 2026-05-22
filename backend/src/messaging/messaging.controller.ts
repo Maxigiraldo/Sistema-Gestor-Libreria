@@ -25,7 +25,7 @@ export class MessagingController {
   send(@Req() req: any, @Body() body: SendMessageDto) {
     const user = req.user;
     const userId = parseInt(user.sub, 10);
-    const isAdmin = user.role === 'administrator' || user.role === 'root';
+    const isAdmin = user.role === 'administrator';
     const clientId = isAdmin ? body.clientId! : userId;
     return this.service.send(userId, user.role, user.username, clientId, body.content);
   }
@@ -36,21 +36,21 @@ export class MessagingController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ROOT)
+  @Roles(UserRole.ADMIN)
   @Get('conversations')
   conversations() {
     return this.service.getConversations();
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ROOT)
+  @Roles(UserRole.ADMIN)
   @Get('messages/:clientId')
   conversation(@Param('clientId', ParseIntPipe) clientId: number) {
     return this.service.getConversation(clientId);
   }
 
   @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.ROOT)
+  @Roles(UserRole.ADMIN)
   @Post('messages/:clientId/read')
   markRead(@Param('clientId', ParseIntPipe) clientId: number) {
     return this.service.markRead(clientId);

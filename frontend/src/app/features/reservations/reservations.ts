@@ -18,6 +18,9 @@ export class ReservationsComponent implements OnInit {
   removingId: number | null = null;
   removeError = '';
 
+  selectedIds = new Set<number>();
+  private firstLoad = true;
+
   constructor(
     private reservationsService: ReservationsService,
     private cdr: ChangeDetectorRef,
@@ -32,6 +35,17 @@ export class ReservationsComponent implements OnInit {
       next: (data) => {
         this.reservations = data;
         this.loading = false;
+        if (this.firstLoad) {
+          // Auto-select all on first load
+          this.cartItems.forEach(i => this.selectedIds.add(i.exemplar.id));
+          this.firstLoad = false;
+        } else {
+          // Clean up IDs that are no longer in the cart
+          const currentIds = new Set(this.cartItems.map(i => i.exemplar.id));
+          for (const id of this.selectedIds) {
+            if (!currentIds.has(id)) this.selectedIds.delete(id);
+          }
+        }
         this.cdr.detectChanges();
       },
       error: () => {
@@ -48,8 +62,16 @@ export class ReservationsComponent implements OnInit {
       .flatMap(r => r.items);
   }
 
+  get selectedItems(): ReservationItem[] {
+    return this.cartItems.filter(i => this.selectedIds.has(i.exemplar.id));
+  }
+
   get cartTotal(): number {
-    return this.cartItems.reduce((sum, i) => sum + Number(i.exemplar.book.price), 0);
+    return this.selectedItems.reduce((sum, i) => sum + Number(i.exemplar.book.price), 0);
+  }
+
+  get allSelected(): boolean {
+    return this.cartItems.length > 0 && this.cartItems.every(i => this.selectedIds.has(i.exemplar.id));
   }
 
   get cartExpiresAt(): string | null {
@@ -59,6 +81,28 @@ export class ReservationsComponent implements OnInit {
 
   get past(): Reservation[] {
     return this.reservations.filter(r => r.status !== 'active');
+  }
+
+  isSelected(exemplarId: number): boolean {
+    return this.selectedIds.has(exemplarId);
+  }
+
+  toggleItem(exemplarId: number) {
+    if (this.selectedIds.has(exemplarId)) {
+      this.selectedIds.delete(exemplarId);
+    } else {
+      this.selectedIds.add(exemplarId);
+    }
+    this.cdr.detectChanges();
+  }
+
+  toggleAll() {
+    if (this.allSelected) {
+      this.selectedIds.clear();
+    } else {
+      this.cartItems.forEach(i => this.selectedIds.add(i.exemplar.id));
+    }
+    this.cdr.detectChanges();
   }
 
   removeItem(exemplarId: number) {
@@ -78,8 +122,8 @@ export class ReservationsComponent implements OnInit {
   }
 
   checkout() {
-    if (this.cartItems.length === 0) return;
-    const items = this.cartItems.map(i => ({
+    if (this.selectedItems.length === 0) return;
+    const items = this.selectedItems.map(i => ({
       exemplarId: i.exemplar.id,
       title: i.exemplar.book.title,
       author: i.exemplar.book.author,

@@ -52,6 +52,10 @@ export class RegisterComponent {
 
   // ── Validaciones ────────────────────────────────────────────────────────────
 
+  nameValid(name: string): boolean {
+    return /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]{2,}$/.test(name.trim());
+  }
+
   dniValid(): boolean {
     return /^\d{6,12}$/.test(this.dni.trim());
   }
@@ -64,13 +68,50 @@ export class RegisterComponent {
     return /^[a-zA-Z0-9_-]{3,30}$/.test(this.username.trim());
   }
 
+  // ── Filtros de entrada ───────────────────────────────────────────────────────
+
+  onFirstNameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]/g, '');
+    input.value = val;
+    this.firstName = val;
+  }
+
+  onLastNameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]/g, '');
+    input.value = val;
+    this.lastName = val;
+  }
+
+  onBirthPlaceInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-\.]/g, '');
+    input.value = val;
+    this.birthPlace = val;
+  }
+
+  onDniInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/\D/g, '').slice(0, 12);
+    input.value = val;
+    this.dni = val;
+  }
+
+  onUsernameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 30);
+    input.value = val;
+    this.username = val;
+  }
+
   // ── Navegación ──────────────────────────────────────────────────────────────
 
   goStep2() {
     this.submitted1 = true;
     if (
-      this.firstName.trim() &&
-      this.lastName.trim() &&
+      this.firstName.trim() && this.nameValid(this.firstName) &&
+      this.lastName.trim()  && this.nameValid(this.lastName)  &&
       this.dniValid() &&
       this.birthDate &&
       this.birthPlace.trim() &&
@@ -97,6 +138,13 @@ export class RegisterComponent {
       this.password.trim().length < 6 ||
       !this.acceptPrivacy
     ) return;
+
+    // Trim campos de texto antes de enviar
+    this.firstName       = this.firstName.trim();
+    this.lastName        = this.lastName.trim();
+    this.birthPlace      = this.birthPlace.trim();
+    this.shippingAddress = this.shippingAddress.trim();
+    this.username        = this.username.trim();
 
     this.loading = true;
 

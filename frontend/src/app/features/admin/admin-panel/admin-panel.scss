@@ -375,6 +375,79 @@ table {
   line-height: 1.5;
 }
 
+/* ── Orders tab ────────────────────────────── */
+
+.orders-filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-btn {
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: all .15s;
+
+  &:hover { border-color: #111827; color: #111827; }
+  &.active { background: #111827; color: #fff; border-color: #111827; }
+}
+
+.books-cell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: #374151;
+}
+
+.cancel-reason-cell {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amount-cell {
+  font-family: Georgia, serif;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.delivery-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  background: #f3f4f6;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 600;
+}
+
+.order-status-badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+
+  &.os-confirmed { background: #d1fae5; color: #065f46; }
+  &.os-cancelled { background: #fee2e2; color: #991b1b; }
+}
+
+.row-cancelled td { opacity: 0.7; }
+
 /* ── Returns tab ────────────────────────────── */
 
 .cause-tag {

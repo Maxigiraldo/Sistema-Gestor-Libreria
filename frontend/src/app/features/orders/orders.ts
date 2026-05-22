@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { timeout, TimeoutError } from 'rxjs';
 import { OrdersService, Order } from '../../core/services/orders';
 import { ShippingService, Shipping } from '../../core/services/shipping';
 import { ReturnsService, ReturnRequest, ReturnCause, RETURN_CAUSE_LABELS, RefundMethod } from '../../core/services/returns';
@@ -21,6 +22,9 @@ export class OrdersComponent implements OnInit {
   confirmCancelId: number | null = null;
   cancellingId: number | null = null;
   cancelError = '';
+  cancelSuccessMsg = '';
+  cancelReason = '';
+  cancelRefundMethod: 'balance' | 'card' = 'balance';
 
   expandedOrders = new Set<number>();
   shippingMap: Record<number, Shipping | null | 'loading'> = {};
@@ -85,6 +89,9 @@ export class OrdersComponent implements OnInit {
   requestCancel(id: number) {
     this.confirmCancelId = id;
     this.cancelError = '';
+    this.cancelSuccessMsg = '';
+    this.cancelReason = '';
+    this.cancelRefundMethod = 'balance';
   }
 
   confirmCancel() {
@@ -94,11 +101,12 @@ export class OrdersComponent implements OnInit {
     this.cancellingId = id;
     this.cdr.detectChanges();
 
-    this.ordersService.cancel(id).subscribe({
-      next: () => {
+    this.ordersService.cancel(id, this.cancelReason.trim() || undefined, this.cancelRefundMethod).subscribe({
+      next: (res) => {
         const order = this.orders.find(o => o.id === id);
-        if (order) order.status = 'cancelled';
+        if (order) { order.status = 'cancelled'; order.cancelReason = this.cancelReason.trim(); }
         this.cancellingId = null;
+        this.cancelSuccessMsg = res.message;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -213,7 +221,7 @@ export class OrdersComponent implements OnInit {
       cause: this.returnCause,
       additionalDescription: this.returnDescription.trim() || undefined,
       refundMethod: this.returnRefundMethod,
-    }).subscribe({
+    }).pipe(timeout(20000)).subscribe({
       next: (res) => {
         this.myReturns.push(res.return);
         this.returningId = null;
@@ -223,7 +231,11 @@ export class OrdersComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.returnError = err.error?.message ?? 'No se pudo crear la solicitud de devolución';
+        if (err instanceof TimeoutError) {
+          this.returnError = 'El servidor tardó demasiado. Por favor intenta de nuevo.';
+        } else {
+          this.returnError = err.error?.message ?? 'No se pudo crear la solicitud de devolución';
+        }
         this.returningId = null;
         this.cdr.detectChanges();
       }

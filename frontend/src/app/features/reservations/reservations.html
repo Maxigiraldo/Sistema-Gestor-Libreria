@@ -28,8 +28,34 @@
     <!-- ── Carrito con items ──────────────────────────── -->
     <section class="section" *ngIf="cartItems.length > 0">
 
+      <!-- Select all header -->
+      <div class="select-all-row">
+        <button class="select-all-btn" (click)="toggleAll()">
+          <span class="checkbox" [class.checked]="allSelected">
+            <svg *ngIf="allSelected" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="2,6 5,9 10,3"/>
+            </svg>
+          </span>
+          <span>{{ allSelected ? 'Deseleccionar todo' : 'Seleccionar todo' }}</span>
+        </button>
+        <span class="selection-hint" *ngIf="selectedItems.length < cartItems.length && selectedItems.length > 0">
+          {{ selectedItems.length }} de {{ cartItems.length }} seleccionados
+        </span>
+      </div>
+
       <div class="cart-list">
-        <div class="cart-item" *ngFor="let item of cartItems">
+        <div class="cart-item" *ngFor="let item of cartItems"
+             [class.item-deselected]="!isSelected(item.exemplar.id)">
+
+          <!-- Checkbox -->
+          <button class="item-checkbox" (click)="toggleItem(item.exemplar.id)" type="button">
+            <span class="checkbox" [class.checked]="isSelected(item.exemplar.id)">
+              <svg *ngIf="isSelected(item.exemplar.id)" width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2,6 5,9 10,3"/>
+              </svg>
+            </span>
+          </button>
+
           <div class="item-info">
             <span class="item-code">{{ item.exemplar.uniqueCode }}</span>
             <h3 class="item-title">{{ item.exemplar.book.title }}</h3>
@@ -53,10 +79,17 @@
       <!-- Resumen y checkout -->
       <div class="cart-summary">
         <div class="summary-row">
-          <span class="summary-label">{{ cartItems.length }} {{ cartItems.length === 1 ? 'libro' : 'libros' }}</span>
+          <span class="summary-label">
+            {{ selectedItems.length }} {{ selectedItems.length === 1 ? 'libro' : 'libros' }}
+            <span *ngIf="selectedItems.length < cartItems.length" class="summary-sublabel">
+              ({{ cartItems.length - selectedItems.length }} sin seleccionar)
+            </span>
+          </span>
           <span class="summary-total">{{ cartTotal | currency:'COP':'$':'1.0-0' }}</span>
         </div>
-        <button class="btn-checkout" (click)="checkout()">
+        <button class="btn-checkout"
+                [disabled]="selectedItems.length === 0"
+                (click)="checkout()">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>

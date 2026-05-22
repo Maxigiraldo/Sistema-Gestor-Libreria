@@ -85,6 +85,12 @@ export const routes: Routes = [
   },
   { path: 'reservations', redirectTo: 'cart', pathMatch: 'full' },
   {
+    path: 'novedades',
+    loadComponent: () =>
+      import('./features/news/novedades').then(m => m.NovedadesComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'set-password',
     loadComponent: () =>
       import('./features/auth/set-password/set-password')

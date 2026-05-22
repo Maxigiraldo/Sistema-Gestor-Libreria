@@ -35,14 +35,14 @@
           <label>Nombre de usuario *</label>
           <input
             type="text"
-            [(ngModel)]="form.username"
+            [value]="form.username"
+            (input)="onUsernameInput($event)"
             name="username"
             placeholder="tu_usuario"
             autocomplete="username"
           />
-          <span class="field-error" *ngIf="submitted && !form.username.trim()">
-            Obligatorio.
-          </span>
+          <span class="field-error" *ngIf="submitted && !form.username.trim()">Obligatorio.</span>
+          <span class="field-error" *ngIf="submitted && form.username.trim() && !usernameValid()">3-30 caracteres. Solo letras, números, _ o -. Sin espacios.</span>
         </div>
 
         <div class="field-row">
@@ -50,23 +50,27 @@
             <label>Nombre</label>
             <input
               type="text"
-              [(ngModel)]="form.firstName"
+              [value]="form.firstName"
+              (input)="onNameInput('firstName', $event)"
               name="firstName"
               placeholder="Tu nombre"
               [readonly]="!isClient"
               [class.input-disabled]="!isClient"
             />
+            <span class="field-error" *ngIf="submitted && isClient && !nameValid(form.firstName)">Solo letras, mínimo 2 caracteres.</span>
           </div>
           <div class="field">
             <label>Apellido</label>
             <input
               type="text"
-              [(ngModel)]="form.lastName"
+              [value]="form.lastName"
+              (input)="onNameInput('lastName', $event)"
               name="lastName"
               placeholder="Tu apellido"
               [readonly]="!isClient"
               [class.input-disabled]="!isClient"
             />
+            <span class="field-error" *ngIf="submitted && isClient && !nameValid(form.lastName)">Solo letras, mínimo 2 caracteres.</span>
           </div>
         </div>
         <span class="field-hint" *ngIf="!isClient">

@@ -50,8 +50,12 @@ export class BonusConfigComponent implements OnInit {
     });
   }
 
+  blockNonNumeric(event: KeyboardEvent) {
+    if (['-', '+', 'e', 'E', '.'].includes(event.key)) event.preventDefault();
+  }
+
   save() {
-    if (this.newPercentage === null || this.newPercentage < 0 || this.newPercentage > 100) {
+    if (this.newPercentage === null || isNaN(Number(this.newPercentage)) || this.newPercentage < 0 || this.newPercentage > 100) {
       this.error = 'El porcentaje debe estar entre 0 y 100';
       return;
     }

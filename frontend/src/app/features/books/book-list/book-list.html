@@ -94,6 +94,9 @@
               <span class="fallback-author">{{ book.author }}</span>
             </div>
 
+            <!-- Novedad badge -->
+            <span class="novedad-star" *ngIf="isNewBook(book)" title="Novedad en tus géneros favoritos">★</span>
+
             <!-- Condition badge -->
             <span class="condition-tag" [class.used]="book.condition === 'used'">
               {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}

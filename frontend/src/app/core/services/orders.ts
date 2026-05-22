@@ -16,10 +16,12 @@ export interface Order {
   status: 'confirmed' | 'cancelled';
   deliveryType: 'home_delivery' | 'store_pickup';
   shippingAddress: string | null;
+  cancelReason?: string;
   total: string;
   discount: string;
   details: OrderDetail[];
   createdAt: string;
+  client?: { id: number; username: string; email: string };
 }
 
 export interface CreateOrderData {
@@ -58,7 +60,14 @@ export class OrdersService {
     return this.http.get<Order>(`${this.base}/orders/${id}`);
   }
 
-  cancel(id: number) {
-    return this.http.delete<{ message: string }>(`${this.base}/orders/${id}`);
+  cancel(id: number, reason?: string, refundMethod?: 'balance' | 'card') {
+    return this.http.delete<{ message: string; refundMethod?: string }>(
+      `${this.base}/orders/${id}`,
+      { body: { reason, refundMethod } }
+    );
+  }
+
+  getAllForAdmin() {
+    return this.http.get<Order[]>(`${this.base}/orders/admin`);
   }
 }

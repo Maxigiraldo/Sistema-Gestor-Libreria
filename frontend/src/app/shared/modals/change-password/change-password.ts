@@ -34,8 +34,8 @@ export class ChangePasswordComponent {
       return;
     }
 
-    if (this.form.newPassword.length < 6) {
-      this.error = 'La nueva contraseña debe tener al menos 6 caracteres';
+    if (this.form.newPassword.trim().length < 6) {
+      this.error = 'La nueva contraseña debe tener al menos 6 caracteres (sin contar espacios)';
       return;
     }
 

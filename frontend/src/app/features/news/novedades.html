@@ -1,0 +1,291 @@
+<app-navbar />
+
+<div class="novedades-root">
+
+  <!-- ── Header ───────────────────────────────────────── -->
+  <div class="novedades-hero">
+    <div class="hero-text">
+      <span class="hero-label">NOVEDADES</span>
+      <h1 class="hero-heading">Libros nuevos<br>para ti</h1>
+      <p class="hero-sub">Títulos recientes de tus géneros favoritos.</p>
+    </div>
+    <div class="hero-actions">
+      <button class="sub-toggle"
+              [class.subscribed]="subscribed"
+              [disabled]="loadingSubscription"
+              (click)="toggleSubscription()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        {{ loadingSubscription ? '...' : (subscribed ? 'Suscrito ✓' : 'Suscribirse') }}
+      </button>
+      <a [routerLink]="['/profile/categories']" class="link-categories">Mis géneros →</a>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────── -->
+  <div class="skeleton-section" *ngIf="loading">
+    <div class="skeleton-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4,5,6]">
+        <div class="skel-cover"></div>
+        <div class="skel-title"></div>
+        <div class="skel-author"></div>
+        <div class="skel-price"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── No suscrito ──────────────────────────────────── -->
+  <div class="empty-hero" *ngIf="!loading && !subscribed">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+    <h2>Activa las novedades</h2>
+    <p>Suscríbete para recibir los libros nuevos de los géneros que marcaste en <a [routerLink]="['/profile/categories']">tus categorías</a>.</p>
+    <button class="btn-subscribe-big" (click)="toggleSubscription()" [disabled]="loadingSubscription">
+      {{ loadingSubscription ? 'Activando...' : 'Suscribirme' }}
+    </button>
+  </div>
+
+  <!-- ── Sin libros nuevos ─────────────────────────────── -->
+  <div class="empty-hero" *ngIf="!loading && subscribed && books.length === 0">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+    </svg>
+    <h2>Todo al día</h2>
+    <p>No hay títulos nuevos en tus géneros favoritos en los últimos 30 días. Vuelve pronto.</p>
+    <a [routerLink]="['/']" class="btn-catalog">Ver catálogo completo</a>
+  </div>
+
+  <!-- ── Grid de libros ────────────────────────────────── -->
+  <div class="books-section" *ngIf="!loading && subscribed && books.length > 0">
+    <div class="section-header">
+      <h2 class="section-heading">{{ books.length }} {{ books.length === 1 ? 'novedad' : 'novedades' }} encontradas</h2>
+    </div>
+
+    <div class="books-grid">
+      <article class="book-card"
+               *ngFor="let book of books; let i = index"
+               (click)="openDetail(book)"
+               [style.animation-delay]="(i * 0.04) + 's'">
+
+        <!-- Portada -->
+        <div class="book-cover" [class.cover-out]="getAvailableCount(book) === 0">
+          <img *ngIf="getCover(book)"
+               [src]="getCover(book)"
+               [alt]="book.title"
+               loading="lazy"
+               class="cover-img" />
+          <div *ngIf="!getCover(book)"
+               class="cover-fallback"
+               [style.background]="getBookColor(book)">
+            <span class="fallback-title">{{ book.title }}</span>
+            <span class="fallback-author">{{ book.author }}</span>
+          </div>
+
+          <!-- Novedad badge -->
+          <span class="novedad-star" title="Novedad en tus géneros favoritos">★</span>
+
+          <!-- Condition badge -->
+          <span class="condition-tag" [class.used]="book.condition === 'used'">
+            {{ book.condition === 'new' ? 'Nuevo' : 'Usado' }}
+          </span>
+
+          <!-- Agotado overlay -->
+          <div class="out-overlay" *ngIf="getAvailableCount(book) === 0">
+            <span>Agotado</span>
+          </div>
+
+          <!-- Hover CTA -->
+          <div class="cover-hover">
+            <span class="hover-cta">Ver detalles</span>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="book-info">
+          <h3 class="book-title">{{ book.title }}</h3>
+          <p class="book-author">{{ book.author }}</p>
+          <div class="book-footer">
+            <span class="book-price">{{ book.price | currency:'COP':'$':'1.0-0' }}</span>
+            <button class="btn-cart"
+                    [disabled]="getAvailableCount(book) === 0"
+                    (click)="openDetail(book); $event.stopPropagation()"
+                    aria-label="Ver detalles">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Detail modal (idéntico al catálogo) ─────────────── -->
+<div class="detail-modal"
+     [class.modal-open]="selectedBook !== null"
+     (click)="closeDetail()">
+
+  <div class="detail-modal-inner" (click)="$event.stopPropagation()" *ngIf="selectedBook">
+
+    <button class="modal-close" (click)="closeDetail()" aria-label="Cerrar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="detail-layout">
+
+      <!-- ── Columna izquierda: portada ── -->
+      <div class="detail-left">
+        <div class="detail-cover-wrap">
+          <img *ngIf="getCover(selectedBook)"
+               [src]="getCover(selectedBook)"
+               [alt]="selectedBook.title"
+               class="detail-cover-img" />
+          <div *ngIf="!getCover(selectedBook)"
+               class="detail-cover-fallback"
+               [style.background]="getBookColor(selectedBook)">
+            <span>{{ selectedBook.title }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Columna derecha: info ── -->
+      <div class="detail-right">
+
+        <div class="detail-top-badges">
+          <span class="detail-genre" *ngIf="selectedBook.genre">{{ selectedBook.genre | uppercase }}</span>
+          <span class="detail-condition" [class.used]="selectedBook.condition === 'used'">
+            {{ selectedBook.condition === 'new' ? 'Nuevo' : 'Usado' }}
+          </span>
+        </div>
+
+        <h2 class="detail-title">{{ selectedBook.title }}</h2>
+        <p class="detail-author">{{ selectedBook.author }}</p>
+
+        <div class="detail-price-block">
+          <span class="detail-price">{{ selectedBook.price | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="detail-stock" [class.out]="getAvailableCount(selectedBook) === 0">
+            {{ getAvailableCount(selectedBook) > 0
+                ? getAvailableCount(selectedBook) + ' disponibles'
+                : 'Agotado' }}
+          </span>
+        </div>
+
+        <p class="detail-description" *ngIf="getDescription(selectedBook)">
+          {{ getDescription(selectedBook) }}
+        </p>
+
+        <div class="detail-meta-list">
+          <div class="detail-meta-item" *ngIf="selectedBook.publisher">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            <span class="meta-label">Editorial</span>
+            <span class="meta-value">{{ selectedBook.publisher }}</span>
+          </div>
+          <div class="detail-meta-item" *ngIf="selectedBook.language">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span class="meta-label">Idioma</span>
+            <span class="meta-value">{{ selectedBook.language }}</span>
+          </div>
+          <div class="detail-meta-item" *ngIf="selectedBook.publicationYear">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <span class="meta-label">Publicado</span>
+            <span class="meta-value">{{ selectedBook.publicationYear }}</span>
+          </div>
+        </div>
+
+        <p class="detail-msg success" *ngIf="cartMessage">{{ cartMessage }}</p>
+        <p class="detail-msg error"   *ngIf="cartError">{{ cartError }}</p>
+
+        <div class="detail-actions" *ngIf="isClient">
+          <button class="btn-action-primary"
+                  [disabled]="getAvailableCount(selectedBook) === 0"
+                  (click)="buyBook(selectedBook)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            Comprar ahora
+          </button>
+          <button class="btn-action-secondary"
+                  [disabled]="getAvailableCount(selectedBook) === 0 || isAddingToCart || !!cartMessage"
+                  (click)="addToCart(selectedBook)">
+            <span *ngIf="isAddingToCart" class="btn-spinner"></span>
+            <svg *ngIf="!isAddingToCart" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+            {{ isAddingToCart ? 'Agregando...' : cartMessage ? 'En carrito ✓' : 'Agregar al carrito' }}
+          </button>
+        </div>
+
+        <div class="delivery-chips">
+          <div class="delivery-chip">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <div><span>Envío a domicilio</span><small>Disponible</small></div>
+          </div>
+          <div class="delivery-chip">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <div><span>Retiro en tienda</span><small>Disponible</small></div>
+          </div>
+          <div class="delivery-chip">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.27"/>
+            </svg>
+            <div><span>Devoluciones</span><small>8 días para cambios</small></div>
+          </div>
+        </div>
+
+        <a *ngIf="getPreviewLink(selectedBook)"
+           [href]="getPreviewLink(selectedBook)"
+           target="_blank" rel="noopener noreferrer"
+           class="detail-preview-link">Vista previa en Google Books →</a>
+
+        <!-- Podría interesarte -->
+        <div class="recs-section" *ngIf="loadingRecs || recommendations.length > 0">
+          <h4 class="recs-heading">Podría interesarte</h4>
+          <div class="recs-skeleton" *ngIf="loadingRecs">
+            <div class="rec-skel" *ngFor="let i of [1,2,3]"></div>
+          </div>
+          <div class="recs-list" *ngIf="!loadingRecs">
+            <div class="rec-card" *ngFor="let rec of recommendations" (click)="openDetail(rec)">
+              <div class="rec-cover">
+                <img *ngIf="getCover(rec)" [src]="getCover(rec)" [alt]="rec.title" loading="lazy" />
+                <div *ngIf="!getCover(rec)" class="rec-cover-fallback" [style.background]="getBookColor(rec)">
+                  <span>{{ rec.title }}</span>
+                </div>
+              </div>
+              <div class="rec-info">
+                <p class="rec-title">{{ rec.title }}</p>
+                <p class="rec-author">{{ rec.author }}</p>
+                <p class="rec-price">{{ rec.price | currency:'COP':'$':'1.0-0' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

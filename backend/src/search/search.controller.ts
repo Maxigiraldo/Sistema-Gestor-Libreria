@@ -7,6 +7,7 @@ export class SearchController {
 
   @Get()
   search(
+    @Query('q') q?: string,
     @Query('title') title?: string,
     @Query('author') author?: string,
     @Query('genre') genre?: string,
@@ -19,6 +20,7 @@ export class SearchController {
     @Query('publicationYear') publicationYear?: number,
   ) {
     return this.searchService.search({
+      q,
       title,
       author,
       genre,

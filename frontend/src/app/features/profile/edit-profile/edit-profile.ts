@@ -34,6 +34,28 @@ export class EditProfileComponent implements OnInit {
     return this.userRole === 'client';
   }
 
+  usernameValid(): boolean {
+    return /^[a-zA-Z0-9_-]{3,30}$/.test(this.form.username.trim());
+  }
+
+  nameValid(name: string): boolean {
+    return !name.trim() || /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]{2,}$/.test(name.trim());
+  }
+
+  onUsernameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-Z0-9_\-]/g, '').slice(0, 30);
+    input.value = val;
+    this.form.username = val;
+  }
+
+  onNameInput(field: 'firstName' | 'lastName', event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-]/g, '');
+    input.value = val;
+    (this.form as any)[field] = val;
+  }
+
   constructor(
     private auth: AuthService,
     private users: UsersService,
@@ -71,7 +93,9 @@ export class EditProfileComponent implements OnInit {
     this.submitted = true;
     this.error = '';
     this.success = '';
-    if (!this.form.username.trim()) return;
+    if (!this.form.username.trim() || !this.usernameValid()) return;
+    if (this.isClient && !this.nameValid(this.form.firstName)) return;
+    if (this.isClient && !this.nameValid(this.form.lastName)) return;
 
     this.saving = true;
     this.users.updateProfile(this.form).subscribe({

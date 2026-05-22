@@ -7,6 +7,7 @@ import { UsersService, AdminUser } from '../../../core/services/users';
 import { AuthService } from '../../../core/services/auth';
 import { ReturnsService, ReturnRequest, ReturnStatus, RETURN_CAUSE_LABELS, RETURN_STATUS_LABELS } from '../../../core/services/returns';
 import { MessagingService, ChatMessage, Conversation } from '../../../core/services/messaging';
+import { OrdersService, Order } from '../../../core/services/orders';
 
 @Component({
   selector: 'app-admin-panel',
@@ -16,8 +17,13 @@ import { MessagingService, ChatMessage, Conversation } from '../../../core/servi
   styleUrl: './admin-panel.scss'
 })
 export class AdminPanelComponent implements OnInit {
-  activeTab: 'list' | 'create' | 'returns' | 'messages' = 'list';
+  activeTab: 'list' | 'create' | 'returns' | 'messages' | 'orders' = 'list';
   isRoot = false;
+
+  // Orders tab
+  allOrders: Order[] = [];
+  loadingOrders = false;
+  ordersFilter: 'all' | 'confirmed' | 'cancelled' = 'all';
 
   admins: AdminUser[] = [];
   loadingList = true;
@@ -51,6 +57,7 @@ export class AdminPanelComponent implements OnInit {
     private auth: AuthService,
     private returnsService: ReturnsService,
     private messagingService: MessagingService,
+    private ordersService: OrdersService,
     private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -149,6 +156,31 @@ export class AdminPanelComponent implements OnInit {
 
   causeLabel(cause: string): string { return (this.CAUSE_LABELS as any)[cause] ?? cause; }
   statusLabel(status: string): string { return (this.STATUS_LABELS as any)[status] ?? status; }
+
+  loadOrders() {
+    this.loadingOrders = true;
+    this.ordersService.getAllForAdmin().subscribe({
+      next: (data) => { this.allOrders = data; this.loadingOrders = false; this.cdr.detectChanges(); },
+      error: () => { this.loadingOrders = false; this.cdr.detectChanges(); }
+    });
+  }
+
+  get filteredOrders(): Order[] {
+    if (this.ordersFilter === 'all') return this.allOrders;
+    return this.allOrders.filter(o => o.status === this.ordersFilter);
+  }
+
+  orderStatusLabel(status: string): string {
+    return status === 'confirmed' ? 'Confirmado' : 'Cancelado';
+  }
+
+  orderDeliveryLabel(type: string): string {
+    return type === 'home_delivery' ? 'Domicilio' : 'Tienda';
+  }
+
+  getBookTitles(order: Order): string {
+    return order.details?.map(d => d.exemplar?.book?.title ?? '').filter(Boolean).join(', ') || '—';
+  }
 
   get totalUnread(): number {
     return this.conversations.reduce((s, c) => s + (c.unread || 0), 0);

@@ -49,7 +49,7 @@ export class Return {
   })
   cause: ReturnCause;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   additionalDescription: string;
 
   @Column({
@@ -59,7 +59,7 @@ export class Return {
   })
   refundMethod: RefundMethod;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   qrCode: string;
 
   @Column({ nullable: true, type: 'date' })

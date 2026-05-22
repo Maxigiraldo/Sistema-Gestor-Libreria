@@ -41,7 +41,7 @@ export class SetPasswordComponent implements OnInit {
   onSubmit() {
     this.submitted = true;
     this.error = '';
-    if (this.password.length < 6 || !this.passwordsMatch) return;
+    if (this.password.trim().length < 6 || !this.passwordsMatch) return;
 
     this.loading = true;
     this.http.post<{ message: string }>(`${environment.apiUrl}/auth/set-password`, {

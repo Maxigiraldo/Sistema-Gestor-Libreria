@@ -9,6 +9,7 @@ import { GoogleBooksService, GoogleBookInfo } from '../../../core/services/googl
 import { SearchService, SearchParams } from '../../../core/services/search';
 import { ReservationsService } from '../../../core/services/reservations';
 import { AuthService } from '../../../core/services/auth';
+import { NewsService } from '../../../core/services/news';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
 import { SidebarComponent, SidebarFilters } from '../../../shared/sidebar/sidebar';
 
@@ -39,6 +40,7 @@ export class BookListComponent implements OnInit, OnDestroy {
   cartError = '';
   isAddingToCart = false;
   selectedGenre = '';
+  newBookIds = new Set<number>();
 
   recommendations: Book[] = [];
   loadingRecs = false;
@@ -55,6 +57,7 @@ export class BookListComponent implements OnInit, OnDestroy {
     private searchService: SearchService,
     private reservationsService: ReservationsService,
     public auth: AuthService,
+    private newsService: NewsService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
@@ -62,6 +65,13 @@ export class BookListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.searchQuery = this.searchService.getCurrentQuery();
     this.loadBooks();
+
+    if (this.auth.getRole() === 'client') {
+      this.newsService.getNewBookIds().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (ids) => { this.newBookIds = new Set(ids); this.cdr.detectChanges(); },
+        error: () => {}
+      });
+    }
 
     this.subs.add(
       this.searchSubject.pipe(debounceTime(350)).subscribe(() => this.loadBooks())
@@ -90,7 +100,7 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   private buildParams(): SearchParams {
     const p: SearchParams = {};
-    if (this.searchQuery)              p.title     = this.searchQuery;
+    if (this.searchQuery)              p.q         = this.searchQuery;
     if (this.sidebarFilters.genre)     p.genre     = this.sidebarFilters.genre;
     if (this.sidebarFilters.condition) p.condition = this.sidebarFilters.condition;
     if (this.sidebarFilters.minPrice)  p.minPrice  = this.sidebarFilters.minPrice;
@@ -238,6 +248,10 @@ export class BookListComponent implements OnInit, OnDestroy {
 
   get isClient(): boolean {
     return this.auth.getRole() === 'client';
+  }
+
+  isNewBook(book: Book): boolean {
+    return this.newBookIds.has(book.id);
   }
 
   get genres(): string[] {

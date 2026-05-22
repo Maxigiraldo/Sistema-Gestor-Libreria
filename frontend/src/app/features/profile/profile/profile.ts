@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { PaymentsService, Card, Balance } from '../../../core/services/payments';
+import { NewsService } from '../../../core/services/news';
 import { ConfirmLogoutComponent } from '../../../shared/modals/confirm-logout/confirm-logout';
 import { ChangePasswordComponent } from '../../../shared/modals/change-password/change-password';
 import { NavbarComponent } from '../../../shared/navbar/navbar';
@@ -19,6 +20,8 @@ export class ProfileComponent implements OnInit {
   user: any = null;
   showLogoutModal = false;
   showPasswordModal = false;
+  subscribedToNews = false;
+  togglingNews = false;
 
   balance: Balance | null = null;
   savedCards: Card[] = [];
@@ -32,6 +35,7 @@ export class ProfileComponent implements OnInit {
   constructor(
     private auth: AuthService,
     private paymentsService: PaymentsService,
+    private newsService: NewsService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -39,6 +43,10 @@ export class ProfileComponent implements OnInit {
     this.user = this.auth.getUser();
     if (this.user?.role === 'client') {
       this.loadPaymentData();
+      this.newsService.getSubscription().subscribe({
+        next: ({ subscribed }) => { this.subscribedToNews = subscribed; this.cdr.detectChanges(); },
+        error: () => {}
+      });
     }
   }
 
@@ -55,11 +63,30 @@ export class ProfileComponent implements OnInit {
 
   get isClient(): boolean { return this.user?.role === 'client'; }
 
+  toggleNewsSubscription() {
+    this.togglingNews = true;
+    this.newsService.setSubscription(!this.subscribedToNews).subscribe({
+      next: ({ subscribed }) => {
+        this.subscribedToNews = subscribed;
+        this.togglingNews = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.togglingNews = false; this.cdr.detectChanges(); }
+    });
+  }
+
   openTopup() {
     this.topupAmount = 50000;
     this.topupError = '';
     this.topupSuccess = '';
     this.showTopupModal = true;
+  }
+
+  onTopupInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^0-9]/g, '');
+    input.value = val;
+    this.topupAmount = val ? parseInt(val, 10) : 0;
   }
 
   confirmTopup() {

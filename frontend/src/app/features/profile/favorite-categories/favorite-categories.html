@@ -12,7 +12,7 @@
         Volver al perfil
       </a>
       <h1>Categorías favoritas</h1>
-      <p class="subtitle">Selecciona los géneros que más te interesan</p>
+      <p class="subtitle">Selecciona los géneros que más te interesan para personalizar tu experiencia.</p>
     </div>
 
     <div class="loading-wrap" *ngIf="loading">
@@ -23,25 +23,34 @@
       <div class="genres-grid">
         <button
           *ngFor="let genre of allGenres"
-          class="genre-btn"
+          class="genre-chip"
           [class.selected]="isSelected(genre)"
           (click)="toggle(genre)"
           type="button"
         >
-          {{ genre }}
+          <span class="chip-label">{{ genre }}</span>
+          <svg *ngIf="isSelected(genre)" class="chip-check" width="14" height="14"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
         </button>
       </div>
 
-      <p class="selection-hint">{{ selected.size }} género(s) seleccionado(s)</p>
+      <div class="selection-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        {{ selected.size }} género(s) seleccionado(s)
+      </div>
 
       <div class="error-msg" *ngIf="error">{{ error }}</div>
-      <div class="success-msg" *ngIf="success">✅ {{ success }}</div>
+      <div class="success-msg" *ngIf="success">{{ success }}</div>
 
       <div class="form-actions">
-        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
         <button class="btn-primary" (click)="save()" [disabled]="saving">
           {{ saving ? 'Guardando...' : 'Guardar preferencias' }}
         </button>
+        <a [routerLink]="['/profile']" class="btn-secondary">Cancelar</a>
       </div>
     </div>
 

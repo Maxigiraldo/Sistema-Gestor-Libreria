@@ -18,8 +18,9 @@
         Catálogo
       </a>
     </li>
-    <li><a [routerLink]="['/']" class="nav-link">Novedades</a></li>
-    <li><a [routerLink]="['/']" class="nav-link">Géneros</a></li>
+    <li *ngIf="user?.role === 'client'">
+      <a [routerLink]="['/novedades']" routerLinkActive="nav-link-active" class="nav-link">Novedades</a>
+    </li>
     <li *ngIf="user?.role === 'client'">
       <a [routerLink]="['/orders']" routerLinkActive="nav-link-active" class="nav-link">Mis pedidos</a>
     </li>

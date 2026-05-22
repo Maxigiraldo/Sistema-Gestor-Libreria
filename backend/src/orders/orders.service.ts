@@ -98,18 +98,34 @@ export class OrdersService {
       }
     }
 
-    // Marcar las reservas de estos ejemplares como CONVERTED para que el cron no las libere
+    // Partial checkout: remove only the purchased items from the reservation.
+    // Remaining items stay reserved (ACTIVE). Only mark the reservation CONVERTED
+    // when it becomes fully empty.
     if (fromReservation) {
-      const items = await this.reservationItemRepository.find({
+      const purchasedItems = await this.reservationItemRepository.find({
         where: { exemplar: { id: In(exemplarIds) } },
         relations: ['reservation'],
       });
-      const reservationIds = [...new Set(items.map((i) => i.reservation.id))];
-      if (reservationIds.length > 0) {
-        await this.reservationRepository.update(
-          { id: In(reservationIds), status: ReservationStatus.ACTIVE },
-          { status: ReservationStatus.CONVERTED },
-        );
+
+      const affectedReservationIds = [...new Set(purchasedItems.map((i) => i.reservation.id))];
+
+      if (purchasedItems.length > 0) {
+        await this.reservationItemRepository.delete({
+          id: In(purchasedItems.map((i) => i.id)),
+        });
+      }
+
+      // Convert only reservations that are now fully empty
+      for (const resId of affectedReservationIds) {
+        const remaining = await this.reservationItemRepository.count({
+          where: { reservation: { id: resId } },
+        });
+        if (remaining === 0) {
+          await this.reservationRepository.update(
+            { id: resId, status: ReservationStatus.ACTIVE },
+            { status: ReservationStatus.CONVERTED },
+          );
+        }
       }
     }
 
@@ -146,7 +162,7 @@ export class OrdersService {
     return order;
   }
 
-  async cancel(id: number, userId: number) {
+  async cancel(id: number, userId: number, reason?: string, refundMethod?: 'balance' | 'card') {
     const order = await this.orderRepository.findOne({
       where: { id, client: { id: userId } },
       relations: ['details', 'details.exemplar'],
@@ -164,8 +180,29 @@ export class OrdersService {
     }
 
     order.status = OrderStatus.CANCELLED;
+    order.cancelReason = reason ?? '';
     await this.orderRepository.save(order);
 
-    return { message: 'Orden cancelada exitosamente' };
+    // Reembolso inmediato a saldo
+    if (refundMethod === 'balance') {
+      await this.paymentsService.topup(userId, Number(order.total));
+      return {
+        message: `Pedido cancelado. $${Number(order.total).toLocaleString('es-CO')} reembolsados a tu saldo.`,
+        refundMethod,
+      };
+    }
+
+    // Tarjeta: reembolso simulado (3-5 días hábiles)
+    return {
+      message: 'Pedido cancelado. El reembolso a tu tarjeta se procesará en 3-5 días hábiles.',
+      refundMethod: refundMethod ?? 'card',
+    };
+  }
+
+  async findAllForAdmin() {
+    return this.orderRepository.find({
+      relations: ['client', 'details', 'details.exemplar', 'details.exemplar.book'],
+      order: { createdAt: 'DESC' },
+    });
   }
 }

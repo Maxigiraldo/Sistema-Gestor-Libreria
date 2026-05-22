@@ -44,6 +44,66 @@
 /* ── Cart items ────────────────────────────── */
 .section { margin-bottom: 48px; }
 
+/* Select-all row */
+.select-all-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.select-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: 0;
+  transition: color .15s;
+
+  &:hover { color: #111827; }
+}
+
+.selection-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* Checkbox */
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  background: #fff;
+  flex-shrink: 0;
+  transition: all .15s;
+
+  &.checked {
+    border-color: #111827;
+    background: #111827;
+  }
+}
+
+.item-checkbox {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+
+  &:hover .checkbox:not(.checked) { border-color: #9ca3af; }
+}
+
 .cart-list {
   border: 1px solid #e5e7eb;
   border-left: 4px solid #111827;
@@ -55,10 +115,15 @@
   gap: 16px;
   padding: 18px 20px;
   border-bottom: 1px solid #f3f4f6;
-  transition: background .15s;
+  transition: background .15s, opacity .15s;
 
   &:last-child { border-bottom: none; }
   &:hover { background: #f9fafb; }
+
+  &.item-deselected {
+    opacity: 0.45;
+    background: #fafafa;
+  }
 }
 
 .item-info { flex: 1; min-width: 0; }
@@ -145,6 +210,13 @@
   letter-spacing: .05em;
 }
 
+.summary-sublabel {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .summary-total {
   font-family: Georgia, serif;
   font-size: 22px;
@@ -167,7 +239,8 @@
   cursor: pointer;
   transition: background .2s;
 
-  &:hover { background: #1f2937; }
+  &:hover:not(:disabled) { background: #1f2937; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 /* ── History ────────────────────────────────── */

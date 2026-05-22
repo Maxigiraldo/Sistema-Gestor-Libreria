@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { Book } from './books';
 
 export interface SearchParams {
+  q?: string;
   title?: string;
   author?: string;
   genre?: string;

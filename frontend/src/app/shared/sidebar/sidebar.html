@@ -39,20 +39,40 @@
       </svg>
     </button>
     <div class="section-body" [class.section-body-open]="sections.price">
-      <div class="price-display">
-        <span class="price-label">Hasta</span>
-        <span class="price-value">{{ formatPrice(maxPriceSlider) }}</span>
+      <div class="price-inputs">
+        <div class="price-input-group">
+          <label class="price-input-label">Mínimo</label>
+          <input class="price-input"
+                 type="text"
+                 inputmode="numeric"
+                 placeholder="$0"
+                 [value]="minPriceInput"
+                 (input)="onMinPriceInput($event)" />
+        </div>
+        <span class="price-input-sep">—</span>
+        <div class="price-input-group">
+          <label class="price-input-label">Máximo</label>
+          <input class="price-input"
+                 type="text"
+                 inputmode="numeric"
+                 placeholder="$500.000"
+                 [value]="maxPriceInput"
+                 (input)="onMaxPriceInput($event)" />
+        </div>
       </div>
-      <input class="price-slider"
-             type="range"
-             min="5000"
-             max="500000"
-             step="5000"
-             [(ngModel)]="maxPriceSlider"
-             (ngModelChange)="onSliderChange()" />
-      <div class="price-range-labels">
-        <span>$5.000</span>
-        <span>$500.000</span>
+      <div class="slider-wrap">
+        <input class="price-slider"
+               type="range"
+               min="5000"
+               max="500000"
+               step="5000"
+               [(ngModel)]="maxPriceSlider"
+               (ngModelChange)="onSliderChange()"
+               [style.--fill]="sliderPercent + '%'" />
+        <div class="price-range-labels">
+          <span>$5.000</span>
+          <span>Hasta {{ formatPrice(maxPriceSlider) }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -68,46 +88,21 @@
     </button>
     <div class="section-body" [class.section-body-open]="sections.condition">
       <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="" />
+        <input type="radio" [(ngModel)]="filters.condition" (ngModelChange)="onConditionChange()" name="condition" value="" />
         <span class="radio-custom"></span>
         Todos
       </label>
       <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="new" />
+        <input type="radio" [(ngModel)]="filters.condition" (ngModelChange)="onConditionChange()" name="condition" value="new" />
         <span class="radio-custom"></span>
         Nuevo
       </label>
       <label class="radio-option">
-        <input type="radio" [(ngModel)]="filters.condition" name="condition" value="used" />
+        <input type="radio" [(ngModel)]="filters.condition" (ngModelChange)="onConditionChange()" name="condition" value="used" />
         <span class="radio-custom"></span>
         Usado
       </label>
     </div>
   </div>
-
-  <!-- ── Valoración ─────────────────────────────── -->
-  <div class="filter-section">
-    <button class="section-toggle" (click)="toggleSection('rating')">
-      <span>Valoración</span>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline *ngIf="sections.rating"  points="18 15 12 9 6 15"/>
-        <polyline *ngIf="!sections.rating" points="6 9 12 15 18 9"/>
-      </svg>
-    </button>
-    <div class="section-body" [class.section-body-open]="sections.rating">
-      <button class="rating-row"
-              *ngFor="let r of [5,4,3,2,1]"
-              [class.rating-row-active]="filters.rating === r"
-              (click)="setRating(r)">
-        <span class="stars-row">
-          <span *ngFor="let s of stars" class="star" [class.star-on]="s <= r">★</span>
-        </span>
-        <span class="rating-label">{{ r === 5 ? 'Solo 5 ★' : r + ' ★ y más' }}</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Apply button -->
-  <button class="btn-apply" (click)="applyFilters()">Aplicar filtros</button>
 
 </aside>

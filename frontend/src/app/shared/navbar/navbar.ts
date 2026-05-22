@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../core/services/auth';
@@ -33,6 +33,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     private searchService: SearchService,
     private messagingService: MessagingService,
     public cartService: ReservationsService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -54,6 +55,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   onSearchInput() {
     this.searchService.setQuery(this.searchQuery);
+    if (this.router.url !== '/') {
+      this.router.navigate(['/']);
+    }
   }
 
   confirmLogout() {

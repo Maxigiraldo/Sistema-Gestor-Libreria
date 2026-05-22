@@ -17,6 +17,7 @@
 
   <p class="error-msg" *ngIf="error">{{ error }}</p>
   <p class="error-msg" *ngIf="cancelError">{{ cancelError }}</p>
+  <p class="success-msg cancel-success" *ngIf="cancelSuccessMsg">{{ cancelSuccessMsg }}</p>
 
   <div class="empty-state" *ngIf="!loading && !error && orders.length === 0">
     <p>No tienes pedidos aún.</p>
@@ -57,8 +58,11 @@
       <div class="order-footer">
         <div class="footer-left">
           <span class="order-total">Total: {{ +order.total | currency:'COP':'$':'1.0-0' }}</span>
-          <span class="order-address" *ngIf="order.shippingAddress">
+          <span class="order-address" *ngIf="order.shippingAddress && order.status !== 'cancelled'">
             {{ order.shippingAddress }}
+          </span>
+          <span class="cancel-reason-tag" *ngIf="order.status === 'cancelled' && order.cancelReason">
+            Motivo: {{ order.cancelReason }}
           </span>
         </div>
 
@@ -135,14 +139,42 @@
 
   </div>
 
-  <!-- Modal: Confirmar cancelación -->
+  <!-- Modal: Confirmar cancelación con reembolso -->
   <div class="confirm-backdrop" *ngIf="confirmCancelId" (click)="confirmCancelId = null">
-    <div class="confirm-modal" (click)="$event.stopPropagation()">
-      <h3>¿Cancelar pedido #{{ confirmCancelId }}?</h3>
-      <p>Los artículos volverán a estar disponibles. Esta acción no se puede deshacer.</p>
-      <div class="confirm-actions">
+    <div class="confirm-modal return-modal" (click)="$event.stopPropagation()">
+      <h3>Cancelar pedido #{{ confirmCancelId }}</h3>
+      <p>Los artículos volverán al catálogo. Esta acción no se puede deshacer.</p>
+
+      <div class="return-form">
+        <label class="return-label">Motivo de cancelación (opcional)</label>
+        <textarea class="return-textarea"
+                  [(ngModel)]="cancelReason"
+                  placeholder="¿Por qué deseas cancelar este pedido?"
+                  rows="2">
+        </textarea>
+
+        <label class="return-label" style="margin-top:14px">Método de reembolso *</label>
+        <div class="refund-options">
+          <label class="refund-option" [class.selected]="cancelRefundMethod === 'balance'">
+            <input type="radio" name="cancelRefund" value="balance" [(ngModel)]="cancelRefundMethod" />
+            <div class="refund-option-content">
+              <span class="refund-option-title">Saldo de cuenta</span>
+              <span class="refund-option-desc">Reembolso inmediato a tu saldo</span>
+            </div>
+          </label>
+          <label class="refund-option" [class.selected]="cancelRefundMethod === 'card'">
+            <input type="radio" name="cancelRefund" value="card" [(ngModel)]="cancelRefundMethod" />
+            <div class="refund-option-content">
+              <span class="refund-option-title">Tarjeta original</span>
+              <span class="refund-option-desc">3-5 días hábiles</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="confirm-actions" style="margin-top:16px">
         <button class="btn-outline" (click)="confirmCancelId = null">Volver</button>
-        <button class="btn-confirm-cancel" (click)="confirmCancel()">Sí, cancelar</button>
+        <button class="btn-confirm-cancel" (click)="confirmCancel()">Sí, cancelar pedido</button>
       </div>
     </div>
   </div>

@@ -55,6 +55,9 @@ export class Order {
   @Column({ nullable: true })
   shippingAddress: string;
 
+  @Column({ nullable: true, type: 'text' })
+  cancelReason: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }

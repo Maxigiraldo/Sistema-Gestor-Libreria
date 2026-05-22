@@ -93,7 +93,11 @@
         <div class="field">
           <label>Año de publicación</label>
           <input type="number" [(ngModel)]="form.publicationYear" name="publicationYear"
-                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly"
+                 min="1000" max="2100" (keydown)="blockNonNumeric($event)" />
+          <span class="field-error" *ngIf="formSubmitted && form.publicationYear && (form.publicationYear < 1000 || form.publicationYear > 2100)">
+            Año inválido (1000–2100).
+          </span>
         </div>
 
         <div class="field">
@@ -105,7 +109,11 @@
         <div class="field">
           <label>Páginas</label>
           <input type="number" [(ngModel)]="form.pages" name="pages"
-                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly" />
+                 [readonly]="infoReadonly" [class.input-locked]="infoReadonly"
+                 min="1" (keydown)="blockNonNumeric($event)" />
+          <span class="field-error" *ngIf="formSubmitted && form.pages !== null && form.pages < 1">
+            Debe ser mayor a 0.
+          </span>
         </div>
 
         <div class="field">
@@ -118,7 +126,8 @@
         <div class="field">
           <label>Precio (COP) *</label>
           <input type="number" [(ngModel)]="form.price" name="price" required
-                 min="1000" step="1000" placeholder="Ej: 25000" />
+                 min="1000" step="1000" placeholder="Ej: 25000"
+                 (keydown)="blockNonNumeric($event)" />
           <span class="field-error" *ngIf="formSubmitted && (form.price === null || form.price < 1000)">
             Mínimo $1.000 COP.
           </span>
@@ -136,7 +145,7 @@
         <div class="field" *ngIf="!isEditing">
           <label>Cantidad de ejemplares *</label>
           <input type="number" [(ngModel)]="form.quantity" name="quantity" required
-                 min="1" step="1" />
+                 min="1" step="1" (keydown)="blockNonNumeric($event)" />
           <span class="field-error" *ngIf="formSubmitted && form.quantity < 1">Mínimo 1 ejemplar.</span>
         </div>
 
@@ -149,7 +158,8 @@
         <div class="field" *ngIf="isEditing">
           <label>Agregar ejemplares</label>
           <input type="number" [(ngModel)]="additionalQuantity" name="additionalQuantity"
-                 min="0" step="1" placeholder="0" />
+                 min="0" step="1" placeholder="0"
+                 (keydown)="blockNonNumeric($event)" />
           <span class="field-hint">Deja en 0 si no deseas agregar.</span>
         </div>
 

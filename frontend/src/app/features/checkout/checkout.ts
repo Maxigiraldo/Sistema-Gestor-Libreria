@@ -151,6 +151,20 @@ export class CheckoutComponent implements OnInit {
     this.cardError = '';
   }
 
+  onCardHolderNameInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s'\-\.]/g, '');
+    input.value = val;
+    this.cardHolderName = val;
+  }
+
+  onCvvInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = input.value.replace(/\D/g, '').slice(0, 4);
+    this.cardCvv = val;
+    input.value = val;
+  }
+
   onCardExpiryInput(event: Event) {
     const input = event.target as HTMLInputElement;
     let v = input.value.replace(/\D/g, '').slice(0, 4);

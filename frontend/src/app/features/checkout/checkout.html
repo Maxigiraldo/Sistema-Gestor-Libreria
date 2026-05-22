@@ -188,7 +188,8 @@
         <input class="card-input"
                type="text"
                placeholder="Nombre del titular"
-               [(ngModel)]="cardHolderName"
+               [value]="cardHolderName"
+               (input)="onCardHolderNameInput($event)"
                autocomplete="cc-name" />
 
         <div class="card-row">
@@ -203,7 +204,8 @@
           <input class="card-input"
                  type="text"
                  placeholder="CVV"
-                 [(ngModel)]="cardCvv"
+                 [value]="cardCvv"
+                 (input)="onCvvInput($event)"
                  maxlength="4"
                  inputmode="numeric"
                  autocomplete="cc-csc" />

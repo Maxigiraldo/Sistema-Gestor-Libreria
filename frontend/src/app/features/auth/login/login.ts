@@ -29,7 +29,7 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
 
-    this.auth.login(this.username, this.password).subscribe({
+    this.auth.login(this.username.trim(), this.password).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/']);

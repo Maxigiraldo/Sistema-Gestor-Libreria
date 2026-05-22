@@ -45,22 +45,24 @@
         <div class="field-row">
           <div class="field">
             <label>Nombre *</label>
-            <input type="text" [(ngModel)]="firstName" name="firstName" placeholder="Carlos"/>
+            <input type="text" [value]="firstName" (input)="onFirstNameInput($event)" name="firstName" placeholder="Carlos" autocomplete="given-name"/>
             <span class="field-error" *ngIf="submitted1 && !firstName.trim()">Obligatorio.</span>
+            <span class="field-error" *ngIf="submitted1 && firstName.trim() && !nameValid(firstName)">Solo letras, mínimo 2 caracteres.</span>
           </div>
           <div class="field">
             <label>Apellido *</label>
-            <input type="text" [(ngModel)]="lastName" name="lastName" placeholder="Ramírez"/>
+            <input type="text" [value]="lastName" (input)="onLastNameInput($event)" name="lastName" placeholder="Ramírez" autocomplete="family-name"/>
             <span class="field-error" *ngIf="submitted1 && !lastName.trim()">Obligatorio.</span>
+            <span class="field-error" *ngIf="submitted1 && lastName.trim() && !nameValid(lastName)">Solo letras, mínimo 2 caracteres.</span>
           </div>
         </div>
 
         <div class="field">
           <label>Número de documento *</label>
-          <input type="text" [(ngModel)]="dni" name="dni" placeholder="1002345678" inputmode="numeric"/>
+          <input type="text" [value]="dni" (input)="onDniInput($event)" name="dni" placeholder="1002345678" inputmode="numeric"/>
           <span class="field-hint">Cédula de ciudadanía u otro documento.</span>
           <span class="field-error" *ngIf="submitted1 && !dni.trim()">Obligatorio.</span>
-          <span class="field-error" *ngIf="submitted1 && !dniValid()">Solo números, entre 6 y 12 dígitos.</span>
+          <span class="field-error" *ngIf="submitted1 && dni.trim() && !dniValid()">Solo números, entre 6 y 12 dígitos.</span>
         </div>
 
         <div class="field-row">
@@ -72,7 +74,7 @@
           </div>
           <div class="field">
             <label>Lugar de nacimiento *</label>
-            <input type="text" [(ngModel)]="birthPlace" name="birthPlace" placeholder="Pereira"/>
+            <input type="text" [value]="birthPlace" (input)="onBirthPlaceInput($event)" name="birthPlace" placeholder="Pereira"/>
             <span class="field-error" *ngIf="submitted1 && !birthPlace.trim()">Obligatorio.</span>
           </div>
         </div>
@@ -117,7 +119,7 @@
 
         <div class="field">
           <label>Nombre de usuario *</label>
-          <input type="text" [(ngModel)]="username" name="username" placeholder="carlos_ramirez" autocomplete="username"/>
+          <input type="text" [value]="username" (input)="onUsernameInput($event)" name="username" placeholder="carlos_ramirez" autocomplete="username"/>
           <span class="field-hint">Solo letras, números y guión bajo. Sin espacios.</span>
           <span class="field-error" *ngIf="submitted2 && !usernameValid()">3-30 caracteres. Solo letras, números, _ o -. Sin espacios.</span>
         </div>

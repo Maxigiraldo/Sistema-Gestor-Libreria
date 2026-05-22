@@ -60,6 +60,25 @@
         <div class="balance-loading" *ngIf="!balance">Cargando saldo...</div>
       </div>
 
+      <!-- Novedades subscription (client only) -->
+      <div class="info-card" *ngIf="isClient">
+        <div class="card-title-row">
+          <h3 class="card-title"><span class="card-icon">🔔</span> Novedades</h3>
+          <button class="btn-toggle-news"
+                  [class.active]="subscribedToNews"
+                  [disabled]="togglingNews"
+                  (click)="toggleNewsSubscription()">
+            {{ togglingNews ? '...' : (subscribedToNews ? 'Suscrito ✓' : 'Suscribirse') }}
+          </button>
+        </div>
+        <p class="news-desc">
+          {{ subscribedToNews
+            ? 'Recibes notificaciones de libros nuevos en tus géneros favoritos.'
+            : 'Activa para ver libros nuevos de tus géneros favoritos en la sección Novedades.' }}
+        </p>
+        <a [routerLink]="['/novedades']" class="news-link" *ngIf="subscribedToNews">Ver novedades →</a>
+      </div>
+
       <!-- Saved cards (client only) -->
       <div class="info-card" *ngIf="isClient">
         <h3 class="card-title"><span class="card-icon">💳</span> Tarjetas guardadas</h3>
@@ -104,7 +123,9 @@
 
     <div class="topup-custom">
       <label>O ingresa un monto personalizado (COP)</label>
-      <input type="number" [(ngModel)]="topupAmount" min="1000" step="1000"
+      <input type="text" inputmode="numeric"
+             [value]="topupAmount || ''"
+             (input)="onTopupInput($event)"
              class="topup-input" placeholder="Ej: 75000" />
     </div>
 

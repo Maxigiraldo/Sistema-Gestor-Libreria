@@ -24,11 +24,17 @@
     </a>
     <button
         class="nav-item"
+        [class.active]="activeTab === 'orders'"
+        (click)="activeTab = 'orders'; loadOrders()">
+        🛒 Pedidos
+    </button>
+    <button
+        class="nav-item"
         [class.active]="activeTab === 'returns'"
         (click)="activeTab = 'returns'; loadReturns()">
         🔄 Devoluciones
     </button>
-    <button
+    <button *ngIf="!isRoot"
         class="nav-item"
         [class.active]="activeTab === 'messages'"
         (click)="activeTab = 'messages'; loadMessages()">
@@ -158,6 +164,72 @@
 
         </form>
     </div>
+    </section>
+
+    <!-- ───── PEDIDOS ───── -->
+    <section *ngIf="activeTab === 'orders'">
+      <div class="section-header">
+        <div>
+          <h2>Pedidos</h2>
+          <p class="subtitle">Todos los pedidos de clientes</p>
+        </div>
+        <div class="orders-filter-row">
+          <button class="filter-btn" [class.active]="ordersFilter === 'all'"      (click)="ordersFilter = 'all'">Todos</button>
+          <button class="filter-btn" [class.active]="ordersFilter === 'confirmed'" (click)="ordersFilter = 'confirmed'">Confirmados</button>
+          <button class="filter-btn" [class.active]="ordersFilter === 'cancelled'" (click)="ordersFilter = 'cancelled'">Cancelados</button>
+          <button class="btn-secondary" (click)="loadOrders()">↻ Actualizar</button>
+        </div>
+      </div>
+
+      <div class="loading-state" *ngIf="loadingOrders">
+        <div class="spinner"></div>
+        <span>Cargando pedidos...</span>
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loadingOrders">
+        <table *ngIf="filteredOrders.length > 0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Cliente</th>
+              <th>Libros</th>
+              <th>Total</th>
+              <th>Entrega</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              <th>Motivo cancel.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filteredOrders" [class.row-cancelled]="order.status === 'cancelled'">
+              <td class="id-cell">{{ order.id }}</td>
+              <td>
+                <div class="user-cell">
+                  <div class="avatar">{{ (order.client?.username ?? '?')[0].toUpperCase() }}</div>
+                  {{ order.client?.username ?? '—' }}
+                </div>
+              </td>
+              <td class="books-cell" [title]="getBookTitles(order)">{{ getBookTitles(order) }}</td>
+              <td class="amount-cell">{{ +order.total | currency:'COP':'$':'1.0-0' }}</td>
+              <td>
+                <span class="delivery-tag">{{ orderDeliveryLabel(order.deliveryType) }}</span>
+              </td>
+              <td>
+                <span class="order-status-badge" [class]="'os-' + order.status">
+                  {{ orderStatusLabel(order.status) }}
+                </span>
+              </td>
+              <td class="date-cell">{{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td class="cancel-reason-cell">{{ order.cancelReason || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="filteredOrders.length === 0">
+          <div class="empty-icon">🛒</div>
+          <p>No hay pedidos {{ ordersFilter !== 'all' ? 'con este estado' : '' }}.</p>
+        </div>
+      </div>
     </section>
 
     <!-- ───── DEVOLUCIONES ───── -->

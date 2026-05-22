@@ -51,7 +51,21 @@ export class ReturnsService {
       throw new BadRequestException('El plazo de 8 días para devoluciones ha vencido');
     }
 
-    // Guardamos primero para obtener el ID y generar la URL de seguimiento
+    // Remove any prior failed attempt (partial record with no qrCode)
+    const failed = await this.returnRepository.findOne({
+      where: { order: { id: orderId }, client: { id: userId }, qrCode: null as any },
+    });
+    if (failed) await this.returnRepository.delete(failed.id);
+
+    // Existing completed return blocks re-submission
+    const existing = await this.returnRepository.findOne({
+      where: { order: { id: orderId }, client: { id: userId } },
+    });
+    if (existing) throw new BadRequestException('Ya existe una solicitud de devolución para este pedido');
+
+    // Save first to get the ID, then generate QR and update in a single round-trip
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
+
     const returnRequest = this.returnRepository.create({
       order: { id: orderId },
       client: { id: userId },
@@ -64,7 +78,6 @@ export class ReturnsService {
 
     const saved = await this.returnRepository.save(returnRequest);
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:4200';
     const trackingUrl = `${frontendUrl}/devolucion/${saved.id}`;
     const qrCode = await QRCode.toDataURL(trackingUrl);
     saved.qrCode = qrCode;
@@ -73,7 +86,7 @@ export class ReturnsService {
     // Send QR by email (non-blocking)
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (user) {
-      this.mailService.sendReturnQr(user.email, user.username, orderId, saved.id, qrCode)
+      this.mailService.sendReturnQr(user.email, user.username, orderId, saved.id, qrCode, trackingUrl)
         .catch(() => {});
     }
 

@@ -1,69 +1,74 @@
 .categories-layout {
-  padding: 40px 32px;
-  max-width: 720px;
+  padding: 48px 32px 64px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
 .categories-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
 }
 
 .page-header {
-  border-bottom: 2px solid #000;
-  padding-bottom: 20px;
+  border-bottom: 1.5px solid #e5e7eb;
+  padding-bottom: 24px;
 
   h1 {
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 400;
     color: #111827;
-    margin: 8px 0 4px;
+    margin: 10px 0 8px;
+    letter-spacing: -0.01em;
   }
 
   .subtitle {
-    font-size: 13px;
+    font-size: 14px;
     color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    line-height: 1.5;
   }
 }
 
 .btn-back {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #6b7280;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
   text-decoration: none;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   font-weight: 600;
-  transition: color 0.2s;
+  transition: color 0.15s;
 
-  &:hover { color: #111827; }
+  &:hover { color: #374151; }
 }
 
 .genres-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
-.genre-btn {
-  padding: 8px 18px;
+.genre-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
   border: 1.5px solid #d1d5db;
   background: #ffffff;
   color: #374151;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
 
   &:hover {
-    border-color: #111827;
+    border-color: #374151;
     color: #111827;
   }
 
@@ -71,15 +76,28 @@
     background: #111827;
     color: #ffffff;
     border-color: #111827;
+
+    .chip-check { stroke: #ffffff; }
   }
 }
 
+.chip-label {
+  line-height: 1;
+}
+
+.chip-check {
+  flex-shrink: 0;
+}
+
 .selection-hint {
-  font-size: 12px;
-  color: #9ca3af;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
   margin-bottom: 8px;
+
+  svg { stroke: #9ca3af; }
 }
 
 .error-msg {
@@ -88,6 +106,7 @@
   padding: 12px 16px;
   background: #fef2f2;
   font-size: 14px;
+  margin-bottom: 8px;
 }
 
 .success-msg {
@@ -96,46 +115,48 @@
   padding: 12px 16px;
   background: #f0fdf4;
   font-size: 14px;
+  margin-bottom: 8px;
 }
 
 .form-actions {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 28px;
+  align-items: center;
 }
 
 .btn-primary {
-  padding: 12px 28px;
-  background: #000000;
+  padding: 13px 32px;
+  background: #111827;
   color: #ffffff;
   border: none;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-family: inherit;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: background 0.2s;
 
-  &:hover:not(:disabled) { background: #1f2937; }
+  &:hover:not(:disabled) { background: #374151; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
 .btn-secondary {
-  padding: 12px 28px;
+  padding: 13px 28px;
   background: #ffffff;
   color: #374151;
-  border: 1px solid #d1d5db;
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  border: 1.5px solid #d1d5db;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  letter-spacing: 0.02em;
   text-decoration: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   transition: all 0.2s;
 
-  &:hover { border-color: #111827; color: #111827; }
+  &:hover { border-color: #374151; color: #111827; }
 }
 
 .loading-wrap {

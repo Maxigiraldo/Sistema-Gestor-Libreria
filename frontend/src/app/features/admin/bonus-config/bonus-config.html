@@ -40,6 +40,7 @@
               max="100"
               step="1"
               placeholder="Ej. 15"
+              (keydown)="blockNonNumeric($event)"
             />
             <span class="suffix">%</span>
           </div>

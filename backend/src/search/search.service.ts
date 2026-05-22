@@ -11,6 +11,7 @@ export class SearchService {
   ) {}
 
   async search(query: {
+    q?: string;
     title?: string;
     author?: string;
     genre?: string;
@@ -22,6 +23,25 @@ export class SearchService {
     maxPrice?: number;
     publicationYear?: number;
   }) {
+    // q → OR search across title, author and genre combined with AND sidebar filters
+    if (query.q) {
+      const base: any = { active: true };
+      if (query.condition) base.condition = query.condition;
+      if (query.genre) base.genre = query.genre;
+      if (query.minPrice && query.maxPrice) base.price = Between(query.minPrice, query.maxPrice);
+
+      const q = query.q;
+      const books = await this.bookRepository.find({
+        where: [
+          { ...base, title: ILike(`%${q}%`) },
+          { ...base, author: ILike(`%${q}%`) },
+          { ...base, genre: ILike(`%${q}%`) },
+        ],
+        relations: ['exemplars'],
+      });
+      return { total: books.length, results: books };
+    }
+
     const where: any = { active: true };
 
     if (query.title) where.title = ILike(`%${query.title}%`);

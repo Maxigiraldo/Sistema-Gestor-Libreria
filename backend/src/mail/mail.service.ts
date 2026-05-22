@@ -19,7 +19,7 @@ export class MailService {
     });
   }
 
-  async sendReturnQr(email: string, username: string, orderId: number, returnId: number, qrCode: string) {
+  async sendReturnQr(email: string, username: string, orderId: number, returnId: number, qrCode: string, trackingUrl: string) {
     await this.transporter.sendMail({
       from: this.config.get('MAIL_FROM') ?? 'Librería <no-reply@libreria.com>',
       to: email,
@@ -28,9 +28,14 @@ export class MailService {
         <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;padding:32px;border-left:4px solid #059669">
           <h2 style="font-size:22px;font-weight:400;margin-bottom:8px">Solicitud de devolución recibida</h2>
           <p style="color:#4b5563;line-height:1.6">Hola <strong>${username}</strong>, hemos recibido tu solicitud de devolución para el pedido <strong>#${orderId}</strong>.</p>
-          <p style="color:#4b5563;line-height:1.6">Guarda este código QR — lo necesitarás para el seguimiento y entrega del producto:</p>
+          <p style="color:#4b5563;line-height:1.6">Guarda este código QR o usa el enlace de seguimiento:</p>
           <div style="text-align:center;margin:24px 0">
-            <img src="${qrCode}" alt="QR Devolución #${returnId}" style="max-width:200px;border:1px solid #e5e7eb;padding:12px" />
+            <img src="${qrCode}" alt="QR Devolución #${returnId}" style="max-width:200px;border:1px solid #e5e7eb;padding:12px;display:block;margin:0 auto 16px" />
+            <a href="${trackingUrl}"
+               style="display:inline-block;padding:10px 24px;background:#059669;color:#fff;text-decoration:none;font-size:13px;font-family:Georgia,serif;letter-spacing:.04em">
+              Ver seguimiento →
+            </a>
+            <p style="font-size:12px;color:#6b7280;margin-top:10px;word-break:break-all">${trackingUrl}</p>
           </div>
           <p style="font-size:13px;color:#6b7280">Referencia: Devolución <strong>#${returnId}</strong></p>
           <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0"/>
