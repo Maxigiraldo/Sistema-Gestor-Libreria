@@ -58,7 +58,7 @@ export class CheckoutComponent implements OnInit {
   cardBrand: CardBrand = '';
   cardError = '';
 
-  readonly STORE_ADDRESS = 'Cra. 15 #93-47, Chapinero, Bogotá';
+  readonly STORE_ADDRESS = 'Universidad Tecnológica de Pereira, Pereira';
   readonly STORE_HOURS = 'Lunes a Sábado: 9:00am – 7:00pm';
 
   readonly DECLINE_TEST_HINT = 'Para simular rechazo, usa un número que termine en 0002 (ej: 4111111111110002)';
@@ -72,7 +72,7 @@ export class CheckoutComponent implements OnInit {
     sanitizer: DomSanitizer
   ) {
     this.mapUrl = sanitizer.bypassSecurityTrustResourceUrl(
-      'https://www.openstreetmap.org/export/embed.html?bbox=-74.058%2C4.667%2C-74.038%2C4.687&layer=mapnik&marker=4.677%2C-74.048'
+      'https://www.openstreetmap.org/export/embed.html?bbox=-75.704%2C4.789%2C-75.690%2C4.802&layer=mapnik&marker=4.7956%2C-75.6962'
     );
 
     const nav = this.router.getCurrentNavigation();
