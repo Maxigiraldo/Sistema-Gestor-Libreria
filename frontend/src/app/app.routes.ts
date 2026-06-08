@@ -64,6 +64,19 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard]
   },
   {
+    path: 'admin/branches',
+    loadComponent: () =>
+      import('./features/admin/branches/branches')
+      .then(m => m.AdminBranchesComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'sucursales',
+    loadComponent: () =>
+      import('./features/branches/branch-locations/branch-locations')
+      .then(m => m.BranchLocationsComponent)
+  },
+  {
     path: 'orders',
     loadComponent: () =>
       import('./features/orders/orders').then(m => m.OrdersComponent),
