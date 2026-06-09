@@ -1,0 +1,164 @@
+<app-navbar />
+
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <h3>Sucursales</h3>
+    <nav>
+      <button class="nav-item" [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">
+        📋 Listado
+      </button>
+      <button class="nav-item" [class.active]="activeTab === 'form' && formMode === 'create'" (click)="openCreate()">
+        ➕ Nueva sucursal
+      </button>
+      <a class="nav-item" [routerLink]="['/admin']">
+        ← Panel admin
+      </a>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+
+    <!-- ── LISTADO ── -->
+    <section *ngIf="activeTab === 'list'">
+      <div class="section-header">
+        <div>
+          <h2>Sucursales físicas</h2>
+          <p class="subtitle">Gestiona las sedes de la librería</p>
+        </div>
+        <button class="btn-primary" (click)="openCreate()">+ Nueva sucursal</button>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        <span>Cargando...</span>
+      </div>
+
+      <div class="table-wrapper" *ngIf="!loading">
+        <table *ngIf="branches.length > 0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Ciudad</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Horario</th>
+              <th>Mapa</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of branches">
+              <td class="id-cell">{{ b.id }}</td>
+              <td class="name-cell">{{ b.name }}</td>
+              <td>{{ b.city }}</td>
+              <td class="address-cell">{{ b.address }}</td>
+              <td class="secondary-cell">{{ b.phone || '—' }}</td>
+              <td class="secondary-cell">{{ b.openingHours || '—' }}</td>
+              <td>
+                <a [href]="mapsLink(b)" target="_blank" class="maps-link" title="Ver en Google Maps">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Ver mapa
+                </a>
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button class="btn-edit" (click)="openEdit(b)">Editar</button>
+                  <button class="btn-deactivate"
+                          [disabled]="deletingId === b.id"
+                          (click)="delete(b)">
+                    {{ deletingId === b.id ? '...' : 'Eliminar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="empty-state" *ngIf="branches.length === 0">
+          <div class="empty-icon">🏪</div>
+          <p>No hay sucursales registradas.</p>
+          <button class="btn-primary" (click)="openCreate()">Crear la primera</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FORMULARIO ── -->
+    <section *ngIf="activeTab === 'form'">
+      <div class="section-header">
+        <div>
+          <h2>{{ formMode === 'create' ? 'Nueva sucursal' : 'Editar sucursal' }}</h2>
+          <p class="subtitle">{{ formMode === 'create' ? 'Registra una nueva sede física' : 'Actualiza los datos de la sucursal' }}</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <form (ngSubmit)="onSubmit()" novalidate>
+
+          <div class="field">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="form.name" name="name" placeholder="Ej: Librería Centro" />
+            <span class="field-error" *ngIf="submitted && !form.name.trim()">Obligatorio.</span>
+          </div>
+
+          <div class="field">
+            <label>Ciudad *</label>
+            <input type="text" [(ngModel)]="form.city" name="city" placeholder="Ej: Bogotá" />
+            <span class="field-error" *ngIf="submitted && !form.city.trim()">Obligatorio.</span>
+          </div>
+
+          <div class="field">
+            <label>Dirección *</label>
+            <input type="text" [(ngModel)]="form.address" name="address" placeholder="Ej: Cra. 7 #32-16" />
+            <span class="field-error" *ngIf="submitted && !form.address.trim()">Obligatorio.</span>
+          </div>
+
+          <div class="coords-row">
+            <div class="field">
+              <label>Latitud *</label>
+              <input type="number" step="any" [(ngModel)]="form.latitude" name="latitude" placeholder="Ej: 4.710989" />
+              <span class="field-error" *ngIf="latError">Latitud inválida (−90 a 90).</span>
+            </div>
+            <div class="field">
+              <label>Longitud *</label>
+              <input type="number" step="any" [(ngModel)]="form.longitude" name="longitude" placeholder="Ej: -74.072092" />
+              <span class="field-error" *ngIf="lngError">Longitud inválida (−180 a 180).</span>
+            </div>
+          </div>
+
+          <div class="coords-hint">
+            Puedes obtener las coordenadas haciendo clic derecho en Google Maps y seleccionando "¿Qué hay aquí?"
+          </div>
+
+          <div class="field">
+            <label>Teléfono</label>
+            <input type="text" [(ngModel)]="form.phone" name="phone" placeholder="Ej: +57 1 234 5678" />
+          </div>
+
+          <div class="field">
+            <label>Horario de atención</label>
+            <input type="text" [(ngModel)]="form.openingHours" name="openingHours" placeholder="Ej: Lun–Sáb 9:00–19:00" />
+          </div>
+
+          <div class="error-msg" *ngIf="error">{{ error }}</div>
+          <div class="success-msg" *ngIf="success">✅ {{ success }}</div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelForm()">Cancelar</button>
+            <button type="submit" class="btn-primary" [disabled]="saving">
+              <span *ngIf="!saving">{{ formMode === 'create' ? 'Crear sucursal' : 'Guardar cambios' }}</span>
+              <span *ngIf="saving" class="spinner-wrap">
+                <span class="spinner-sm"></span> Guardando...
+              </span>
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </section>
+
+  </main>
+</div>

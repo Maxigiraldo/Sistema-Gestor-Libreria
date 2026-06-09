@@ -20,6 +20,9 @@
     </li>
     <li><a [routerLink]="['/']" class="nav-link">Novedades</a></li>
     <li><a [routerLink]="['/']" class="nav-link">Géneros</a></li>
+    <li>
+      <a [routerLink]="['/sucursales']" routerLinkActive="nav-link-active" class="nav-link">Sucursales</a>
+    </li>
     <li *ngIf="user?.role === 'client'">
       <a [routerLink]="['/orders']" routerLinkActive="nav-link-active" class="nav-link">Mis pedidos</a>
     </li>
